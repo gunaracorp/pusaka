@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi
+// Sistem Informasi Sertifikasi Profesi & Akreditasi Biro
+// Perjalanan Wisata, Umrah & Haji
+// ============================================================
+
+model Program {
+  id            String   @id @default(cuid())
+  code          String   @unique // PIHK, PPIU, BPW, IATA, IJIN-UMRAH, IJIN-HAJI, BPW-PRO
+  name          String
+  shortName     String
+  category      String // PERUSAHAAN | PROFESI | IZIN
+  tagline       String
+  description   String
+  requirements  String // JSON array of strings
+  benefits      String // JSON array of strings
+  durationDays  Int
+  price         Int // in IDR
+  seatsLeft     Int
+  holderCount   Int
+  passRate      Int // percentage
+  accreditation String // JSON array of partner/accreditation names
+  accentColor   String // tailwind-ish color key: emerald, amber, teal, rose...
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Institution {
+  id          String   @id @default(cuid())
+  name        String
+  type        String // PPIU | PIHK | BPW | IATA
+  city        String
+  province    String
+  certNumber  String   @unique // e.g. PPU-2025-0184
+  programCode String
+  status      String // AKTIF | DIPERBARUI | KADALUARSA
+  tier        String // SILVER | GOLD | PLATINUM
+  score       Int // audit score 0-100
+  issuedAt    DateTime
+  expiresAt   DateTime
+  contact     String?
+  phone       String?
+  createdAt   DateTime @default(now())
+}
+
+model Expert {
+  id              String  @id @default(cuid())
+  name            String
+  field           String // bidang utama: Hukum, Ibadah, Aviasi, dst
+  expertise       String // deskripsi keahlian
+  category        String // HUKUM | IBADAH | AVIASI | MANAJEMEN | KEUANGAN | TEKNOLOGI | KESEHATAN | BAHASA | LOGISTIK
+  licenseNo       String  @unique
+  experienceYears Int
+  organization    String
+  education       String
+  initials        String
+  featured        Boolean @default(false)
+  createdAt       DateTime @default(now())
+}
+
+model Application {
+  id           String   @id @default(cuid())
+  trackingCode String   @unique // PSK-2025-XXXXX
+  applicantType String // PERUSAHAAN | INDIVIDU
+  programCode  String
+  fullName     String
+  email        String
+  phone        String
+  institution  String?
+  city         String
+  message      String?
+  status       String   @default("SUBMITTED") // SUBMITTED | REVIEW | VERIFIKASI | ASSESSMENT | APPROVED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerifyLog {
+  id         String   @id @default(cuid())
+  certNumber String
+  result     String // VALID | INVALID
+  createdAt  DateTime @default(now())
+}
+
+model NewsArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String
+  category    String // PENGUMUMAN | REGULASI | KEGIATAN | KEMITRAAN
+  author      String
+  featured    Boolean  @default(false)
+  publishedAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
