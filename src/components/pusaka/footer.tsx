@@ -1,6 +1,7 @@
 "use client";
 
 import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Twitter, Youtube } from "lucide-react";
+import { useAdminStore } from "@/lib/admin-store";
 
 const PROGRAM_LINKS = [
   { href: "#program", label: "Akreditasi PPIU" },
@@ -26,6 +27,14 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const setLoginOpen = useAdminStore((s) => s.setLoginOpen);
+  const setShowAdmin = useAdminStore((s) => s.setShowAdmin);
+  const openAdminPanel = () => {
+    const authed = useAdminStore.getState().status === "authed";
+    if (authed) setShowAdmin(true);
+    else setLoginOpen(true);
+  };
+
   return (
     <footer className="mt-auto bg-emerald-950 pb-safe text-emerald-100">
       <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
@@ -129,7 +138,9 @@ export function Footer() {
       {/* bar bawah */}
       <div className="border-t border-emerald-900">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-emerald-300/60 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} PUSAKA • Terdaftar &amp; Diawasi oleh Dewan Pakar Nasional</p>
+          <p>
+            © {new Date().getFullYear()} PUSAKA • Terdaftar &amp; Diawasi oleh Dewan Pakar Nasional
+          </p>
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-md border border-emerald-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider">
               <ShieldCheck className="h-3 w-3 text-amber-400" aria-hidden />
@@ -139,6 +150,14 @@ export function Footer() {
               <ShieldCheck className="h-3 w-3 text-amber-400" aria-hidden />
               BNSP Listed
             </span>
+            <button
+              type="button"
+              onClick={openAdminPanel}
+              aria-label="Buka Panel Admin PUSAKA"
+              className="rounded-md px-2 py-1 text-[11px] text-emerald-300/30 transition-colors hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+            >
+              Panel Admin
+            </button>
           </div>
         </div>
       </div>

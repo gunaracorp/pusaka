@@ -1,6 +1,14 @@
 import { PrismaClient } from '@prisma/client'
+import { randomBytes, scryptSync } from 'crypto'
 
 const prisma = new PrismaClient()
+
+/** Hash password dengan scrypt (node crypto) — format salt:hash hex */
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString('hex')
+  const hash = scryptSync(password, salt, 64).toString('hex')
+  return `${salt}:${hash}`
+}
 
 const programs = [
   {
@@ -365,6 +373,26 @@ async function main() {
   await prisma.expert.deleteMany()
   await prisma.institution.deleteMany()
   await prisma.program.deleteMany()
+
+  // ===== Akun CMS Admin =====
+  await prisma.adminUser.deleteMany()
+  await prisma.adminUser.createMany({
+    data: [
+      {
+        username: 'admin',
+        name: 'Administrator PUSAKA',
+        passwordHash: hashPassword(process.env.ADMIN_PASSWORD ?? 'Pusaka2026!'),
+        role: 'SUPERADMIN',
+      },
+      {
+        username: 'editor',
+        name: 'Editor Konten PUSAKA',
+        passwordHash: hashPassword(process.env.EDITOR_PASSWORD ?? 'Editor2026!'),
+        role: 'STAFF',
+      },
+    ],
+  })
+  console.log('  ✓ 2 akun admin (admin / editor)')
 
   for (const p of programs) await prisma.program.create({ data: p })
   console.log(`  ✓ ${programs.length} programs`)

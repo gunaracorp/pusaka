@@ -13,6 +13,16 @@ datasource db {
 // Perjalanan Wisata, Umrah & Haji
 // ============================================================
 
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  name         String
+  passwordHash String // format: salt:hash (scrypt)
+  role         String   @default("STAFF") // SUPERADMIN | STAFF
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+}
+
 model Program {
   id            String   @id @default(cuid())
   code          String   @unique // PIHK, PPIU, BPW, IATA, IJIN-UMRAH, IJIN-HAJI, BPW-PRO

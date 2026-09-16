@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BadgeCheck, Menu, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Menu, Shield, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,10 +11,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { NAV_LINKS } from "@/lib/pusaka";
+import { useAdminStore } from "@/lib/admin-store";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const setLoginOpen = useAdminStore((s) => s.setLoginOpen);
+  const setShowAdmin = useAdminStore((s) => s.setShowAdmin);
+  const openAdminPanel = () => {
+    // Jika sudah login, langsung tampilkan dashboard; jika belum, buka dialog login
+    const authed = useAdminStore.getState().status === "authed";
+    if (authed) setShowAdmin(true);
+    else setLoginOpen(true);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -59,6 +68,15 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 text-stone-400 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
+            aria-label="Panel Admin"
+            onClick={openAdminPanel}
+          >
+            <Shield className="h-4 w-4" aria-hidden />
+          </Button>
           <Button asChild className="h-10 min-w-44 bg-emerald-700 hover:bg-emerald-800">
             <a href="#pendaftaran" className="gap-2">
               <BadgeCheck className="h-4 w-4" aria-hidden />
@@ -100,6 +118,17 @@ export function Navbar() {
                 </a>
               ))}
               <div className="mt-4 border-t pt-4">
+                <Button
+                  variant="outline"
+                  className="mb-2 h-11 w-full gap-2 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  onClick={() => {
+                    setOpen(false);
+                    openAdminPanel();
+                  }}
+                >
+                  <Shield className="h-4 w-4" aria-hidden />
+                  Panel Admin
+                </Button>
                 <Button asChild className="h-11 w-full bg-emerald-700 hover:bg-emerald-800">
                   <a href="#pendaftaran" onClick={() => setOpen(false)} className="gap-2">
                     <ShieldCheck className="h-4 w-4" aria-hidden />

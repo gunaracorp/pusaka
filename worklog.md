@@ -118,3 +118,108 @@ Stage Summary:
 - Website PUSAKA lengkap & terverifikasi end-to-end di http://localhost:3000 (preview panel).
 - 9 API endpoint + 18 komponen section + 5 gambar AI (hero-bg, news-qr, news-iata, news-health, munas).
 - Demo: verifikasi PPU-2025-0001 / BPW-2025-0102 / IAT-2025-0201; lacak PSK-2025-83012.
+
+---
+Task ID: 4 (perencanaan CMS)
+Agent: Main Orchestrator (Z.ai)
+Task: Menyiapkan fondasi CMS Admin PUSAKA.
+
+Work Log:
+- Menambah model `AdminUser` ke prisma/schema.prisma (username unique, name, passwordHash scrypt format "salt:hash", role SUPERADMIN|STAFF, lastLoginAt). Sudah db:push.
+- Seed 2 akun: `admin`/`Pusaka2026!` (SUPERADMIN) dan `editor`/`Editor2026!` (STAFF) — bisa di-override via env ADMIN_PASSWORD/EDITOR_PASSWORD.
+- Dev server di-restart agar Prisma client baru termuat.
+
+Stage Summary:
+- Kredensial CMS: admin/Pusaka2026! dan editor/Editor2026!
+- Kontrak API CMS di bawah — WAJIB dipatuhi agent 4-a & 4-b.
+
+## KONTRAK API CMS (src/app/api/...)
+
+Autentikasi: cookie httpOnly `pusaka_admin_session` berisi token HMAC (`base64url(payload).sig`), payload {username, name, role, exp}. Secret default "pusaka-super-secret-key-2026" (env SESSION_SECRET). Semua route /api/admin/* WAJIB guard session → 401 {ok:false, error:"Tidak terautentikasi"} jika invalid/expired.
+
+1. **POST /api/auth/login** body {username, password} → verifikasi terhadap AdminUser (scrypt). Sukses: 200 {ok:true,data:{user:{username,name,role}}} + Set-Cookie (maxAge 24 jam, httpOnly, sameSite lax, path /) + update lastLoginAt. Gagal: 401 {ok:false,error:"User ID atau password salah"}. Body kosong: 400.
+2. **POST /api/auth/logout** → hapus cookie → {ok:true,data:{loggedOut:true}}.
+3. **GET /api/auth/me** → {ok:true,data:{user:{username,name,role}}} ATAU {ok:true,data:null} (tanpa session — tetap HTTP 200).
+
+Semua admin routes pakai pattern dynamic `[id]`:
+4. **GET /api/admin/stats** → { totals:{programs,institutions,experts,news,applications,applicationsPending,verificationsToday,contactMessages,contactUnread}, recentApplications:Application[5] desc createdAt, recentVerifications:VerifyLog[8] desc, monthlyApplications:[{month:"Sep 2026",count}] 6 bulan terakhir dari createdAt Application }
+5. **/api/admin/programs**: GET (list) + POST (create). **/api/admin/programs/[id]**: PUT + DELETE.
+6. **/api/admin/institutions**: GET + POST. **/api/admin/institutions/[id]**: PUT + DELETE.
+7. **/api/admin/experts**: GET + POST. **/api/admin/experts/[id]**: PUT + DELETE.
+8. **/api/admin/news**: GET + POST. **/api/admin/news/[id]**: PUT + DELETE.
+9. **/api/admin/applications**: GET (all desc, include program name lookup optional) . **/api/admin/applications/[id]**: PATCH {status} (valid enum) + DELETE.
+10. **/api/admin/messages**: GET desc. **/api/admin/messages/[id]**: PATCH {handled:boolean} + DELETE.
+11. **/api/admin/verify-logs**: GET (desc, limit 200, join count). Read-only.
+
+Aturan teknis:
+- Semua response { ok, data } / { ok, error } + try/catch + HTTP status tepat (400 zod, 401 auth, 404 not found, 409 unique conflict, 500 server).
+- `export const dynamic = 'force-dynamic'`.
+- Parse cookie dari `request.headers.get('cookie')` manual (JANGAN next/headers). Set cookie via NextResponse `res.cookies.set(...)`.
+- zod v4 validasi body. Password JANGAN pernah di-log atau dikirim balik.
+- Untuk POST/PUT program: requirements/benefits/accreditation boleh berupa string[] ATAU string JSON → simpan sebagai JSON string konsisten dengan data public (JSON.stringify). Frontend public sudah men-parse JSON string.
+- Kredensial tidak boleh dikembalikan dalam response apapun selain {user:{username,name,role}}.
+
+---
+Task ID: 4-a
+Agent: Backend Auth & Admin API Agent
+Task: Membangun auth CMS + 15 admin API routes
+
+Work Log:
+- Membaca worklog.md (KONTRAK API CMS + KONTRAK API lama), prisma/schema.prisma, dan route contoh (verify, applications, experts, programs) agar gaya konsisten.
+- Membuat `src/lib/auth.ts`: hashPassword scrypt ("salt:hash" hex, randomBytes 16 byte), verifyPassword timing-safe (crypto.timingSafeEqual, keylen = panjang hash tersimpan), createSessionToken (JSON → base64url → HMAC-SHA256 secret env SESSION_SECRET ?? "pusaka-super-secret-key-2026" → format `payload.sig`), verifySessionToken (cek signature timing-safe + exp epoch ms ATAU ISO string), getAdminSession (parse header cookie manual split "; " — tanpa next/headers, decodeURIComponent aman), konstanta SESSION_COOKIE='pusaka_admin_session' & SESSION_MAX_AGE=86400, tipe SessionPayload {username,name,role,exp}.
+- Membuat `src/lib/admin-validation.ts`: skema zod v4 bersama (program/institution/expert/news create+update partial, applicationPatch, messagePatch) + helper formatZodError, isUniqueConstraintError (Prisma P2002 → 409), normalizeJsonList (array → JSON.stringify; string JSON array valid → biarkan; string biasa → pecah per baris baru), slugify, parseIsoDate. Field code/certNumber/licenseNo/initials/programCode di-trim + di-uppercase via transform; score 0-100, experienceYears 0-60, initials max 4; featured optional (default false di handler).
+- 3 route auth: POST /api/auth/login (zod min 1, cari AdminUser by username trim, verifyPassword, sukses → token exp now+24jam + update lastLoginAt + Set-Cookie httpOnly/sameSite lax/path=/ maxAge 86400; salah → 401 "User ID atau password salah" (pesan identik utk user tak ada); body invalid → 400; password tidak pernah di-log), POST /api/auth/logout (cookie kosong maxAge 0 → {loggedOut:true}), GET /api/auth/me (valid → data.user; tidak ada/expired → data:null HTTP 200).
+- 12 route admin (semua diawal guard getAdminSession → 401 "Tidak terautentikasi"): /admin/stats (9 totals + recentApplications 5 + recentVerifications 8 + monthlyApplications 6 bulan label Indonesia ["Jan".."Des"] + tahun), /admin/programs GET+POST & [id] PUT+DELETE (409 code duplikat, normalisasi requirements/benefits/accreditation), /admin/institutions GET+POST & [id] PUT+DELETE (certNumber unique 409, ISO date → Date, contact/phone optional), /admin/experts GET+POST & [id] PUT+DELETE (licenseNo unique 409), /admin/news GET+POST & [id] PUT+DELETE (slug auto-generate dari title bila kosong, unique 409, publishedAt default now), /admin/applications GET (desc + programName di-resolve manual via map — tanpa relasi FK) & [id] PATCH status enum + DELETE, /admin/messages GET desc & [id] PATCH handled + DELETE, /admin/verify-logs GET (desc take 200 + header X-Total-Count).
+- Semua route: `export const dynamic = 'force-dynamic'`, import { db } dari '@/lib/db', params Promise di-await (`await ctx.params`, Next 16), try/catch + console.error, format {ok,data}/{ok,error}, HTTP 400/401/404/409/500. Tidak menyentuh page.tsx/layout/globals/components/schema.
+- Verifikasi curl sequential (semua sukses): login admin → 200 + cookie; me → user SUPERADMIN; stats tanpa cookie → 401; login password salah → 401; POST news → slug auto "uji-coba-cms-test-artikel"; PUT news → featured:true, category REGULASI; DELETE news → {id}; GET applications → 4 item + programName terisi; logout → me data:null.
+- Uji lanjutan: POST programs code "test-x1" → tersimpan "TEST-X1" (uppercase), requirements array & benefits multiline & accreditation JSON-string → JSON array konsisten, "30" → int 30 (coerce); duplicate code → 409; PUT partial (featured+seatsLeft "35"→35) tanpa mengubah field lain; DELETE + PUT id hilang → 404. POST institutions certNumber "uji-2026-9001" → "UJI-2026-9001" + programCode "ppiu" → "PPIU" + score "88" → 88; duplicate → 409; verifikasi publik /api/verify terhadap sertifikat baru → valid:true; PUT tier/score; DELETE. POST experts licenseNo "pak-2026-7777" → uppercase, initials "uc" → "UC", "12" → 12; duplicate 409; PUT; DELETE. PATCH application status APPROVED (lalu dikembalikan VERIFIKASI) + status invalid → 400; POST /api/contact → GET messages → PATCH handled:true → DELETE. verify-logs 23 log + X-Total-Count. Tamper token → 401. Login editor (username " editor " dengan spasi) → STAFF 200. Login {} → 400, bukan JSON → 400.
+- Bunx tsc --noEmit: 0 error untuk src/app/api/** + src/lib/auth.ts + src/lib/admin-validation.ts (error tersisa hanya di skills/ bawaan sandbox & komponen CMS agent 4-b yang masih dikerjakan paralel). dev.log bersih tanpa error kompilasi. lastLoginAt kedua akun ter-update. Data uji dibersihkan (news/institution/expert/message/program uji dihapus, status aplikasi dikembalikan).
+
+Stage Summary:
+- Endpoint live & teruji: POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me, GET /api/admin/stats, GET+POST /api/admin/programs, PUT+DELETE /api/admin/programs/[id], GET+POST /api/admin/institutions, PUT+DELETE /api/admin/institutions/[id], GET+POST /api/admin/experts, PUT+DELETE /api/admin/experts/[id], GET+POST /api/admin/news, PUT+DELETE /api/admin/news/[id], GET /api/admin/applications, PATCH+DELETE /api/admin/applications/[id], GET /api/admin/messages, PATCH+DELETE /api/admin/messages/[id], GET /api/admin/verify-logs.
+- Mekanisme cookie: token HMAC-SHA256 `base64url(payload).sig` di cookie httpOnly `pusaka_admin_session` (sameSite lax, path /, maxAge 86400, secret env SESSION_SECRET ?? "pusaka-super-secret-key-2026"); cookie diparse manual dari request header (tanpa next/headers) sehingga aman utk route handler; guard 401 terbukti bekerja (cookie salah/kosong/tampered, token palsu, setelah logout).
+- Catatan utk agent frontend CMS (4-b): semua GET admin mengembalikan array (kecuali stats = objek {totals, recentApplications, recentVerifications, monthlyApplications}); /api/admin/applications menyertakan `programName`; /api/admin/verify-logs menyertakan header X-Total-Count; requirements/benefits/accreditation berupa string JSON array (parse di client); slug di-generate otomatis jika tidak dikirim; field unik konflik → HTTP 409; kode/nomor sertifikat/lisensi/initials otomatis di-uppercase.
+
+---
+Task ID: 4-b
+Agent: Frontend CMS Agent
+Task: Membangun CMS admin (login + dashboard CRUD)
+
+Work Log:
+- Membaca worklog.md (KONTRAK API CMS), page.tsx, lib/pusaka.ts, navbar/footer, prisma schema, dan inventaris komponen shadcn/ui.
+- Membuat `src/lib/admin-store.ts` (zustand v5): state {user, status: loading|authed|guest, loginOpen, showAdmin} + action init() (GET /api/auth/me → set user/status), login() (POST /api/auth/login → sukses set user+authed+close dialog return true; gagal return false), logout() (POST /api/auth/logout → guest), setLoginOpen(), setShowAdmin(). Semua fetch relative via apiRequest.
+- Membuat `src/lib/admin-api.ts`: fetcher typed seluruh endpoint admin (auth/me, admin/stats, programs, institutions, experts, news, applications GET/PATCH/DELETE, messages GET/PATCH/DELETE, verify-logs dengan normalizer toleran array|{logs}); payload types Program/Institution/Expert/News; konstanta APPLICATION_STATUS_META (SUBMITTED stone, REVIEW amber, VERIFIKASI cyan, ASSESSMENT orange, APPROVED emerald) + APPLICATION_STATUSES.
+- Membuat 10 komponen di `src/components/pusaka/admin/`:
+  1) admin-login-dialog.tsx — dialog "Panel Admin PUSAKA", field User ID/Password + toggle mata, tombol Masuk loading spinner, error inline merah, kotak hint border emerald kredensial demo (admin/Pusaka2026! & editor/Editor2026!) klik-isi-otomatis; ikon LogIn/Eye/EyeOff/ShieldCheck; reset error via pola adjust-state-during-render (bebas lint set-state-in-effect).
+  2) admin-dashboard.tsx — shell fixed inset-0 z-[60]: sidebar emerald-950 w-64 (logo PUSAKA + badge CMS, 8 menu ber-ikon, aktif bg-emerald-800/50 border-l amber, footer "Sesi aman • HMAC cookie"), topbar (judul section, tombol Lihat Situs → setShowAdmin(false), avatar inisial + nama + role + tombol Keluar → logout), mobile hamburger → Sheet kiri berisi menu sama + pb-safe, konten overflow-y-auto p-4/6.
+  3) admin-dashboard-home.tsx — 8 kartu statistik (grid 2/4: Total Program, Institusi, Dewan Pakar, Sertifikat Terbit dari GET /api/stats certificateHolders, Pengajuan + badge pending, Verifikasi Hari Ini, Pesan + badge unread, Berita), BarChart Recharts monthlyApplications (emerald #059669), daftar 5 pengajuan terbaru + 8 verifikasi terbaru (badge VALID/INVALID), skeleton + empty/error state + Promise.allSettled.
+  4) admin-programs.tsx — CRUD penuh: tabel (Kode mono, Nama, badge Kategori, formatIDR, Pemegang, star unggulan, edit/hapus), Dialog form semua field kontrak (code, name, shortName, category Select, tagline, description, requirements/benefits/accreditation textarea satu-per-baris → dikirim sebagai array string, durationDays/price/seatsLeft/holderCount/passRate number, accentColor Select 7 warna, featured Switch), POST/PUT/DELETE + AlertDialog konfirmasi + toast.
+  5) admin-institutions.tsx — tabel (certNumber mono, Nama, badge Type/Tier/Status via meta publik, Kota, Progress skor), form: name, certNumber, type Select, programCode Select dari /api/programs, tier/status Select, city/province, score 0-100, issuedAt/expiresAt input date (konversi ISO ↔ yyyy-MM-dd), contact/phone.
+  6) admin-experts.tsx — tabel (avatar inisial, Nama+organisasi, Bidang, badge Kategori 9 bidang, Lisensi mono, Pengalaman, star, aksi), count badge dinamis "46 Pakar", form lengkap (name, field, expertise, category Select, licenseNo, experienceYears, organization, education, initials auto-fallback dari nama, featured Switch).
+  7) admin-news.tsx — tabel (judul bold + slug mono, badge kategori, penulis, tanggal, star, aksi), form: title, slug placeholder "otomatis dari judul" (+slugify client), excerpt, content Textarea besar rows 10, category Select, author, featured Switch, publishedAt date opsional.
+  8) admin-applications.tsx — tabel (trackingCode mono, pemohon+email, badge PERUSAHAAN/INDIVIDU, programName||programCode, kota, tanggal, badge status berwarna + Select inline PATCH ubah status dengan spinner), filter Select status, tombol refresh, delete berkonfirmasi.
+  9) admin-messages.tsx — kartu pesan (nama+mailto, subjek bold, isi, tanggal lengkap, badge "Belum dibaca", toggle Mail/MailOpen PATCH handled, delete), tombol refresh, highlight kartu belum dibaca.
+  10) admin-verify-logs.tsx — read-only: certNumber mono, badge VALID emerald/INVALID merah, waktu relatif (timeAgo) + lengkap (formatDateTime), counter badge VALID/INVALID, refresh, max-h-[70vh] scroll dengan scrollbar tipis global.
+- Pola kualitas lintas section: tabel dibungkus max-h-[70vh] overflow-auto (min-w agar horizontal scroll di mobile), baris hover emerald, header sticky, skeleton loading, empty state ikon+teks, toast sonner sukses/error, tombol icon aria-label, label htmlFor, focus-visible ring, palet emerald+amber tanpa indigo/blue.
+- Integrasi page.tsx: tambah useEffect init() via useAdminStore((s)=>s.init); jika status==='authed' && showAdmin → render <AdminDashboard/> SAJA (+AdminLoginDialog); selain itu situs publik penuh + <AdminLoginDialog/> selalu dirender. Navbar: tombol ikon Shield ghost aria-label "Panel Admin" sebelum CTA (desktop) + tombol "Panel Admin" di Sheet mobile. Footer: button "Panel Admin" opacity rendah di bar bawah.
+- bun run lint → 0 error 0 warning (memperbaiki 1 error react-hooks/set-state-in-effect di login dialog). dev.log: GET / 200, GET /api/auth/me 200, tanpa error kompilasi. Smoke curl: POST /api/auth/login (admin) → {ok:true,data:{user}}; GET /api/admin/stats & /api/admin/verify-logs dengan cookie → 200 sesuai kontrak; /api/admin/stats tanpa sesi → 401 (guard jalan). Tidak menyentuh src/app/api/**, prisma, atau komponen publik lain.
+
+Stage Summary:
+- CMS Admin PUSAKA lengkap: login dialog + dashboard shell (sidebar 8 menu, topbar, mobile Sheet) + 8 section (Dashboard statistik, Pengajuan, Program CRUD, Institusi CRUD, Dewan Pakar CRUD, Berita CRUD, Pesan, Log Verifikasi read-only) — semua mengikuti KONTRAK API CMS dengan response {ok,data}.
+- Store: useAdminStore (zustand) di src/lib/admin-store.ts; fetcher admin di src/lib/admin-api.ts.
+- Cara akses: situs publik → ikon perisai di navbar (desktop) / tombol "Panel Admin" di menu mobile / tautan "Panel Admin" di footer → dialog login (klik kartu kredensial demo untuk isi otomatis) → masuk → dashboard menggantikan situs (showAdmin); tombol "Lihat Situs" kembali ke publik; Keluar mengakhiri sesi. Kredensial: admin/Pusaka2026! (SUPERADMIN), editor/Editor2026! (STAFF).
+
+---
+Task ID: 5
+Agent: Main Orchestrator (Z.ai)
+Task: Integrasi final CMS + verifikasi E2E Agent Browser.
+
+Work Log:
+- Menemukan bug UX: saat masih authed di tampilan publik, trigger "Panel Admin" membuka dialog login lagi. Diperbaiki di navbar.tsx & footer.tsx: helper openAdminPanel() → jika status authed setShowAdmin(true), else setLoginOpen(true).
+- Agent Browser E2E lengkap: login via kartu kredensial demo → dashboard (7 program, 24 institusi, 46 pakar, 23.498 sertifikat, pengajuan pending, verifikasi hari ini) → Pengajuan: ubah status inline PSK-2025-83013 → Asesmen (toast sukses) → Berita: tulis artikel baru (slug otomatis) → tampil di tabel CMS DAN situs publik (sinkron) → reload browser: sesi persist (cookie HMAC httpOnly) → "Lihat Situs" → logout → kembali publik dengan toast.
+- `bun run lint` → 0 error. dev.log bersih.
+
+Stage Summary:
+- CMS PUSAKA lengkap & terverifikasi E2E. Kredensial: admin/Pusaka2026! (SUPERADMIN), editor/Editor2026! (STAFF).
+- 18 file backend (auth + 15 admin routes + lib auth/validation), 10 komponen CMS + admin-store + admin-api.
+- Akses: ikon perisai di navbar / link "Panel Admin" di footer.
