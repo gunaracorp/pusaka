@@ -6,6 +6,7 @@ import { Hero } from "@/components/pusaka/hero";
 import { TrustMarquee } from "@/components/pusaka/trust-marquee";
 import { QuickVerify } from "@/components/pusaka/quick-verify";
 import { Programs } from "@/components/pusaka/programs";
+import { GlobalNetwork } from "@/components/pusaka/global-network";
 import { VerifySection } from "@/components/pusaka/verify-section";
 import { Process } from "@/components/pusaka/process";
 import { Directory } from "@/components/pusaka/directory";
@@ -50,6 +51,7 @@ export default function Home() {
         <TrustMarquee />
         <QuickVerify />
         <Programs />
+        <GlobalNetwork />
         <VerifySection />
         <Process />
         <Directory />

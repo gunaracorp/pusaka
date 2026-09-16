@@ -23,6 +23,8 @@ export interface ProgramT {
   holderCount: number;
   passRate: number;
   accreditation: string; // JSON string array
+  /** JSON string array {flag, country, detail} — cakupan negara program (kontrak baru). */
+  countries: string | null;
   accentColor: string;
   featured: boolean;
   createdAt: string;
@@ -74,6 +76,8 @@ export interface NewsArticleT {
 }
 
 export interface StatsT {
+  globalCountries: number;
+  globalPartners: number;
   totals: {
     certificateHolders: number;
     institutions: number;
@@ -86,6 +90,54 @@ export interface StatsT {
   tierDistribution: { tier: string; count: number }[];
   recentActivity: { certNumber: string; result: string; at: string }[];
   topProvinces: { province: string; count: number }[];
+}
+
+export interface ProgramCountryDetail {
+  flag: string;
+  country: string;
+  detail: string;
+}
+
+export interface GlobalNodeT {
+  id: string;
+  kind: "KANTOR_PERWAKILAN" | "MITRA_INTERNASIONAL" | string;
+  country: string;
+  /** ISO-2, boleh duplikat (Arab Saudi 2 node). */
+  countryCode: string;
+  region:
+    | "TIMUR_TENGAH"
+    | "ASIA_TENGGARA"
+    | "ASIA_SELATAN"
+    | "ASIA_TIMUR"
+    | "EROPA"
+    | "AFRIKA"
+    | "AMERIKA"
+    | "OSEANIA"
+    | string;
+  city: string;
+  /** emoji bendera */
+  flag: string;
+  title: string;
+  orgName: string;
+  description: string;
+  /** JSON string array kode program — parse dengan safeParseJsonArray */
+  scope: string;
+  status: "AKTIF" | "MOU" | "APLIKASI" | string;
+  /** tahun */
+  since: string;
+  contact: string | null;
+  order: number;
+}
+
+export interface GlobalResp {
+  nodes: GlobalNodeT[];
+  summary: {
+    totalCountries: number;
+    totalNodes: number;
+    offices: number;
+    partners: number;
+    regionCounts: { region: string; count: number }[];
+  };
 }
 
 export type VerifyData =
@@ -129,6 +181,7 @@ export interface ContactBody {
 export const NAV_LINKS = [
   { href: "#beranda", label: "Beranda" },
   { href: "#program", label: "Program" },
+  { href: "#jaringan-global", label: "Jaringan" },
   { href: "#verifikasi", label: "Verifikasi" },
   { href: "#direktori", label: "Direktori" },
   { href: "#dewan-pakar", label: "Dewan Pakar" },
@@ -202,7 +255,52 @@ export const NEWS_CATEGORY_META: Record<string, string> = {
   KEMITRAAN: "bg-orange-100 text-orange-800",
 };
 
+export const GLOBAL_REGION_LABEL: Record<string, string> = {
+  TIMUR_TENGAH: "Timur Tengah",
+  ASIA_TENGGARA: "Asia Tenggara",
+  ASIA_SELATAN: "Asia Selatan",
+  ASIA_TIMUR: "Asia Timur",
+  EROPA: "Eropa",
+  AFRIKA: "Afrika",
+  AMERIKA: "Amerika",
+  OSEANIA: "Oseania",
+};
+
+export const GLOBAL_REGION_ORDER = [
+  "TIMUR_TENGAH",
+  "ASIA_TENGGARA",
+  "ASIA_SELATAN",
+  "ASIA_TIMUR",
+  "EROPA",
+  "AFRIKA",
+  "AMERIKA",
+  "OSEANIA",
+];
+
+export const GLOBAL_KIND_LABEL: Record<string, string> = {
+  KANTOR_PERWAKILAN: "Kantor Perwakilan",
+  MITRA_INTERNASIONAL: "Mitra Internasional",
+};
+
+export const GLOBAL_STATUS_META: Record<string, { label: string; badgeClass: string }> = {
+  AKTIF: { label: "Aktif Beroperasi", badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  MOU: { label: "MoU Ditandatangani", badgeClass: "bg-amber-100 text-amber-800 border-amber-200" },
+  APLIKASI: { label: "Dalam Proses", badgeClass: "bg-stone-100 text-stone-600 border-stone-200" },
+};
+
+export const PROGRAM_LABELS: Record<string, string> = {
+  PIHK: "Pendamping Haji Khusus",
+  PPIU: "Perusahaan Perjalanan Umrah",
+  BPW: "Biro Perjalanan Wisata",
+  IATA: "Sertifikasi IATA",
+  "IJIN-UMRAH": "Izin Umrah",
+  "IJIN-HAJI": "Izin Haji",
+  "BPW-PRO": "BPW Profesional",
+};
+
 export const FALLBACK_STATS: StatsT = {
+  globalCountries: 32,
+  globalPartners: 26,
   totals: {
     certificateHolders: 14840,
     institutions: 24,
@@ -305,6 +403,23 @@ export function safeParseJsonArray(raw: string | null | undefined): string[] {
   }
 }
 
+/** Parse kolom JSON-string cakupan negara program ({flag,country,detail}[]) dengan aman. */
+export function safeParseCountryList(raw: string | null | undefined): ProgramCountryDetail[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (x): x is ProgramCountryDetail =>
+        !!x &&
+        typeof x === "object" &&
+        typeof (x as ProgramCountryDetail).country === "string"
+    );
+  } catch {
+    return [];
+  }
+}
+
 /** Pola QR 5x5 deterministik dari string (untuk dekorasi sertifikat digital). */
 export function qrPattern(seed: string): boolean[] {
   let h = 2166136261;
@@ -397,3 +512,6 @@ export const postContact = (body: ContactBody) =>
     method: "POST",
     body: JSON.stringify(body),
   });
+
+// 10. GET /api/global
+export const getGlobal = () => apiRequest<GlobalResp>("/api/global");

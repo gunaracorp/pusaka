@@ -17,6 +17,10 @@ export interface StatsData {
   tierDistribution: { tier: string; count: number }[];
   recentActivity: { certNumber: string; result: string; at: string }[];
   topProvinces: { province: string; count: number }[];
+  /** Jaringan global: jumlah negara unik (distinct countryCode GlobalNode). */
+  globalCountries: number;
+  /** Jaringan global: jumlah mitra internasional (kind=MITRA_INTERNASIONAL). */
+  globalPartners: number;
 }
 
 const TIER_ORDER: string[] = ["SILVER", "GOLD", "PLATINUM"];
@@ -55,6 +59,22 @@ export async function GET() {
       }),
     ]);
 
+    // Statistik jaringan global — try/catch terpisah agar tetap aman (default 0)
+    // jika tabel GlobalNode kosong/belum ada.
+    let globalCountries = 0;
+    let globalPartners = 0;
+    try {
+      const globalNodes = await db.globalNode.findMany({
+        select: { countryCode: true, kind: true },
+      });
+      globalCountries = new Set(globalNodes.map((n) => n.countryCode)).size;
+      globalPartners = globalNodes.filter(
+        (n) => n.kind === "MITRA_INTERNASIONAL"
+      ).length;
+    } catch (globalError) {
+      console.error("[API /api/stats] Global node query error:", globalError);
+    }
+
     const data: StatsData = {
       totals: {
         certificateHolders: holderAgg._sum.holderCount ?? 0,
@@ -80,6 +100,8 @@ export async function GET() {
         .map((g) => ({ province: g.province, count: g._count.province }))
         .sort((a, b) => b.count - a.count || a.province.localeCompare(b.province))
         .slice(0, 6),
+      globalCountries,
+      globalPartners,
     };
 
     return NextResponse.json({ ok: true, data });

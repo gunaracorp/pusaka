@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { randomBytes, scryptSync } from 'crypto'
+import { globalNodes, programCountries } from './data/globalNodes'
 
 const prisma = new PrismaClient()
 
@@ -373,6 +374,7 @@ async function main() {
   await prisma.expert.deleteMany()
   await prisma.institution.deleteMany()
   await prisma.program.deleteMany()
+  await prisma.globalNode.deleteMany()
 
   // ===== Akun CMS Admin =====
   await prisma.adminUser.deleteMany()
@@ -394,8 +396,38 @@ async function main() {
   })
   console.log('  ✓ 2 akun admin (admin / editor)')
 
-  for (const p of programs) await prisma.program.create({ data: p })
-  console.log(`  ✓ ${programs.length} programs`)
+  for (const p of programs) {
+    await prisma.program.create({ data: p })
+    // Cakupan internasional per program (JSON array of {flag, country, detail})
+    await prisma.program.update({
+      where: { code: p.code },
+      data: { countries: JSON.stringify(programCountries[p.code] ?? []) },
+    })
+  }
+  console.log(`  ✓ ${programs.length} programs (+ cakupan internasional)`)
+
+  // ===== Jaringan Global (kantor perwakilan & mitra internasional) =====
+  for (const node of globalNodes) {
+    await prisma.globalNode.create({
+      data: {
+        kind: node.kind,
+        country: node.country,
+        countryCode: node.countryCode,
+        region: node.region,
+        city: node.city,
+        flag: node.flag,
+        title: node.title,
+        orgName: node.orgName,
+        description: node.description,
+        scope: JSON.stringify(node.scope),
+        status: node.status,
+        since: node.since,
+        contact: node.contact,
+        order: node.order,
+      },
+    })
+  }
+  console.log(`  ✓ ${globalNodes.length} global nodes (jaringan global)`)
 
   const now = new Date() // selalu relatif terhadap tanggal sistem agar konsisten
   for (const [i, inst] of institutions.entries()) {

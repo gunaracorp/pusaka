@@ -10,6 +10,7 @@ import {
   Building2,
   Eye,
   FileStack,
+  Globe2,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -32,6 +33,7 @@ import { AdminExperts } from "@/components/pusaka/admin/admin-experts";
 import { AdminNews } from "@/components/pusaka/admin/admin-news";
 import { AdminMessages } from "@/components/pusaka/admin/admin-messages";
 import { AdminVerifyLogs } from "@/components/pusaka/admin/admin-verify-logs";
+import { AdminGlobalNodes } from "@/components/pusaka/admin/admin-global-nodes";
 
 type MenuKey =
   | "dashboard"
@@ -39,6 +41,7 @@ type MenuKey =
   | "programs"
   | "institutions"
   | "experts"
+  | "global"
   | "news"
   | "messages"
   | "verify-logs";
@@ -55,6 +58,7 @@ const MENU: MenuItem[] = [
   { key: "programs", label: "Program", icon: Award },
   { key: "institutions", label: "Institusi", icon: Building2 },
   { key: "experts", label: "Dewan Pakar", icon: Users },
+  { key: "global", label: "Jaringan Global", icon: Globe2 },
   { key: "news", label: "Berita", icon: Newspaper },
   { key: "messages", label: "Pesan", icon: Mail },
   { key: "verify-logs", label: "Log Verifikasi", icon: ScanSearch },
@@ -126,6 +130,8 @@ function renderSection(key: MenuKey) {
       return <AdminInstitutions />;
     case "experts":
       return <AdminExperts />;
+    case "global":
+      return <AdminGlobalNodes />;
     case "news":
       return <AdminNews />;
     case "messages":

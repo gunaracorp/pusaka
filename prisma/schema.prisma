@@ -40,8 +40,29 @@ model Program {
   passRate      Int // percentage
   accreditation String // JSON array of partner/accreditation names
   accentColor   String // tailwind-ish color key: emerald, amber, teal, rose...
+  countries     String? // JSON array of {flag, country, detail} — cakupan internasional per program
   featured      Boolean  @default(false)
   createdAt     DateTime @default(now())
+}
+
+model GlobalNode {
+  id          String   @id @default(cuid())
+  kind        String   // KANTOR_PERWAKILAN | MITRA_INTERNASIONAL
+  country     String
+  countryCode String   // ISO-2, e.g. "SA" (BOLEH duplikat antar node)
+  region      String   // TIMUR_TENGAH|ASIA_TENGGARA|ASIA_SELATAN|ASIA_TIMUR|EROPA|AFRIKA|AMERIKA|OSEANIA
+  city        String
+  flag        String   // emoji bendera
+  title       String
+  orgName     String
+  description String
+  scope       String   // JSON array of program codes
+  status      String   // AKTIF | MOU | APLIKASI
+  since       String   // tahun, e.g. "2018"
+  contact     String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Institution {

@@ -6,6 +6,7 @@
 import {
   apiRequest,
   type ExpertT,
+  type GlobalNodeT,
   type InstitutionT,
   type NewsArticleT,
   type ProgramT,
@@ -121,6 +122,23 @@ export interface NewsPayload {
   author: string;
   featured: boolean;
   publishedAt?: string;
+}
+
+export interface GlobalNodePayload {
+  kind: string; // KANTOR_PERWAKILAN | MITRA_INTERNASIONAL
+  country: string;
+  countryCode: string; // ISO-2
+  region: string;
+  city: string;
+  flag: string; // emoji
+  title: string;
+  orgName: string;
+  description: string;
+  scope: string[]; // array kode program (bukan JSON string)
+  status: string; // AKTIF | MOU | APLIKASI
+  since: string; // tahun
+  contact?: string | null;
+  order: number;
 }
 
 // ---------- META STATUS PENGAJUAN (dipakai dashboard & tabel) ----------
@@ -244,3 +262,23 @@ export async function listAdminVerifyLogs(): Promise<AdminVerifyLogT[]> {
   }
   return [];
 }
+
+// ---------- GLOBAL NODES (jaringan global) ----------
+
+/** GET /api/admin/global-nodes — array node urut order asc. */
+export const listAdminGlobalNodes = () => apiRequest<GlobalNodeT[]>("/api/admin/global-nodes");
+
+export const createAdminGlobalNode = (body: GlobalNodePayload) =>
+  apiRequest<GlobalNodeT>("/api/admin/global-nodes", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const updateAdminGlobalNode = (id: string, body: GlobalNodePayload) =>
+  apiRequest<GlobalNodeT>(`/api/admin/global-nodes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+
+export const deleteAdminGlobalNode = (id: string) =>
+  apiRequest<{ deleted: boolean }>(`/api/admin/global-nodes/${id}`, { method: "DELETE" });

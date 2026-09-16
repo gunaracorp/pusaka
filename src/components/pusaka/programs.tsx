@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
@@ -27,6 +27,7 @@ import {
   formatIDR,
   formatNumber,
   getPrograms,
+  safeParseCountryList,
   safeParseJsonArray,
   type ProgramT,
 } from "@/lib/pusaka";
@@ -58,6 +59,7 @@ function ProgramDetailDialog({
   const requirements = safeParseJsonArray(program?.requirements);
   const benefits = safeParseJsonArray(program?.benefits);
   const accreditation = safeParseJsonArray(program?.accreditation);
+  const countries = safeParseCountryList(program?.countries);
   const Icon = program ? PROGRAM_ICON[program.code] ?? Globe2 : Globe2;
 
   function handleApply(code: string) {
@@ -80,6 +82,9 @@ function ProgramDetailDialog({
                   <DialogTitle className="font-display text-left text-xl font-bold">
                     {program.name}
                   </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Detail program sertifikasi {program.shortName}
+                  </DialogDescription>
                   <p className="mt-1 text-sm text-stone-500">{program.tagline}</p>
                 </div>
               </div>
@@ -153,6 +158,33 @@ function ProgramDetailDialog({
                       </Badge>
                     ))}
                   </div>
+                </div>
+              ) : null}
+
+              {countries.length > 0 ? (
+                <div>
+                  <h4 className="mb-2 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-stone-500">
+                    <Globe2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+                    Cakupan Internasional
+                  </h4>
+                  <ul>
+                    {countries.map((c) => (
+                      <li
+                        key={`${c.country}-${c.detail}`}
+                        className="flex items-start gap-2.5 border-b border-stone-100 py-2 last:border-b-0"
+                      >
+                        <span className="mt-0.5 text-lg leading-none" aria-hidden>
+                          {c.flag}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-stone-800">{c.country}</p>
+                          {c.detail ? (
+                            <p className="text-sm leading-snug text-stone-600">{c.detail}</p>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ) : null}
 

@@ -225,6 +225,67 @@ export const applicationPatchSchema = z.object({
   status: z.enum(["SUBMITTED", "REVIEW", "VERIFIKASI", "ASSESSMENT", "APPROVED"]),
 });
 
+/* ============================= GLOBAL NODE =============================== */
+
+export const countryCodeField = z
+  .string()
+  .trim()
+  .transform((v) => v.toUpperCase())
+  .pipe(
+    z
+      .string()
+      .length(2, "Kode negara harus tepat 2 huruf (ISO-2, contoh: SA)")
+      .regex(/^[A-Z]{2}$/, "Kode negara hanya boleh 2 huruf (ISO-2)")
+  );
+
+export const globalNodeCreateSchema = z.object({
+  kind: z.enum(["KANTOR_PERWAKILAN", "MITRA_INTERNASIONAL"]),
+  country: z.string().trim().min(2, "Nama negara minimal 2 karakter"),
+  countryCode: countryCodeField,
+  region: z.enum([
+    "TIMUR_TENGAH",
+    "ASIA_TENGGARA",
+    "ASIA_SELATAN",
+    "ASIA_TIMUR",
+    "EROPA",
+    "AFRIKA",
+    "AMERIKA",
+    "OSEANIA",
+  ]),
+  city: z.string().trim().min(2, "Kota minimal 2 karakter"),
+  flag: z.string().trim().min(1, "Emoji bendera wajib diisi"),
+  title: z.string().trim().min(2, "Judul minimal 2 karakter"),
+  orgName: z.string().trim().min(2, "Nama organisasi minimal 2 karakter"),
+  description: z.string().trim().min(2, "Deskripsi minimal 2 karakter"),
+  scope: stringListField,
+  status: z.enum(["AKTIF", "MOU", "APLIKASI"]),
+  since: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, "Tahun harus 4 digit (contoh: 2018)"),
+  contact: z.string().trim().optional().nullable(),
+  order: z.coerce
+    .number()
+    .int("Order harus bilangan bulat")
+    .min(0, "Order minimal 0")
+    .default(0),
+});
+
+/**
+ * Update pakai .partial(); field `order` dioverride jadi optional TANPA default
+ * agar PUT partial tidak mengembalikan order ke 0 (default zod tetap berjalan
+ * meski key tidak dikirim).
+ */
+export const globalNodeUpdateSchema = globalNodeCreateSchema
+  .extend({
+    order: z.coerce
+      .number()
+      .int("Order harus bilangan bulat")
+      .min(0, "Order minimal 0")
+      .optional(),
+  })
+  .partial();
+
 /* ================================ MESSAGE ================================ */
 
 export const messagePatchSchema = z.object({

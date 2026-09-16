@@ -13,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Award, FileSearch, Layers, Users } from "lucide-react";
+import { Award, FileSearch, Globe2, Handshake, Layers, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedCounter } from "@/components/pusaka/animated-counter";
@@ -64,6 +64,8 @@ export function StatsSection() {
     { icon: Layers, label: "Lembaga Terakreditasi", value: s.totals.institutions, suffix: "" },
     { icon: Users, label: "Dewan Pakar", value: s.totals.experts, suffix: "" },
     { icon: FileSearch, label: "Verifikasi Hari Ini", value: s.totals.verificationsToday, suffix: "" },
+    { icon: Globe2, label: "Negara Mitra", value: s.globalCountries ?? 32, suffix: "" },
+    { icon: Handshake, label: "Mitra Internasional", value: s.globalPartners ?? 26, suffix: "" },
   ];
 
   return (
@@ -75,8 +77,8 @@ export function StatsSection() {
           subtitle="Kinerja sertifikasi & akreditasi PUSAKA diperbarui langsung dari basis data operasional — terbuka untuk publik."
         />
 
-        {/* 4 counter besar */}
-        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {/* 6 counter besar */}
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {counters.map((c, idx) => {
             const Icon = c.icon;
             return (

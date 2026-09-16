@@ -1,0 +1,386 @@
+   100→    seatsLeft: 25,
+   101→    holderCount: 3120,
+   102→    passRate: 88,
+   103→    accreditation: JSON.stringify(['Kemenparekraf', 'ASITA', 'BNSP']),
+   104→    accentColor: 'amber',
+   105→    featured: true,
+   106→  },
+   107→  {
+   108→    code: 'IATA',
+   109→    name: 'Sertifikasi IATA (International Air Transport Association)',
+   110→    shortName: 'IATA',
+   111→    category: 'PERUSAHAAN',
+   112→    tagline: 'Kualifikasi Internasional Agen Tiket & Kargo Udara',
+   113→    description:
+   114→      'Program persiapan & ujian sertifikasi IATA untuk agen tiket dan kargo udara. Mencakup Foundation, Consultant, hingga Management Level. Diselenggarakan bersama training partner resmi IATA dengan pengajar bersertifikat internasional.',
+   115→    requirements: JSON.stringify([
+   116→      'Pendidikan minimal SMA/SMK sederajat',
+   117→      'Kemampuan Bahasa Inggris aktif (placement test)',
+   118→      'Pengalaman ticketing 1 tahun (untuk level Consultant)',
+   119→      'Fotokopi paspor yang masih berlaku',
+   120→    ]),
+   121→    benefits: JSON.stringify([
+   122→      'Sertifikat internasional IATA Montreal, Canada',
+   123→      'Berlaku seumur hidup (Foundation & Consultant)',
+   124→      'Pengakuan global di 290+ maskapai anggota IATA',
+   125→      'Ujian resmi di pusat ujian PUSAKA terakreditasi',
+   126→    ]),
+   127→    durationDays: 60,
+   128→    price: 12500000,
+   129→    seatsLeft: 15,
+   130→    holderCount: 1432,
+   131→    passRate: 79,
+   132→    accreditation: JSON.stringify(['IATA Montreal', 'GDS Amadeus', 'GDS Sabre']),
+   133→    accentColor: 'rose',
+   134→    featured: true,
+   135→  },
+   136→  {
+   137→    code: 'IJIN-UMRAH',
+   138→    name: 'Pendampingan Izin Penyelenggara Umrah',
+   139→    shortName: 'Izin Umrah',
+   140→    category: 'IZIN',
+   141→    tagline: 'Konsultansi & Pendampingan Perizinan PPIU Kemenag',
+   142→    description:
+   143→      'Layanan konsultansi terpadu pengurusan izin penyelenggara perjalanan ibadah umrah (Izin PPIU) hingga terbit. Termasuk pendampingan legalitas badan usaha, susunan anggaran dasar, rekening terpisah, hingga clear-to-verify Kemenag.',
+   144→    requirements: JSON.stringify([
+   145→      'Akta pendirian CV/PT yang mengatur usaha perjalanan ibadah',
+   146→      'Modal dasar minimal sesuai regulasi Kemenag terbaru',
+   147→      'Pengurus & penanggung jawab tidak terlibat tindak pidana',
+   148→      'Kantor korespondensi & papan nama usaha',
+   149→    ]),
+   150→    benefits: JSON.stringify([
+   151→      'Pendampingan penuh hingga izin terbit (guarantee process)',
+   152→      'Audit pra-perizinan oleh Dewan Pakar',
+   153→      'Template dokumen legal & SOP siap pakai',
+   154→      'Konsultasi hukum 1-on-1 tanpa batas selama proses',
+   155→    ]),
+   156→    durationDays: 90,
+   157→    price: 15000000,
+   158→    seatsLeft: 10,
+   159→    holderCount: 486,
+   160→    passRate: 96,
+   161→    accreditation: JSON.stringify(['Kemenag RI', 'Kemenkumham', 'Dewan Pakar Hukum PUSAKA']),
+   162→    accentColor: 'cyan',
+   163→    featured: false,
+   164→  },
+   165→  {
+   166→    code: 'IJIN-HAJI',
+   167→    name: 'Pendampingan Izin PIHK (Haji Khusus)',
+   168→    shortName: 'Izin Haji',
+   169→    category: 'IZIN',
+   170→    tagline: 'Perizinan Penyelenggara Haji Khusus Resmi Kemenag',
+   171→    description:
+   172→      'Layanan konsultansi pengurusan izin penyelenggara perjalanan ibadah haji khusus (PIHK). Meliputi evaluasi kelayakan perusahaan, verifikasi modal, pembinaan pembekalan pendamping, hingga penerbitan izin oleh Menteri Agama.',
+   173→    requirements: JSON.stringify([
+   174→      'Berbadan hukum PT dengan modal dasar sesuai ketentuan',
+   175→      'Memiliki izin PPIU yang aktif minimal 3 tahun',
+   176→      'Pengalaman menyelenggarakan umrah minimal 3 musim',
+   177→      'Memiliki minimal 10 PIHK bersertifikat (pembina)',
+   178→      'Laporan keuangan 2 tahun terakhir diaudit',
+   179→    ]),
+   180→    benefits: JSON.stringify([
+   181→      'Konsultansi intensif tahap pra-izin hingga terbit',
+   182→      'Simulasi verifikasi lapangan Kemenag',
+   183→      'Pendampingan audit keuangan oleh mitra KAP',
+   184→      'Pembinaan 10 kandidat PIHK internal perusahaan',
+   185→    ]),
+   186→    durationDays: 120,
+   187→    price: 35000000,
+   188→    seatsLeft: 6,
+   189→    holderCount: 213,
+   190→    passRate: 98,
+   191→    accreditation: JSON.stringify(['Kemenag RI', 'Kemenko Perekonomian', 'Dewan Pakar PUSAKA']),
+   192→    accentColor: 'lime',
+   193→    featured: false,
+   194→  },
+   195→  {
+   196→    code: 'BPW-PRO',
+   197→    name: 'Sertifikasi Profesional Travel Consultant (BPW-Pro)',
+   198→    shortName: 'BPW-Pro',
+   199→    category: 'PROFESI',
+   200→    tagline: 'Kompetensi Frontliner, Tour Leader & Travel Consultant',
+   201→    description:
+   202→      'Sertifikasi profesi individu bagi travel consultant, tour leader, dan frontliner biro perjalanan. Mencakup customer excellence, itinerary design, GDS dasar, penanganan keluhan, dan etika pelayanan pariwisata.',
+   203→    requirements: JSON.stringify([
+   204→      'Usia minimal 18 tahun, lulus SMA/SMK',
+   205→      'Berpengalaman di industri travel 6 bulan (disarankan)',
+   206→      'Surat rekomendasi perusahaan (tidak wajib bagi fresher)',
+   207→      'Komunikatif & sehat jasmani',
+   208→    ]),
+   209→    benefits: JSON.stringify([
+   210→      'Sertifikat kompetensi BNSP berlaku 3 tahun',
+   211→      'Prioritas rekrutmen jaringan 3.000+ perusahaan anggota',
+   212→      'Modul e-learning seumur hidup',
+   213→      'Uji ulang gratis jika belum lulus',
+   214→    ]),
+   215→    durationDays: 21,
+   216→    price: 1850000,
+   217→    seatsLeft: 60,
+   218→    holderCount: 9250,
+   219→    passRate: 94,
+   220→    accreditation: JSON.stringify(['BNSP', 'ASITA', 'Kemenparekraf']),
+   221→    accentColor: 'orange',
+   222→    featured: true,
+   223→  },
+   224→]
+   225→
+   226→const institutions = [
+   227→  { name: 'PT Zahra Tour Indonesia', type: 'PPIU', city: 'Jakarta Selatan', province: 'DKI Jakarta', certNumber: 'PPU-2025-0001', programCode: 'PPIU', status: 'AKTIF', tier: 'PLATINUM', score: 96 },
+   228→  { name: 'PT Al-Hijaz Indo Persada', type: 'PPIU', city: 'Jakarta Timur', province: 'DKI Jakarta', certNumber: 'PPU-2025-0002', programCode: 'PPIU', status: 'AKTIF', tier: 'GOLD', score: 91 },
+   229→  { name: 'PT First Travel Cahaya Umrah', type: 'PPIU', city: 'Bandung', province: 'Jawa Barat', certNumber: 'PPU-2025-0003', programCode: 'PPIU', status: 'DIPERBARUI', tier: 'GOLD', score: 89 },
+   230→  { name: 'PT Barokah Khatulistiwa Tour', type: 'PPIU', city: 'Surabaya', province: 'Jawa Timur', certNumber: 'PPU-2025-0004', programCode: 'PPIU', status: 'AKTIF', tier: 'SILVER', score: 82 },
+   231→  { name: 'PT Srikandi Madinah Travel', type: 'PPIU', city: 'Yogyakarta', province: 'DI Yogyakarta', certNumber: 'PPU-2025-0005', programCode: 'PPIU', status: 'AKTIF', tier: 'PLATINUM', score: 95 },
+   232→  { name: 'PT Amanah Nusantara Wisata', type: 'BPW', city: 'Semarang', province: 'Jawa Tengah', certNumber: 'BPW-2025-0101', programCode: 'BPW', status: 'AKTIF', tier: 'GOLD', score: 90 },
+   233→  { name: 'PT Tour Indonesia Cahaya (TIC)', type: 'BPW', city: 'Medan', province: 'Sumatera Utara', certNumber: 'BPW-2025-0102', programCode: 'BPW', status: 'AKTIF', tier: 'PLATINUM', score: 97 },
+   234→  { name: 'CV Jogja Wisata Langgeng', type: 'BPW', city: 'Yogyakarta', province: 'DI Yogyakarta', certNumber: 'BPW-2025-0103', programCode: 'BPW', status: 'AKTIF', tier: 'SILVER', score: 80 },
+   235→  { name: 'PT Panorama Pesona Indonesia', type: 'BPW', city: 'Jakarta Pusat', province: 'DKI Jakarta', certNumber: 'BPW-2025-0104', programCode: 'BPW', status: 'DIPERBARUI', tier: 'PLATINUM', score: 98 },
+   236→  { name: 'PT Dwidaya World Wide', type: 'BPW', city: 'Surabaya', province: 'Jawa Timur', certNumber: 'BPW-2025-0105', programCode: 'BPW', status: 'AKTIF', tier: 'PLATINUM', score: 96 },
+   237→  { name: 'PT Garuda Krishna Travel', type: 'BPW', city: 'Denpasar', province: 'Bali', certNumber: 'BPW-2025-0106', programCode: 'BPW', status: 'AKTIF', tier: 'GOLD', score: 88 },
+   238→  { name: 'PT Mulya Gayatri Perjalanan', type: 'BPW', city: 'Makassar', province: 'Sulawesi Selatan', certNumber: 'BPW-2025-0107', programCode: 'BPW', status: 'AKTIF', tier: 'SILVER', score: 79 },
+   239→  { name: 'PT Natura Wisata Prima', type: 'BPW', city: 'Palembang', province: 'Sumatera Selatan', certNumber: 'BPW-2025-0108', programCode: 'BPW', status: 'AKTIF', tier: 'GOLD', score: 87 },
+   240→  { name: 'PT Anugrah Tour & Travel', type: 'BPW', city: 'Balikpapan', province: 'Kalimantan Timur', certNumber: 'BPW-2025-0109', programCode: 'BPW', status: 'AKTIF', tier: 'SILVER', score: 81 },
+   241→  { name: 'PT Putra Gunung Sahara', type: 'BPW', city: 'Mataram', province: 'Nusa Tenggara Barat', certNumber: 'BPW-2025-0110', programCode: 'BPW', status: 'AKTIF', tier: 'SILVER', score: 77 },
+   242→  { name: 'PT Cakra Buana Travelindo', type: 'BPW', city: 'Cirebon', province: 'Jawa Barat', certNumber: 'BPW-2025-0111', programCode: 'BPW', status: 'KADALUARSA', tier: 'SILVER', score: 70 },
+   243→  { name: 'PT Borneo Mantap Wisata', type: 'BPW', city: 'Banjarmasin', province: 'Kalimantan Selatan', certNumber: 'BPW-2025-0112', programCode: 'BPW', status: 'AKTIF', tier: 'GOLD', score: 85 },
+   244→  { name: 'PT Samudra Cipta Wisata', type: 'BPW', city: 'Pekanbaru', province: 'Riau', certNumber: 'BPW-2025-0113', programCode: 'BPW', status: 'AKTIF', tier: 'SILVER', score: 78 },
+   245→  { name: 'PT Garuda Oriente Trans', type: 'IATA', city: 'Jakarta Selatan', province: 'DKI Jakarta', certNumber: 'IAT-2025-0201', programCode: 'IATA', status: 'AKTIF', tier: 'PLATINUM', score: 94 },
+   246→  { name: 'PT Satriavi Java Airagent', type: 'IATA', city: 'Semarang', province: 'Jawa Tengah', certNumber: 'IAT-2025-0202', programCode: 'IATA', status: 'AKTIF', tier: 'GOLD', score: 89 },
+   247→  { name: 'PT Bumi Laut Nusantara', type: 'IATA', city: 'Surabaya', province: 'Jawa Timur', certNumber: 'IAT-2025-0203', programCode: 'IATA', status: 'AKTIF', tier: 'GOLD', score: 86 },
+   248→  { name: 'PT Optima Travel Services', type: 'IATA', city: 'Jakarta Pusat', province: 'DKI Jakarta', certNumber: 'IAT-2025-0204', programCode: 'IATA', status: 'DIPERBARUI', tier: 'PLATINUM', score: 93 },
+   249→  { name: 'PT Antariksa Wisata Asia', type: 'PPIU', city: 'Tangerang Selatan', province: 'Banten', certNumber: 'PPU-2025-0006', programCode: 'PPIU', status: 'AKTIF', tier: 'GOLD', score: 87 },
+   250→  { name: 'PT Insight Travel Semesta', type: 'IATA', city: 'Bandung', province: 'Jawa Barat', certNumber: 'IAT-2025-0205', programCode: 'IATA', status: 'AKTIF', tier: 'SILVER', score: 83 },
+   251→]
+   252→
+   253→// ============ 46 DEWAN PAKAR LINTAS BIDANG ============
+   254→const experts = [
+   255→  { name: 'Prof. Dr. H. Ahmad Suyuthi, Lc., M.A.', field: 'Fiqh Manasik Haji & Umrah', category: 'IBADAH', organization: 'UIN Syarif Hidayatullah Jakarta', education: 'Al-Azhar University, Cairo', experienceYears: 24 },
+   256→  { name: 'Dr. Hj. Siti Rohmah Muflihah, M.Ag.', field: 'Manajemen Ibadah Haji Khusus', category: 'IBADAH', organization: 'Kementerian Agama RI (Purnawirawan)', education: 'UIN Sunan Kalijaga Yogyakarta', experienceYears: 21 },
+   257→  { name: 'Dr. Ahmad Syafi’i Baharuddin, S.H., M.H.', field: 'Hukum Perizinan Perjalanan Ibadah', category: 'HUKUM', organization: 'Universitas Padjadjaran', education: 'Universitas Indonesia', experienceYears: 19 },
+   258→  { name: 'Dr. Ratna Fitriani, S.H., LL.M.', field: 'Hukum Pariwisata Internasional', category: 'HUKUM', organization: 'Universitas Gadjah Mada', education: 'Leiden University, Belanda', experienceYears: 17 },
+   259→  { name: 'Ir. Bambang Priyanto, M.T., IPM', field: 'Manajemen Transportasi Darat & Rute', category: 'MANAJEMEN', organization: 'Politeknik Transportasi PDW', education: 'ITB', experienceYears: 22 },
+   260→  { name: 'Capt. Rizal Mahmud, M.Sc.', field: 'Aviasi & Regulasi Penerbangan', category: 'AVIASI', organization: 'Angkasa Pura I (Purnawirawan)', education: 'Sekolah Penerbangan Australia', experienceYears: 26 },
+   261→  { name: 'Farhan Wibowo, AMT., MBA', field: 'Sistem Distribusi GDS & Ticketing', category: 'AVIASI', organization: 'IATA Authorized Training Center', education: 'Universitas Melbourne', experienceYears: 14 },
+   262→  { name: 'Dr. Endah Kusumawardhani, S.E., M.Si., Ak.', field: 'Akuntansi & Audit Keuangan Travel', category: 'KEUANGAN', organization: 'Universitas Indonesia', education: 'Universitas Indonesia', experienceYears: 20 },
+   263→  { name: 'H. Yusuf Ramadhan, S.E., MBA, CFPI', field: 'Keuangan Syariah & Escrow Jemaah', category: 'KEUANGAN', organization: 'Bank Syariah Indonesia', education: 'University of Manchester', experienceYears: 16 },
+   264→  { name: 'Dewi Anggraini, S.E., M.Si., BKP', field: 'Perpajakan Badan Usaha Perjalanan', category: 'KEUANGAN', organization: 'Konsultan Pajak Utama', education: 'Universitas Airlangga', experienceYears: 18 },
+   265→  { name: 'Dr. Cahyono Agus Prihatin, M.M.', field: 'Manajemen Biro Perjalanan Wisata', category: 'MANAJEMEN', organization: 'ASITA Pusat', education: 'Universitas Gadjah Mada', experienceYears: 25 },
+   266→  { name: 'Maya Puspitasari, S.Psi., M.M.', field: 'Manajemen SDM & Customer Excellence', category: 'MANAJEMEN', organization: 'Yayasan Pembinaan Manajemen', education: 'Universitas Indonesia', experienceYears: 15 },
+   267→  { name: 'Dr. Ir. Hendra Gunawan, M.Par.', field: 'Hospitality & Pelayanan Jemaah', category: 'MANAJEMEN', organization: 'Trisakti Institute of Tourism', education: 'Nanyang Technological University', experienceYears: 19 },
+   268→  { name: 'Dr. Taufiq Hidayat, M.Si.', field: 'Regulasi Kepariwisataan Nasional', category: 'HUKUM', organization: 'Kemenparekraf RI (Purnawirawan)', education: 'Universitas Indonesia', experienceYears: 23 },
+   269→  { name: 'Luluk Nur Azizah, S.H., M.H.', field: 'Perlindungan Konsumen Jasa Wisata', category: 'HUKUM', organization: 'BPKN RI', education: 'Universitas Diponegoro', experienceYears: 13 },
+   270→  { name: 'Dr. Kholil Nawawi, Lc., M.A. ', field: 'Linguistik Arab & Interpretasi', category: 'BAHASA', organization: 'LIPIA Jakarta', education: 'Umm Al-Qura University', experienceYears: 22 },
+   271→  { name: 'H. Muhammad Ridwan, S.Pd.I., C.TI.', field: 'Pemanduan & Mutawwif Profesional', category: 'IBADAH', organization: 'Forum Mutawwif Indonesia', education: 'IIQ Jakarta', experienceYears: 17 },
+   272→  { name: 'Dr. Fitria Hasanah, S.KM., M.Kes.', field: 'Kesehatan Jemaah & Promkes', category: 'KESEHATAN', organization: 'Kemenkes RI (Purnawirawan)', education: 'Universitas Airlangga', experienceYears: 20 },
+   273→  { name: 'dr. Angga Pratama, Sp.PD', field: 'Medis Perjalanan & Kesiapsiagaan', category: 'KESEHATAN', organization: 'RS Pusat Pertamina', education: 'UI', experienceYears: 12 },
+   274→  { name: 'Dr. Vina Rahmawati, S.KM., M.Epid.', field: 'Epidemiologi & Quarantine Haji', category: 'KESEHATAN', organization: 'Balai Kesehatan Haji Jeddah', education: 'Universitas Hasanuddin', experienceYears: 14 },
+   275→  { name: 'Ir. Danang Wirapraja, M.Kom.', field: 'Transformasi Digital Travel', category: 'TEKNOLOGI', organization: 'PT Telkom Indonesia', education: 'Institut Teknologi Bandung', experienceYears: 16 },
+   276→  { name: 'Nanda Kurniawan, S.T., CISM', field: 'Keamanan Siber Data Jemaah', category: 'TEKNOLOGI', organization: 'BSSN (Purnawirawan)', education: 'Universitas Teknologi Sumbawa', experienceYears: 13 },
+   277→  { name: 'Rachmad Hidayat, S.Kom., M.T.', field: 'Sistem Informasi Manajemen Travel', category: 'TEKNOLOGI', organization: 'Universitas Telkom', education: 'ITB', experienceYears: 15 },
+   278→  { name: 'Anisa Wulandari, S.Ds., M.A.', field: 'Branding & Komunikasi Publik', category: 'MANAJEMEN', organization: 'Indonesia Brand Institute', education: 'Royal College of Art, London', experienceYears: 11 },
+   279→  { name: 'Bayu Setiawan, S.T., M.M., CTM', field: 'Digital Marketing & OTA Strategy', category: 'MANAJEMEN', organization: 'PT Traveloka Utama', education: 'Queensland University', experienceYears: 12 },
+   280→  { name: 'Dr. H. Syamsul Bahri, M.Ag.', field: 'Etika Pelayanan Ibadah', category: 'IBADAH', organization: 'UIN Alauddin Makassar', education: 'UIN Sunan Ampel', experienceYears: 23 },
+   281→  { name: 'Ir. Joko Susilo, M.M., IPM', field: 'Logistik & Rantai Pasok Perjalanan', category: 'LOGISTIK', organization: 'PT Pos Indonesia', education: 'ITS Surabaya', experienceYears: 21 },
+   282→  { name: 'Yohanes Purwanto, S.T., CTAA', field: 'Kargo Udara & Logistik Haji', category: 'LOGISTIK', organization: 'PT Angkasa Pura Logistik', education: 'STPI Curug', experienceYears: 18 },
+   283→  { name: 'Dr. Imam Muslih, S.Fil.I.', field: 'Akhlaq & Pembinaan Jemaah', category: 'IBADAH', organization: 'Pondok Modern Gontor', education: 'IIQ Jakarta', experienceYears: 25 },
+   284→  { name: 'Dr. Henny Kusumawati, S.H., M.Hum.', field: 'Hukum Kontrak Bisnis Perjalanan', category: 'HUKUM', organization: 'Universitas Brawijaya', education: 'Universitas Brawijaya', experienceYears: 16 },
+   285→  { name: 'Budi Santoso, Ak., CA., CPMA', field: 'Good Corporate Governance', category: 'KEUANGAN', organization: 'Kementerian BUMN (Purnawirawan)', education: 'STAN', experienceYears: 27 },
+   286→  { name: 'Sari Ramadhani, S.E., M.M., CSRS', field: 'Sustainability & Wisata Halal', category: 'MANAJEMEN', organization: 'Universitas Padjadjaran', education: 'University of Birmingham', experienceYears: 10 },
+   287→  { name: 'Dr. Agus Riyanto, M.Si.', field: 'Kepatuhan & Anti-Fraud', category: 'HUKUM', organization: 'Lembaga Integritas Nasional', education: 'Universitas Indonesia', experienceYears: 19 },
+   288→  { name: 'Fadhil Muhammad, S.Hub.Int., M.A.', field: 'Hubungan Internasional & Visa', category: 'MANAJEMEN', organization: 'Kemlu RI (Purnawirawan)', education: 'Australian National University', experienceYears: 17 },
+   289→  { name: 'dr. Laila Fitriani, M.Biomed', field: 'Gizi & Layanan Medis Perjalanan', category: 'KESEHATAN', organization: 'Universitas Padjadjaran', education: 'UGM', experienceYears: 11 },
+   290→  { name: 'Dr. Sofyan Anwar, M.H.I.', field: 'Regulasi Haji Khusus & PIHK', category: 'IBADAH', organization: 'Kemenag RI — Ditjen PHU', education: 'UIN Syarif Hidayatullah', experienceYears: 20 },
+   291→  { name: 'Hj. Nurhayati Abdul Gani, S.E., MM.', field: 'Operasional PPIU Multi-Cabang', category: 'MANAJEMEN', organization: 'Himpunan PPIU Indonesia', education: 'Universitas Trisakti', experienceYears: 24 },
+   292→  { name: 'Michael Tandi, B.Sc., M.B.A.', field: 'Partnership & B2B Aviation', category: 'AVIASI', organization: 'Singapore Airlines Group (Alumni)', education: 'National University of Singapore', experienceYears: 15 },
+   293→  { name: 'Dr. Yulia Hastuti, S.S., M.Hum.', field: 'Penerjemahan Tersumpah & Interpretasi', category: 'BAHASA', organization: 'Universitas Negeri Jakarta', education: 'SOAS University of London', experienceYears: 14 },
+   294→  { name: 'Ir. Rizki Ardiansyah, IPM', field: 'Keselamatan & K3 Perjalanan', category: 'LOGISTIK', organization: 'Kemnaker RI', education: 'ITB', experienceYears: 16 },
+   295→  { name: 'Dr. Maya Kartika, S.Pd., M.Hum.', field: 'Pendampingan Jamaah Disabilitas', category: 'IBADAH', organization: 'Universitas Negeri Yogyakarta', education: 'Monash University', experienceYears: 13 },
+   296→  { name: 'Arif Wibisono, S.T., M.Sc.', field: 'Sistem Reservasi & Payment Gateway', category: 'TEKNOLOGI', organization: 'PT Xendit Teknologi', education: 'TU Delft, Belanda', experienceYears: 12 },
+   297→  { name: 'Dr. Retno Wulandari, S.E., M.Si., Ak.', field: 'Audit Kinerja & Mystery Audit', category: 'KEUANGAN', organization: 'BPKP RI', education: 'IPB University', experienceYears: 22 },
+   298→  { name: 'H. Zainuddin Manaf, S.Ag., M.A.', field: 'Pembinaan Kesehatan Jiwa Jemaah', category: 'KESEHATAN', organization: 'Puskesmas Pembina Haji', education: 'UIN Walisongo', experienceYears: 18 },
+   299→  { name: 'Kartika Sari Dewi, S.Farm., Apt., M.Farm.', field: 'Farmasi Perjalanan & Vaksinasi', category: 'KESEHATAN', organization: 'Universitas Pancasila', education: 'UI', experienceYears: 12 },
+   300→  { name: 'Dr. Bagus Prakoso, S.E., M.Sc.', field: 'Analisis Ekonomi Industri Travel', category: 'KEUANGAN', organization: 'Bank Indonesia (Purnawirawan)', education: 'University of Amsterdam', experienceYears: 20 },
+   301→]
+   302→
+   303→const newsArticles = [
+   304→  {
+   305→    title: 'PUSAKA Luncurkan Sertifikasi Digital QR-Verified untuk Seluruh Pemegang Sertifikat',
+   306→    slug: 'luncurkan-sertifikasi-digital-qr-verified',
+   307→    excerpt: 'Mulai Februari 2025, seluruh sertifikat PUSAKA dilengkapi QR Code yang dapat diverifikasi publik secara real-time melalui portal resmi.',
+   308→    category: 'PENGUMUMAN',
+   309→    author: 'Divisi Komunikasi PUSAKA',
+   310→    featured: true,
+   311→    content:
+   312→      'Jakarta — Pusat Sertifikasi & Akreditasi Kompetensi (PUSAKA) resmi meluncurkan sistem sertifikasi digital dengan QR-Verified Code. Inovasi ini memungkinkan masyarakat memverifikasi keaslian sertifikat PIHK, PPIU, BPW, maupun IATA hanya dalam hitungan detik.\n\nKetua Dewan Pakar PUSAKA menyatakan bahwa sistem ini merupakan jawaban atas meningkatnya kasus pemalsuan sertifikat di industri perjalanan ibadah. "Dengan QR-Verified, jemaah dapat memastikan pendamping dan penyelenggara yang mereka pilih benar-benar bersertifikat," ujarnya.\n\nSistem ini terintegrasi dengan database nasional PUSAKA dan akan diberlakukan bertahap pada seluruh 14.840 pemegang sertifikat aktif.',
+   313→  },
+   314→  {
+   315→    title: 'Kerja Sama Strategis PUSAKA × IATA: Ujian Internasional Kini Tersedia di Jakarta & Surabaya',
+   316→    slug: 'kerja-sama-strategis-pusaka-iata',
+   317→    excerpt: 'Penandatanganan MoU dengan IATA Montreal membuka akses ujian sertifikasi aviasi internasional tanpa harus ke luar negeri.',
+   318→    category: 'KEMITRAAN',
+   319→    author: 'Divisi Kemitraan Global',
+   320→    featured: true,
+   321→    content:
+   322→      'Jakarta — PUSAKA menandatangani Memorandum of Understanding dengan International Air Transport Association (IATA) untuk menjadi Authorized Examination Center di Indonesia.\n\nMulai triwulan kedua, ujian IATA Foundation, Consultant, dan Management Level dapat diikuti di dua pusat ujian resmi: Jakarta dan Surabaya. Program ini diharapkan memangkas biaya sertifikasi aviasi hingga 40% bagi tenaga kerja Indonesia.\n\nAnggota Dewan Pakar bidang aviasi PUSAKA, Capt. Rizal Mahmud, menegaskan bahwa kualifikasi IATA membuka peluang kerja di 290+ maskapai dan 8.000+ agen perjalanan terakreditasi di dunia.',
+   323→  },
+   324→  {
+   325→    title: 'SOP Baru Penanganan Kesehatan Jemaah Haji Khusus Mulai Diberlakukan',
+   326→    slug: 'sop-baru-penanganan-kesehatan-jemaah',
+   327→    excerpt: 'Standar baru mencakup kewajiban pendamping PIHK bersertifikasi medis dasar di setiap rombongan di atas 40 jemaah.',
+   328→    category: 'REGULASI',
+   329→    author: 'Dewan Pakar Bidang Kesehatan',
+   330→    featured: false,
+   331→    content:
+   332→      'Mengacu pada evaluasi musim haji terakhir, Dewan Pakar PUSAKA bidang kesehatan bersama Kemenkes menerbitkan SOP penanganan kesehatan jemaah haji khusus versi terbaru.\n\nSOP ini mewajibkan setiap rombongan dengan jemaah di atas 40 orang didampingi minimal satu pendamping yang lulus modul medis dasar — mencakup pertolongan pertama, manajemen heat stroke, hingga protokol penyakit menular.\n\nPelatihan update ini wajib diikuti seluruh PIHK pemegang sertifikat aktif dan menjadi bagian dari syarat pembaruan sertifikat 3 tahunan.',
+   333→  },
+   334→  {
+   335→    title: 'Hasil Akreditasi Triwulan I: 24 Perusahaan Baru Raih Sertifikasi PPIU & BPW',
+   336→    slug: 'hasil-akreditasi-triwulan-i',
+   337→    excerpt: 'Dari 41 pendaftar, 24 perusahaan dinyatakan lulus audit lapangan. 11 di antaranya meraih tier Platinum.',
+   338→    category: 'KEGIATAN',
+   339→    author: 'Divisi Akreditasi Perusahaan',
+   340→    featured: false,
+   341→    content:
+   342→      'Komite Akreditasi Perusahaan PUSAKA menerbitkan hasil audit triwulan pertama. Sebanyak 24 perusahaan — 6 PPIU dan 18 BPW — resmi memperoleh sertifikasi akreditasi.\n\nProses audit meliputi verifikasi legalitas, audit keuangan, wawancara manajemen, hingga mystery audit pelayanan. Perusahaan yang tidak lulus mendapatkan rekomendasi perbaikan dan dapat mendaftar ulang dalam 6 bulan.\n\n"Tier Platinum kami berikan kepada perusahaan dengan skor audit di atas 93. Mereka menunjukkan tata kelola pelayanan jemaah yang patut diteladani," kata Ketua Komite Akreditasi.',
+   343→  },
+   344→  {
+   345→    title: '46 Dewan Pakar PUSAKA Adakan Musyawarah Nasional Standardisasi 2025',
+   346→    slug: 'musyawarah-nasional-dewan-pakar-2025',
+   347→    excerpt: 'Musyawarah memutuskan pembaruan kurikulum sertifikasi di 9 bidang keilmuan, termasuk bidang baru: Keamanan Siber Data Jemaah.',
+   348→    category: 'KEGIATAN',
+   349→    author: 'Sekretariat Dewan Pakar',
+   350→    featured: false,
+   351→    content:
+   352→      'Seluruh 46 Dewan Pakar PUSAKA lintas bidang berkumpul dalam Musyawarah Nasional Standardisasi di Jakarta. Agenda utama: pembaruan 9 kurikulum sertifikasi dan penetapan bidang keilmuan baru.\n\nSatu bidang baru resmi dibuka: Keamanan Siber Data Jemaah — merespons meningkatnya risiko kebocoran data pribadi di industri perjalanan digital.\n\nHasil musyawarah akan menjadi standar kurikulum pelatihan seluruh Lembaga Pelatihan mitra PUSAKA mulai tahun ajaran baru.',
+   353→  },
+   354→  {
+   355→    title: 'Portal Verifikasi Publik Resmi Dibuka: Cek Keaslian 14.000+ Sertifikat Secara Gratis',
+   356→    slug: 'portal-verifikasi-publik-dibuka',
+   357→    excerpt: 'Masyarakat kini dapat memverifikasi PIHK, PPIU, BPW, dan IATA secara mandiri melalui fitur Verifikasi Sertifikat di portal PUSAKA.',
+   358→    category: 'PENGUMUMAN',
+   359→    author: 'Divisi Teknologi Informasi',
+   360→    featured: false,
+   361→    content:
+   362→      'PUSAKA membuka layanan verifikasi publik gratis. Cukup masukkan nomor sertifikat pada portal, sistem akan menampilkan status keabsahan, pemegang, masa berlaku, hingga tier akreditasi.\n\nFitur ini diharapkan melindungi jemaah dari penipuan berkedok travel umrah & haji yang tidak berizin. "Verifikasi dulu, lalu bertransaksi," pesan Divisi Teknologi PUSAKA.',
+   363→  },
+   364→]
+   365→
+   366→async function main() {
+   367→  console.log('🌱 Seeding PUSAKA database...')
+   368→
+   369→  await prisma.verifyLog.deleteMany()
+   370→  await prisma.contactMessage.deleteMany()
+   371→  await prisma.application.deleteMany()
+   372→  await prisma.newsArticle.deleteMany()
+   373→  await prisma.expert.deleteMany()
+   374→  await prisma.institution.deleteMany()
+   375→  await prisma.program.deleteMany()
+   376→
+   377→  // ===== Akun CMS Admin =====
+   378→  await prisma.adminUser.deleteMany()
+   379→  await prisma.adminUser.createMany({
+   380→    data: [
+   381→      {
+   382→        username: 'admin',
+   383→        name: 'Administrator PUSAKA',
+   384→        passwordHash: hashPassword(process.env.ADMIN_PASSWORD ?? 'Pusaka2026!'),
+   385→        role: 'SUPERADMIN',
+   386→      },
+   387→      {
+   388→        username: 'editor',
+   389→        name: 'Editor Konten PUSAKA',
+   390→        passwordHash: hashPassword(process.env.EDITOR_PASSWORD ?? 'Editor2026!'),
+   391→        role: 'STAFF',
+   392→      },
+   393→    ],
+   394→  })
+   395→  console.log('  ✓ 2 akun admin (admin / editor)')
+   396→
+   397→  for (const p of programs) await prisma.program.create({ data: p })
+   398→  console.log(`  ✓ ${programs.length} programs`)
+   399→
+   400→  const now = new Date() // selalu relatif terhadap tanggal sistem agar konsisten
+   401→  for (const [i, inst] of institutions.entries()) {
+   402→    const issued = new Date(now)
+   403→    issued.setMonth(issued.getMonth() - (3 + i))
+   404→    const expires = new Date(issued)
+   405→    expires.setFullYear(expires.getFullYear() + 3)
+   406→    // institusi berstatus KADALUARSA dibuat sudah lewat masa berlaku
+   407→    if (inst.status === 'KADALUARSA') {
+   408→      expires.setFullYear(issued.getFullYear() + 1)
+   409→      expires.setMonth(expires.getMonth() - 2)
+   410→    }
+   411→    await prisma.institution.create({
+   412→      data: {
+   413→        ...inst,
+   414→        issuedAt: issued,
+   415→        expiresAt: expires,
+   416→        contact: `info@${inst.name.toLowerCase().replace(/^(pt|cv)\s+/,'').split(' ')[0].replace(/[^a-z]/g,'')}.co.id`,
+   417→        phone: `+62 21 ${5000 + i} ${1000 + i * 7}`,
+   418→      },
+   419→    })
+   420→  }
+   421→  console.log(`  ✓ ${institutions.length} institutions`)
+   422→
+   423→  for (const [i, e] of experts.entries()) {
+   424→    const initials = e.name
+   425→      .replace(/^(Prof|Dr|Ir|Capt|H|Hj|dr)\.?\s*/g, '')
+   426→      .split(/[ ,]+/)
+   427→      .filter(w => /^[A-Z]/.test(w))
+   428→      .slice(0, 2)
+   429→      .map(w => w[0])
+   430→      .join('')
+   431→    await prisma.expert.create({
+   432→      data: {
+   433→        ...e,
+   434→        expertise: `Ahli di bidang ${e.field} dengan rekam jejak ${e.experienceYears} tahun pengalaman nasional & internasional.`,
+   435→        licenseNo: `DP-${String(i + 1).padStart(3, '0')}-2025`,
+   436→        initials: initials || 'DP',
+   437→        featured: i < 6,
+   438→      },
+   439→    })
+   440→  }
+   441→  console.log(`  ✓ ${experts.length} experts (46 Dewan Pakar)`)
+   442→
+   443→  for (const [i, a] of newsArticles.entries()) {
+   444→    const d = new Date(now)
+   445→    d.setDate(d.getDate() - i * 9)
+   446→    await prisma.newsArticle.create({ data: { ...a, publishedAt: d } })
+   447→  }
+   448→  console.log(`  ✓ ${newsArticles.length} news articles`)
+   449→
+   450→  // Sample applications for tracking demo
+   451→  const sampleApps = [
+   452→    { trackingCode: 'PSK-2025-83012', applicantType: 'INDIVIDU', programCode: 'PIHK', fullName: 'Ahmad Fauzi Rahman', email: 'ahmad.fauzi@mail.com', phone: '+62 812-3344-5566', city: 'Jakarta', status: 'ASSESSMENT' },
+   453→    { trackingCode: 'PSK-2025-83013', applicantType: 'PERUSAHAAN', programCode: 'PPIU', fullName: 'Siti Aminah', email: 'admin@rahmattour.co.id', phone: '+62 813-9988-7766', institution: 'PT Rahmat Tour Wisata', city: 'Solo', status: 'VERIFIKASI' },
+   454→    { trackingCode: 'PSK-2025-83014', applicantType: 'INDIVIDU', programCode: 'BPW-PRO', fullName: 'Bunga Kirana', email: 'bunga.kirana@mail.com', phone: '+62 878-1234-9090', city: 'Bandung', status: 'APPROVED' },
+   455→    { trackingCode: 'PSK-2025-83015', applicantType: 'PERUSAHAAN', programCode: 'BPW', fullName: 'Deni Hermawan', email: 'corp@denitravel.id', phone: '+62 811-4455-2233', institution: 'CV Deni Travel Perkasa', city: 'Malang', status: 'REVIEW' },
+   456→  ]
+   457→  for (const a of sampleApps) await prisma.application.create({ data: a })
+   458→  console.log(`  ✓ ${sampleApps.length} sample applications`)
+   459→
+   460→  // Verify logs (simulasi aktivitas verifikasi publik)
+   461→  const validCerts = institutions.filter(x => x.status !== 'KADALUARSA')
+   462→  for (let i = 0; i < 18; i++) {
+   463→    const c = validCerts[i % validCerts.length]
+   464→    const d = new Date(now)
+   465→    d.setMinutes(d.getMinutes() - i * 7 - Math.floor(Math.random() * 5))
+   466→    await prisma.verifyLog.create({
+   467→      data: { certNumber: c.certNumber, result: 'VALID', createdAt: d },
+   468→    })
+   469→  }
+   470→  for (let i = 0; i < 4; i++) {
+   471→    const d = new Date(now)
+   472→    d.setMinutes(d.getMinutes() - i * 23)
+   473→    await prisma.verifyLog.create({
+   474→      data: { certNumber: `FAKE-${9000 + i}-XX`, result: 'INVALID', createdAt: d },
+   475→    })
+   476→  }
+   477→  console.log('  ✓ 22 verify logs')
+   478→
+   479→  console.log('✅ Seed complete!')
+   480→}
+   481→
+   482→main()
+   483→  .catch(e => { console.error(e); process.exit(1) })
+   484→  .finally(() => prisma.$disconnect())
+   485→

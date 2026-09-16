@@ -1,0 +1,948 @@
+     1→// ============================================================
+     2→// PUSAKA — Data Jaringan Global (Layanan dari Semua Negara)
+     3→// Sumber data tunggal: dipakai prisma/seed.ts untuk seeding
+     4→// dan sebagai referensi kontrak field GlobalNode.
+     5→//
+     6→// kind   : KANTOR_PERWAKILAN | MITRA_INTERNASIONAL
+     7→// region : TIMUR_TENGAH | ASIA_TENGGARA | ASIA_SELATAN | ASIA_TIMUR
+     8→//          | EROPA | AFRIKA | AMERIKA | OSEANIA
+     9→// status : AKTIF | MOU | APLIKASI
+    10→// scope  : array kode program (PIHK, PPIU, BPW, IATA, IJIN-UMRAH, IJIN-HAJI, BPW-PRO)
+    11→// ============================================================
+    12→
+    13→export interface GlobalNodeSeed {
+    14→  kind: "KANTOR_PERWAKILAN" | "MITRA_INTERNASIONAL";
+    15→  country: string;
+    16→  countryCode: string;
+    17→  region:
+    18→    | "TIMUR_TENGAH"
+    19→    | "ASIA_TENGGARA"
+    20→    | "ASIA_SELATAN"
+    21→    | "ASIA_TIMUR"
+    22→    | "EROPA"
+    23→    | "AFRIKA"
+    24→    | "AMERIKA"
+    25→    | "OSEANIA";
+    26→  city: string;
+    27→  flag: string;
+    28→  title: string;
+    29→  orgName: string;
+    30→  description: string;
+    31→  scope: string[];
+    32→  status: "AKTIF" | "MOU" | "APLIKASI";
+    33→  since: string;
+    34→  contact: string | null;
+    35→  order: number;
+    36→}
+    37→
+    38→export const GLOBAL_REGION_LABEL: Record<string, string> = {
+    39→  TIMUR_TENGAH: "Timur Tengah",
+    40→  ASIA_TENGGARA: "Asia Tenggara",
+    41→  ASIA_SELATAN: "Asia Selatan",
+    42→  ASIA_TIMUR: "Asia Timur",
+    43→  EROPA: "Eropa",
+    44→  AFRIKA: "Afrika",
+    45→  AMERIKA: "Amerika",
+    46→  OSEANIA: "Oseania",
+    47→};
+    48→
+    49→export const ALL_PROGRAM_CODES = [
+    50→  "PIHK",
+    51→  "PPIU",
+    52→  "BPW",
+    53→  "IATA",
+    54→  "IJIN-UMRAH",
+    55→  "IJIN-HAJI",
+    56→  "BPW-PRO",
+    57→];
+    58→
+    59→export const globalNodes: GlobalNodeSeed[] = [
+    60→  // ---------- INDONESIA (KANTOR PUSAT) ----------
+    61→  {
+    62→    kind: "KANTOR_PERWAKILAN",
+    63→    country: "Indonesia",
+    64→    countryCode: "ID",
+    65→    region: "ASIA_TENGGARA",
+    66→    city: "Jakarta",
+    67→    flag: "🇮🇩",
+    68→    title: "Kantor Pusat PUSAKA Jakarta",
+    69→    orgName: "Sekretariat Dewan Pakar 46 Bidang — Kemenag RI & ASITA",
+    70→    description:
+    71→      "Markas pusat seluruh layanan sertifikasi: pengajuan, asesmen lapangan, penerbitan sertifikat digital ber-QR, dan verifikasi daring. Titik koordinasi langsung dengan Kementerian Agama RI, ASITA, BNSP, dan 46 dewan pakar lintas bidang.",
+    72→    scope: ALL_PROGRAM_CODES,
+    73→    status: "AKTIF",
+    74→    since: "2015",
+    75→    contact: "layanan@pusaka.id",
+    76→    order: 1,
+    77→  },
+    78→
+    79→  // ---------- TIMUR TENGAH ----------
+    80→  {
+    81→    kind: "KANTOR_PERWAKILAN",
+    82→    country: "Arab Saudi",
+    83→    countryCode: "SA",
+    84→    region: "TIMUR_TENGAH",
+    85→    city: "Makkah",
+    86→    flag: "🇸🇦",
+    87→    title: "Kantor Perwakilan Makkah — Ambasador Haji & Umrah",
+    88→    orgName: "Koordinasi Kementerian Haji dan Umrah KSA",
+    89→    description:
+    90→      "Jembatan regulasi antara pemerintah Kerajaan Arab Saudi dan lembaga sertifikasi negara mitra: verifikasi pendamping PIHK di Makkah & Madinah, pengawasan mutu pelayanan jamaah, serta koordinasi kuota haji dan umrah lintas negara.",
+    91→    scope: ["PIHK", "IJIN-HAJI", "IJIN-UMRAH", "PPIU"],
+    92→    status: "AKTIF",
+    93→    since: "2018",
+    94→    contact: "makkah@pusaka.id",
+    95→    order: 2,
+    96→  },
+    97→  {
+    98→    kind: "MITRA_INTERNASIONAL",
+    99→    country: "Arab Saudi",
+   100→    countryCode: "SA",
+   101→    region: "TIMUR_TENGAH",
+   102→    city: "Jeddah",
+   103→    flag: "🇸🇦",
+   104→    title: "Aliansi Platform Nusuk",
+   105→    orgName: "Nusuk — Ministry of Hajj and Umrah Digital Platform",
+   106→    description:
+   107→      "Integrasi digital dengan platform resmi Nusuk untuk validasi izin umrah, e-visa, dan identitas jamaah internasional. Setiap PPIU bersertifikat PUSAKA memperoleh jalur registrasi terverifikasi di Nusuk.",
+   108→    scope: ["PPIU", "IJIN-UMRAH"],
+   109→    status: "AKTIF",
+   110→    since: "2021",
+   111→    contact: null,
+   112→    order: 3,
+   113→  },
+   114→  {
+   115→    kind: "KANTOR_PERWAKILAN",
+   116→    country: "Uni Emirat Arab",
+   117→    countryCode: "AE",
+   118→    region: "TIMUR_TENGAH",
+   119→    city: "Dubai",
+   120→    flag: "🇦🇪",
+   121→    title: "Kantor Regional Timur Tengah & Afrika (MENA)",
+   122→    orgName: "IATA Area Office Dubai — Government & Industry Liaison",
+   123→    description:
+   124→      "Pusat koordinasi sertifikasi IATA untuk pasar MENA: pelatihan agen BSP, akreditasi BPW berstandar IATA, dan fasilitasi izin operasi penerbangan haji & umrah charter.",
+   125→    scope: ["IATA", "BPW", "BPW-PRO", "IJIN-HAJI"],
+   126→    status: "AKTIF",
+   127→    since: "2016",
+   128→    contact: null,
+   129→    order: 4,
+   130→  },
+   131→  {
+   132→    kind: "MITRA_INTERNASIONAL",
+   133→    country: "Qatar",
+   134→    countryCode: "QA",
+   135→    region: "TIMUR_TENGAH",
+   136→    city: "Doha",
+   137→    flag: "🇶🇦",
+   138→    title: "Kemitraan Otoritas Pariwisata Qatar",
+   139→    orgName: "Qatar Tourism Authority",
+   140→    description:
+   141→      "Standardisasi biro perjalanan wisata Qatar dengan kerangka mutu PUSAKA, termasuk sertifikasi paket wisata religi dan ziarah lintas benua.",
+   142→    scope: ["BPW", "PPIU"],
+   143→    status: "MOU",
+   144→    since: "2022",
+   145→    contact: null,
+   146→    order: 5,
+   147→  },
+   148→  {
+   149→    kind: "MITRA_INTERNASIONAL",
+   150→    country: "Kuwait",
+   151→    countryCode: "KW",
+   152→    region: "TIMUR_TENGAH",
+   153→    city: "Kota Kuwait",
+   154→    flag: "🇰🇼",
+   155→    title: "Kerja Sama Urusan Islam & Wakaf Kuwait",
+   156→    orgName: "Ministry of Awqaf and Islamic Affairs — Kuwait",
+   157→    description:
+   158→      "Fasilitasi sertifikasi pendamping ibadah untuk jamaah Kuwait dan standar mutu pelayanan haji khusus di wilayah Teluk.",
+   159→    scope: ["PIHK", "IJIN-HAJI"],
+   160→    status: "MOU",
+   161→    since: "2023",
+   162→    contact: null,
+   163→    order: 6,
+   164→  },
+   165→  {
+   166→    kind: "MITRA_INTERNASIONAL",
+   167→    country: "Bahrain",
+   168→    countryCode: "BH",
+   169→    region: "TIMUR_TENGAH",
+   170→    city: "Manama",
+   171→    flag: "🇧🇭",
+   172→    title: "Kemitraan Bahrain Tourism & Exhibitions",
+   173→    orgName: "Bahrain Tourism and Exhibitions Authority",
+   174→    description:
+   175→      "Program sertifikasi bersama untuk biro perjalanan Bahrain dengan fokus paket umrah premium dan wisata halal regional.",
+   176→    scope: ["BPW", "PPIU"],
+   177→    status: "APLIKASI",
+   178→    since: "2024",
+   179→    contact: null,
+   180→    order: 7,
+   181→  },
+   182→  {
+   183→    kind: "MITRA_INTERNASIONAL",
+   184→    country: "Oman",
+   185→    countryCode: "OM",
+   186→    region: "TIMUR_TENGAH",
+   187→    city: "Muscat",
+   188→    flag: "🇴🇲",
+   189→    title: "Kemitraan Otoritas Pariwisata Oman",
+   190→    orgName: "Ministry of Heritage and Tourism — Oman",
+   191→    description:
+   192→      "Sertifikasi biro perjalanan wisata Oman dengan penekanan pada kepatuhan standar internasional dan pelayanan jamaah selama musim umrah.",
+   193→    scope: ["BPW"],
+   194→    status: "APLIKASI",
+   195→    since: "2024",
+   196→    contact: null,
+   197→    order: 8,
+   198→  },
+   199→  {
+   200→    kind: "KANTOR_PERWAKILAN",
+   201→    country: "Yordania",
+   202→    countryCode: "JO",
+   203→    region: "TIMUR_TENGAH",
+   204→    city: "Amman",
+   205→    flag: "🇯🇴",
+   206→    title: "Kantor Regional IATA Amman",
+   207→    orgName: "IATA Regional Office Amman — Middle East & North Africa",
+   208→    description:
+   209→      "Mitra resmi uji kompetensi dan pelatihan IATA di wilayah Levant: kelas travel & tourism consultant, sertifikasi agen tiket, dan ujian global IATA berbahasa Arab dan Inggris.",
+   210→    scope: ["IATA", "BPW", "PPIU"],
+   211→    status: "AKTIF",
+   212→    since: "2019",
+   213→    contact: null,
+   214→    order: 9,
+   215→  },
+   216→  {
+   217→    kind: "MITRA_INTERNASIONAL",
+   218→    country: "Irak",
+   219→    countryCode: "IQ",
+   220→    region: "TIMUR_TENGAH",
+   221→    city: "Baghdad",
+   222→    flag: "🇮🇶",
+   223→    title: "Kerja Sama Kementerian Haji & Ziarah Irak",
+   224→    orgName: "Iraqi Ministry of Hajj and Umrah",
+   225→    description:
+   226→      "Pertukaran standar mutu pendamping haji dan pengawasan bersama armada transportasi jamaah antara Irak dan negara-negara mitra PUSAKA.",
+   227→    scope: ["PIHK", "IJIN-HAJI"],
+   228→    status: "MOU",
+   229→    since: "2023",
+   230→    contact: null,
+   231→    order: 10,
+   232→  },
+   233→  {
+   234→    kind: "MITRA_INTERNASIONAL",
+   235→    country: "Turki",
+   236→    countryCode: "TR",
+   237→    region: "TIMUR_TENGAH",
+   238→    city: "Istanbul",
+   239→    flag: "🇹🇷",
+   240→    title: "Aliansi TÜRSAB Turki",
+   241→    orgName: "TÜRSAB — Association of Turkish Travel Agencies",
+   242→    description:
+   243→      "Saling mengakui sertifikasi biro perjalanan (mutual recognition) antara TÜRSAB dan PUSAKA: audit lapangan bersama, standardisasi tur operator, dan prioritas izin umrah bagi anggota tersertifikasi.",
+   244→    scope: ["BPW", "BPW-PRO", "PPIU"],
+   245→    status: "AKTIF",
+   246→    since: "2020",
+   247→    contact: null,
+   248→    order: 11,
+   249→  },
+   250→
+   251→  // ---------- ASIA TENGGARA ----------
+   252→  {
+   253→    kind: "MITRA_INTERNASIONAL",
+   254→    country: "Malaysia",
+   255→    countryCode: "MY",
+   256→    region: "ASIA_TENGGARA",
+   257→    city: "Kuala Lumpur",
+   258→    flag: "🇲🇾",
+   259→    title: "Kerja Sama Tabung Haji & MOTAC",
+   260→    orgName: "Lembaga Tabung Haji — Ministry of Tourism, Arts and Culture Malaysia",
+   261→    description:
+   262→      "Penyelarasan standar mutu paket umrah & haji Malaysia: audit harga paket, kepastian hotel Makkah/Madinah, dan sertifikasi pendamping haji khusus lintas negara.",
+   263→    scope: ["PIHK", "PPIU", "IJIN-UMRAH", "IJIN-HAJI"],
+   264→    status: "AKTIF",
+   265→    since: "2017",
+   266→    contact: null,
+   267→    order: 12,
+   268→  },
+   269→  {
+   270→    kind: "KANTOR_PERWAKILAN",
+   271→    country: "Singapura",
+   272→    countryCode: "SG",
+   273→    region: "ASIA_TENGGARA",
+   274→    city: "Singapura",
+   275→    flag: "🇸🇬",
+   276→    title: "Kantor Regional ASEAN",
+   277→    orgName: "Koordinasi MUIS & ASEAN Tourism Association",
+   278→    description:
+   279→      "Pusat layanan Asia Tenggara: sekretariat Mutual Recognition Arrangement (MRA) ASEAN, uji kompetensi regional, dan dukungan multi-bahasa untuk pengajuan sertifikasi dari 11 negara anggota.",
+   280→    scope: ALL_PROGRAM_CODES,
+   281→    status: "AKTIF",
+   282→    since: "2021",
+   283→    contact: "asean@pusaka.id",
+   284→    order: 13,
+   285→  },
+   286→  {
+   287→    kind: "MITRA_INTERNASIONAL",
+   288→    country: "Brunei Darussalam",
+   289→    countryCode: "BN",
+   290→    region: "ASIA_TENGGARA",
+   291→    city: "Bandar Seri Begawan",
+   292→    flag: "🇧🇳",
+   293→    title: "Kerja Sama Halal Brunei Darussalam",
+   294→    orgName: "Ministry of Religious Affairs — Brunei Darussalam",
+   295→    description:
+   296→      "Sertifikasi pendamping ibadah dan kurator umrah untuk jamaah Brunei dengan standar kehalalan dan pelayanan premium Brunei Halal Brand.",
+   297→    scope: ["PIHK", "PPIU"],
+   298→    status: "MOU",
+   299→    since: "2022",
+   300→    contact: null,
+   301→    order: 14,
+   302→  },
+   303→  {
+   304→    kind: "MITRA_INTERNASIONAL",
+   305→    country: "Thailand",
+   306→    countryCode: "TH",
+   307→    region: "ASIA_TENGGARA",
+   308→    city: "Bangkok",
+   309→    flag: "🇹🇭",
+   310→    title: "Kemitraan Dewan Islam Thailand",
+   311→    orgName: "The Central Islamic Council of Thailand (CICOT)",
+   312→    description:
+   313→      "Fasilitasi izin umrah dan sertifikasi agen perjalanan Muslim Thailand, termasuk pelatihan pemandu wisata religi berbahasa Thai.",
+   314→    scope: ["PPIU", "PIHK", "IJIN-UMRAH"],
+   315→    status: "MOU",
+   316→    since: "2023",
+   317→    contact: null,
+   318→    order: 15,
+   319→  },
+   320→  {
+   321→    kind: "MITRA_INTERNASIONAL",
+   322→    country: "Filipina",
+   323→    countryCode: "PH",
+   324→    region: "ASIA_TENGGARA",
+   325→    city: "Manila",
+   326→    flag: "🇵🇭",
+   327→    title: "Kerja Sama Komisi Muslim Filipina",
+   328→    orgName: "National Commission on Muslim Filipinos (NCMF)",
+   329→    description:
+   330→      "Program sertifikasi bersama untuk biro perjalanan haji-umrah Filipina dan standardisasi kuota haji regional Mindanao.",
+   331→    scope: ["PPIU", "PIHK", "IJIN-HAJI"],
+   332→    status: "APLIKASI",
+   333→    since: "2024",
+   334→    contact: null,
+   335→    order: 16,
+   336→  },
+   337→
+   338→  // ---------- ASIA SELATAN ----------
+   339→  {
+   340→    kind: "MITRA_INTERNASIONAL",
+   341→    country: "India",
+   342→    countryCode: "IN",
+   343→    region: "ASIA_SELATAN",
+   344→    city: "Mumbai",
+   345→    flag: "🇮🇳",
+   346→    title: "Kerja Sama Haj Committee of India",
+   347→    orgName: "Haj Committee of India — Ministry of Minority Affairs",
+   348→    description:
+   349→      "Koordinasi standar pendamping haji khusus untuk jamaah India: sertifikasi penanggung jawab embarkasi, mutu katering halal, dan kesehatan jamaah lintas 21 titik embarkasi.",
+   350→    scope: ["PIHK", "IJIN-HAJI", "PPIU"],
+   351→    status: "AKTIF",
+   352→    since: "2018",
+   353→    contact: null,
+   354→    order: 17,
+   355→  },
+   356→  {
+   357→    kind: "MITRA_INTERNASIONAL",
+   358→    country: "Pakistan",
+   359→    countryCode: "PK",
+   360→    region: "ASIA_SELATAN",
+   361→    city: "Karachi",
+   362→    flag: "🇵🇰",
+   363→    title: "Kerja Sama Kementerian Agama Pakistan",
+   364→    orgName: "Ministry of Religious Affairs and Interfaith Harmony — Pakistan",
+   365→    description:
+   366→      "Pertukaran standar regulasi tour operator haji Pakistan, audit mutu penginapan, dan sertifikasi pendamping berbahasa Urdu.",
+   367→    scope: ["PIHK", "PPIU"],
+   368→    status: "MOU",
+   369→    since: "2021",
+   370→    contact: null,
+   371→    order: 18,
+   372→  },
+   373→  {
+   374→    kind: "MITRA_INTERNASIONAL",
+   375→    country: "Bangladesh",
+   376→    countryCode: "BD",
+   377→    region: "ASIA_SELATAN",
+   378→    city: "Dhaka",
+   379→    flag: "🇧🇩",
+   380→    title: "Kemitraan HAAB Bangladesh",
+   381→    orgName: "Hajj Agencies Association of Bangladesh (HAAB)",
+   382→    description:
+   383→      "Sertifikasi bersama 1.300+ agen umrah anggota HAAB: skoring mutu paket, verifikasi legalitas, dan pelatihan pendamping jamaah Bangladesh.",
+   384→    scope: ["PPIU", "IJIN-HAJI", "IJIN-UMRAH"],
+   385→    status: "MOU",
+   386→    since: "2022",
+   387→    contact: null,
+   388→    order: 19,
+   389→  },
+   390→
+   391→  // ---------- ASIA TIMUR ----------
+   392→  {
+   393→    kind: "MITRA_INTERNASIONAL",
+   394→    country: "Jepang",
+   395→    countryCode: "JP",
+   396→    region: "ASIA_TIMUR",
+   397→    city: "Tokyo",
+   398→    flag: "🇯🇵",
+   399→    title: "Kemitraan Wisata Halal Jepang",
+   400→    orgName: "Japan National Tourism Organization (JNTO) — Halal Japan Network",
+   401→    description:
+   402→      "Sertifikasi biro perjalanan wisata halal Jepang: pendampingan sertifikasi BPW-Pro, peta mitra halal 47 prefektur, dan program wisata religi Jepang–Timur Tengah.",
+   403→    scope: ["BPW", "BPW-PRO"],
+   404→    status: "APLIKASI",
+   405→    since: "2024",
+   406→    contact: null,
+   407→    order: 20,
+   408→  },
+   409→  {
+   410→    kind: "MITRA_INTERNASIONAL",
+   411→    country: "Korea Selatan",
+   412→    countryCode: "KR",
+   413→    region: "ASIA_TIMUR",
+   414→    city: "Seoul",
+   415→    flag: "🇰🇷",
+   416→    title: "Kemitraan Korea Tourism Organization",
+   417→    orgName: "Korea Tourism Organization (KTO)",
+   418→    description:
+   419→      "Standarisasi biro perjalanan inbound Korea dan sertifikasi paket wisata halal Korea untuk pasar Muslim global.",
+   420→    scope: ["BPW"],
+   421→    status: "APLIKASI",
+   422→    since: "2024",
+   423→    contact: null,
+   424→    order: 21,
+   425→  },
+   426→  {
+   427→    kind: "MITRA_INTERNASIONAL",
+   428→    country: "Tiongkok",
+   429→    countryCode: "CN",
+   430→    region: "ASIA_TIMUR",
+   431→    city: "Beijing",
+   432→    flag: "🇨🇳",
+   433→    title: "Kemitraan Office Pariwisata Tiongkok",
+   434→    orgName: "China National Tourist Office — Beijing",
+   435→    description:
+   436→      "Sertifikasi biro perjalanan wisata dengan spesialisasi rute Sutra religi dan layanan pemandu berbahasa Mandarin untuk jamaah umrah transit.",
+   437→    scope: ["BPW"],
+   438→    status: "MOU",
+   439→    since: "2023",
+   440→    contact: null,
+   441→    order: 22,
+   442→  },
+   443→
+   444→  // ---------- EROPA ----------
+   445→  {
+   446→    kind: "KANTOR_PERWAKILAN",
+   447→    country: "Inggris",
+   448→    countryCode: "GB",
+   449→    region: "EROPA",
+   450→    city: "London",
+   451→    flag: "🇬🇧",
+   452→    title: "Kantor Regional Eropa",
+   453→    orgName: "Koordinasi ABTA & IATA London",
+   454→    description:
+   455→      "Kantor Eropa PUSAKA: asuransi perjalanan jamaah, penyelesaian sengketa konsumen standar Inggris, dan pelatihan IATA untuk agen Eropa Barat.",
+   456→    scope: ["IATA", "BPW", "BPW-PRO"],
+   457→    status: "AKTIF",
+   458→    since: "2022",
+   459→    contact: "eropa@pusaka.id",
+   460→    order: 23,
+   461→  },
+   462→  {
+   463→    kind: "MITRA_INTERNASIONAL",
+   464→    country: "Swiss",
+   465→    countryCode: "CH",
+   466→    region: "EROPA",
+   467→    city: "Jenewa",
+   468→    flag: "🇨🇭",
+   469→    title: "Kemitraan IATA Global Support Office",
+   470→    orgName: "IATA Global Support Office — Geneva",
+   471→    description:
+   472→      "Akses langsung ke pusat standar global IATA: pembaruan regulasi BSP, Multilateral Interline Traffic Agreements, dan lisensi pelatihan resmi IATA untuk wilayah mitra PUSAKA.",
+   473→    scope: ["IATA"],
+   474→    status: "AKTIF",
+   475→    since: "2015",
+   476→    contact: null,
+   477→    order: 24,
+   478→  },
+   479→  {
+   480→    kind: "MITRA_INTERNASIONAL",
+   481→    country: "Jerman",
+   482→    countryCode: "DE",
+   483→    region: "EROPA",
+   484→    city: "Frankfurt",
+   485→    flag: "🇩🇪",
+   486→    title: "Kemitraan DRV Jerman",
+   487→    orgName: "DRV — Deutscher Reiseverband (German Travel Association)",
+   488→    description:
+   489→      "Mutual recognition sertifikasi biro perjalanan Jerman, standar perlindungan konsumen tur Eropa, dan audit keberlanjutan green travel.",
+   490→    scope: ["BPW", "BPW-PRO"],
+   491→    status: "MOU",
+   492→    since: "2022",
+   493→    contact: null,
+   494→    order: 25,
+   495→  },
+   496→  {
+   497→    kind: "MITRA_INTERNASIONAL",
+   498→    country: "Italia",
+   499→    countryCode: "IT",
+   500→    region: "EROPA",
+   501→    city: "Roma",
+   502→    flag: "🇮🇹",
+   503→    title: "Kemitraan FIAVET Italia",
+   504→    orgName: "FIAVET — Federazione Italiana Associazioni Imprese di Viaggio e Turismo",
+   505→    description:
+   506→      "Sertifikasi biro perjalanan religi Italia: paket ziarah Vatikan–Yerusalem–Makkah lintas iman dan standar pelayanan jamaah katolik & muslim.",
+   507→    scope: ["BPW", "PPIU"],
+   508→    status: "APLIKASI",
+   509→    since: "2024",
+   510→    contact: null,
+   511→    order: 26,
+   512→  },
+   513→
+   514→  // ---------- AFRIKA ----------
+   515→  {
+   516→    kind: "MITRA_INTERNASIONAL",
+   517→    country: "Mesir",
+   518→    countryCode: "EG",
+   519→    region: "AFRIKA",
+   520→    city: "Kairo",
+   521→    flag: "🇪🇬",
+   522→    title: "Kemitraan Otoritas Pariwisata Mesir",
+   523→    orgName: "Egyptian Ministry of Tourism and Antiquities",
+   524→    description:
+   525→      "Sertifikasi perusahaan perjalanan umrah Mesir serta fasilitasi izin operasi umrah bagi agen bersertifikat ganda (PUSAKA + Kementerian Pariwisata Mesir).",
+   526→    scope: ["PPIU", "IJIN-UMRAH", "BPW"],
+   527→    status: "AKTIF",
+   528→    since: "2019",
+   529→    contact: null,
+   530→    order: 27,
+   531→  },
+   532→  {
+   533→    kind: "MITRA_INTERNASIONAL",
+   534→    country: "Nigeria",
+   535→    countryCode: "NG",
+   536→    region: "AFRIKA",
+   537→    city: "Abuja",
+   538→    flag: "🇳🇬",
+   539→    title: "Kerja Sama NAHCON Nigeria",
+   540→    orgName: "National Hajj Commission of Nigeria (NAHCON)",
+   541→    description:
+   542→      "Standardisasi mutu tour operator haji Nigeria — yang terbesar di Afrika Barat: skoring paket, sertifikasi pendamping, dan audit kesehatan jamaah.",
+   543→    scope: ["PIHK", "IJIN-HAJI", "PPIU"],
+   544→    status: "MOU",
+   545→    since: "2021",
+   546→    contact: null,
+   547→    order: 28,
+   548→  },
+   549→  {
+   550→    kind: "MITRA_INTERNASIONAL",
+   551→    country: "Maroko",
+   552→    countryCode: "MA",
+   553→    region: "AFRIKA",
+   554→    city: "Casablanca",
+   555→    flag: "🇲🇦",
+   556→    title: "Kemitraan Pariwisata Maroko",
+   557→    orgName: "Moroccan Ministry of Tourism — ONMT",
+   558→    description:
+   559→      "Sertifikasi biro perjalanan Maroko dengan fokus rute wisata halal Maghreb dan paket umrah via Tanger & Casablanca.",
+   560→    scope: ["BPW", "PPIU"],
+   561→    status: "APLIKASI",
+   562→    since: "2024",
+   563→    contact: null,
+   564→    order: 29,
+   565→  },
+   566→  {
+   567→    kind: "MITRA_INTERNASIONAL",
+   568→    country: "Afrika Selatan",
+   569→    countryCode: "ZA",
+   570→    region: "AFRIKA",
+   571→    city: "Johannesburg",
+   572→    flag: "🇿🇦",
+   573→    title: "Kemitraan IATA Regional Johannesburg",
+   574→    orgName: "IATA Regional Office Johannesburg — Africa & Middle East",
+   575→    description:
+   576→      "Pusat uji kompetensi IATA kawasan Afrika: sertifikasi agen tiket, pelatihan kargo udara, dan akreditasi BPW lintas negara Afrika Selatan.",
+   577→    scope: ["IATA", "BPW"],
+   578→    status: "AKTIF",
+   579→    since: "2020",
+   580→    contact: null,
+   581→    order: 30,
+   582→  },
+   583→
+   584→  // ---------- AMERIKA ----------
+   585→  {
+   586→    kind: "KANTOR_PERWAKILAN",
+   587→    country: "Amerika Serikat",
+   588→    countryCode: "US",
+   589→    region: "AMERIKA",
+   590→    city: "New York",
+   591→    flag: "🇺🇸",
+   592→    title: "Kantor Regional Amerika Utara",
+   593→    orgName: "Koordinasi ASTA — American Society of Travel Advisors",
+   594→    description:
+   595→      "Layanan sertifikasi untuk agen perjalanan Amerika Utara: akreditasi IATA, verifikasi haji khusus diaspora, dan dukungan kepatuhan regulasi bagi paket wisata religi.",
+   596→    scope: ["IATA", "BPW", "PPIU"],
+   597→    status: "MOU",
+   598→    since: "2023",
+   599→    contact: "americas@pusaka.id",
+   600→    order: 31,
+   601→  },
+   602→  {
+   603→    kind: "MITRA_INTERNASIONAL",
+   604→    country: "Kanada",
+   605→    countryCode: "CA",
+   606→    region: "AMERIKA",
+   607→    city: "Montreal",
+   608→    flag: "🇨🇦",
+   609→    title: "Kemitraan IATA World Headquarters",
+   610→    orgName: "IATA World Headquarters — Montreal, Canada",
+   611→    description:
+   612→      "Kerja sama kelembagaan dengan markas dunia IATA: sinkronisasi standar akreditasi travel agent global dan hak ujian resmi IATA untuk jaringan PUSAKA.",
+   613→    scope: ["IATA"],
+   614→    status: "AKTIF",
+   615→    since: "2015",
+   616→    contact: null,
+   617→    order: 32,
+   618→  },
+   619→
+   620→  // ---------- OSEANIA ----------
+   621→  {
+   622→    kind: "MITRA_INTERNASIONAL",
+   623→    country: "Australia",
+   624→    countryCode: "AU",
+   625→    region: "OSEANIA",
+   626→    city: "Sydney",
+   627→    flag: "🇦🇺",
+   628→    title: "Kemitraan AFTA Australia",
+   629→    orgName: "AFTA — Australian Federation of Travel Agents",
+   630→    description:
+   631→      "Saling mengakui sertifikasi biro perjalanan Australia, bridging ATAS Accreditation, dan layanan haji khusus komunitas Muslim Australia.",
+   632→    scope: ["BPW", "PPIU", "PIHK"],
+   633→    status: "MOU",
+   634→    since: "2022",
+   635→    contact: null,
+   636→    order: 33,
+   637→  },
+   638→];
+   639→
+   640→// ============================================================
+   641→// CAKUPAN INTERNASIONAL PER PROGRAM
+   642→// Tampil di dialog detail program (bagian "Cakupan Internasional")
+   643→// ============================================================
+   644→
+   645→export interface ProgramCountryDetail {
+   646→  flag: string;
+   647→  country: string;
+   648→  detail: string;
+   649→}
+   650→
+   651→export const programCountries: Record<string, ProgramCountryDetail[]> = {
+   652→  PIHK: [
+   653→    {
+   654→      flag: "🇸🇦",
+   655→      country: "Arab Saudi",
+   656→      detail:
+   657→        "Sertifikasi pendamping diakui Kementerian Haji & Umrah KSA untuk pendampingan jamaah asing di Makkah, Madinah, dan Jeddah.",
+   658→    },
+   659→    {
+   660→      flag: "🇮🇩",
+   661→      country: "Indonesia",
+   662→      detail:
+   663→        "Terintegrasi sistem PPIH Kemenag RI; kelulusan uji kompetensi diterima di seluruh embarkasi Indonesia.",
+   664→    },
+   665→    {
+   666→      flag: "🇲🇾",
+   667→      country: "Malaysia",
+   668→      detail:
+   669→        "Bridging program dengan Tabung Haji: mutu pelayanan setara pemandu haji Malaysia.",
+   670→    },
+   671→    {
+   672→      flag: "🇮🇳",
+   673→      country: "India",
+   674→      detail:
+   675→        "Standar pendamping 21 titik embarkasi Haj Committee of India (Ministry of Minority Affairs).",
+   676→    },
+   677→    {
+   678→      flag: "🇵🇰",
+   679→      country: "Pakistan",
+   680→      detail:
+   681→        "Pelatihan pendamping berbahasa Urdu bekerja sama dengan Ministry of Religious Affairs Pakistan.",
+   682→    },
+   683→    {
+   684→      flag: "🇧🇩",
+   685→      country: "Bangladesh",
+   686→      detail: "Sertifikasi pendamping bagi 1.300+ agen anggota HAAB Bangladesh.",
+   687→    },
+   688→    {
+   689→      flag: "🇳🇬",
+   690→      country: "Nigeria",
+   691→      detail: "Skoring pendamping untuk tour operator terdaftar NAHCON Nigeria.",
+   692→    },
+   693→    {
+   694→      flag: "🇮🇶",
+   695→      country: "Irak",
+   696→      detail:
+   697→        "Pertukaran standar pendamping dengan Kementerian Haji & Ziarah Irak.",
+   698→    },
+   699→  ],
+   700→  PPIU: [
+   701→    {
+   702→      flag: "🇸🇦",
+   703→      country: "Arab Saudi",
+   704→      detail:
+   705→        "Jalur registrasi terverifikasi di platform Nusuk untuk agen bersertifikat PUSAKA.",
+   706→    },
+   707→    {
+   708→      flag: "🇮🇩",
+   709→      country: "Indonesia",
+   710→      detail:
+   711→        "Modal utama pendaftaran izin PPIU di Kemenag RI dan akses sistem pelayanan umrah terintegrasi.",
+   712→    },
+   713→    {
+   714→      flag: "🇪🇬",
+   715→      country: "Mesir",
+   716→      detail:
+   717→        "Izin operasi umrah ganda bersama Ministry of Tourism and Antiquities Mesir.",
+   718→    },
+   719→    {
+   720→      flag: "🇲🇾",
+   721→      country: "Malaysia",
+   722→      detail: "Audit mutu paket selaras MOTAC & Tabung Haji Malaysia.",
+   723→    },
+   724→    {
+   725→      flag: "🇹🇷",
+   726→      country: "Turki",
+   727→      detail: "Prioritas izin umrah bagi anggota TÜRSAB bersertifikat.",
+   728→    },
+   729→    {
+   730→      flag: "🇹🇭",
+   731→      country: "Thailand",
+   732→      detail: "Fasilitasi izin umrah bersama CICOT untuk agen Thailand.",
+   733→    },
+   734→    {
+   735→      flag: "🇵🇭",
+   736→      country: "Filipina",
+   737→      detail:
+   738→        "Program sertifikasi bersama NCMF untuk biro haji-umrah Filipina.",
+   739→    },
+   740→    {
+   741→      flag: "🇮🇳",
+   742→      country: "India",
+   743→      detail:
+   744→        "Akses kemitraan dengan tour operator umrah terdaftar di seluruh embarkasi India.",
+   745→    },
+   746→  ],
+   747→  BPW: [
+   748→    {
+   749→      flag: "🇨🇦",
+   750→      country: "Kanada",
+   751→      detail:
+   752→        "Standar akreditasi selaras IATA World Headquarters Montreal & Global Support Office Geneva.",
+   753→    },
+   754→    {
+   755→      flag: "🇬🇧",
+   756→      country: "Inggris",
+   757→      detail:
+   758→        "Mutual recognition dengan ABTA dan perlindungan konsumen standar Inggris.",
+   759→    },
+   760→    {
+   761→      flag: "🇩🇪",
+   762→      country: "Jerman",
+   763→      detail:
+   764→        "Bridging sertifikasi DRV Jerman termasuk standar green travel berkelanjutan.",
+   765→    },
+   766→    {
+   767→      flag: "🇯🇵",
+   768→      country: "Jepang",
+   769→      detail:
+   770→        "Dukungan JNTO untuk biro perjalanan halal di 47 prefektur Jepang.",
+   771→    },
+   772→    {
+   773→      flag: "🇰🇷",
+   774→      country: "Korea Selatan",
+   775→      detail: "Standarisasi inbound bersama Korea Tourism Organization.",
+   776→    },
+   777→    {
+   778→      flag: "🇮🇹",
+   779→      country: "Italia",
+   780→      detail: "Program wisata religi lintas iman bersama FIAVET Italia.",
+   781→    },
+   782→    {
+   783→      flag: "🇦🇺",
+   784→      country: "Australia",
+   785→      detail: "Bridging ATAS Accreditation bersama AFTA Australia.",
+   786→    },
+   787→    {
+   788→      flag: "🇿🇦",
+   789→      country: "Afrika Selatan",
+   790→      detail: "Akreditasi regional Afrika via IATA Regional Johannesburg.",
+   791→    },
+   792→  ],
+   793→  IATA: [
+   794→    {
+   795→      flag: "🇨🇦",
+   796→      country: "Kanada",
+   797→      detail: "Ujian resmi mengacu standar IATA World Headquarters Montreal.",
+   798→    },
+   799→    {
+   800→      flag: "🇨🇭",
+   801→      country: "Swiss",
+   802→      detail:
+   803→        "Akses pembaruan regulasi BSP & Multilateral Interline dari Global Support Office Geneva.",
+   804→    },
+   805→    {
+   806→      flag: "🇸🇬",
+   807→      country: "Singapura",
+   808→      detail:
+   809→        "Kantor regional Asia-Pasifik: kelas pelatihan berbahasa Inggris & Melayu.",
+   810→    },
+   811→    {
+   812→      flag: "🇦🇪",
+   813→      country: "Uni Emirat Arab",
+   814→      detail: "Area office Dubai: pelatihan agen BSP pasar MENA.",
+   815→    },
+   816→    {
+   817→      flag: "🇯🇴",
+   818→      country: "Yordania",
+   819→      detail: "Ujian global IATA berbahasa Arab & Inggris di kantor Amman.",
+   820→    },
+   821→    {
+   822→      flag: "🇿🇦",
+   823→      country: "Afrika Selatan",
+   824→      detail: "Pusat uji kompetensi kawasan Afrika di Johannesburg.",
+   825→    },
+   826→    {
+   827→      flag: "🇬🇧",
+   828→      country: "Inggris",
+   829→      detail: "Pelatihan agen Eropa Barat via kantor regional London.",
+   830→    },
+   831→  ],
+   832→  "IJIN-UMRAH": [
+   833→    {
+   834→      flag: "🇸🇦",
+   835→      country: "Arab Saudi",
+   836→      detail:
+   837→        "Visa umrah elektronik & verifikasi melalui platform resmi Nusuk KSA.",
+   838→    },
+   839→    {
+   840→      flag: "🇮🇩",
+   841→      country: "Indonesia",
+   842→      detail: "Pendampingan penerbitan izin PPIU (SIUPPU) di Kemenag RI.",
+   843→    },
+   844→    {
+   845→      flag: "🇪🇬",
+   846→      country: "Mesir",
+   847→      detail:
+   848→        "Fasilitasi izin agen umrah asing di bawah naungan otoritas Mesir.",
+   849→    },
+   850→    {
+   851→      flag: "🇲🇾",
+   852→      country: "Malaysia",
+   853→      detail: "Kepatuhan MOTAC bagi paket umrah Malaysia.",
+   854→    },
+   855→    {
+   856→      flag: "🇹🇷",
+   857→      country: "Turki",
+   858→      detail: "Koordinasi TÜRSAB untuk izin operasi umrah Turki.",
+   859→    },
+   860→    {
+   861→      flag: "🇧🇩",
+   862→      country: "Bangladesh",
+   863→      detail: "Verifikasi legalitas agen anggota HAAB.",
+   864→    },
+   865→    {
+   866→      flag: "🇹🇭",
+   867→      country: "Thailand",
+   868→      detail: "Pembinaan izin bersama CICOT Thailand.",
+   869→    },
+   870→  ],
+   871→  "IJIN-HAJI": [
+   872→    {
+   873→      flag: "🇸🇦",
+   874→      country: "Arab Saudi",
+   875→      detail:
+   876→        "Koordinasi kuota haji langsung dengan Ministry of Hajj and Umrah KSA.",
+   877→    },
+   878→    {
+   879→      flag: "🇮🇩",
+   880→      country: "Indonesia",
+   881→      detail: "Pemetaan kuota haji reguler & khusus Kemenag RI.",
+   882→    },
+   883→    {
+   884→      flag: "🇮🇳",
+   885→      country: "India",
+   886→      detail: "Distribusi kuota 21 embarkasi Haj Committee of India.",
+   887→    },
+   888→    {
+   889→      flag: "🇵🇰",
+   890→      country: "Pakistan",
+   891→      detail: "Skema kuota haji reguler & sponsor Pakistan.",
+   892→    },
+   893→    {
+   894→      flag: "🇧🇩",
+   895→      country: "Bangladesh",
+   896→      detail: "Manajemen kuota agen anggota HAAB Bangladesh.",
+   897→    },
+   898→    {
+   899→      flag: "🇳🇬",
+   900→      country: "Nigeria",
+   901→      detail: "Pengawasan kuota tour operator NAHCON Nigeria.",
+   902→    },
+   903→    {
+   904→      flag: "🇲🇾",
+   905→      country: "Malaysia",
+   906→      detail: "Kuota haji Lembaga Tabung Haji Malaysia.",
+   907→    },
+   908→  ],
+   909→  "BPW-PRO": [
+   910→    {
+   911→      flag: "🇸🇬",
+   912→      country: "Singapura",
+   913→      detail: "Sekretariat MRA ASEAN untuk biro perjalanan kelas pro.",
+   914→    },
+   915→    {
+   916→      flag: "🇦🇪",
+   917→      country: "Uni Emirat Arab",
+   918→      detail: "Akreditasi premium via kantor regional Dubai (MENA).",
+   919→    },
+   920→    {
+   921→      flag: "🇹🇷",
+   922→      country: "Turki",
+   923→      detail: "Audit lapangan bersama TÜRSAB untuk tur operator pro.",
+   924→    },
+   925→    {
+   926→      flag: "🇯🇵",
+   927→      country: "Jepang",
+   928→      detail: "Pendampingan penuh biro perjalanan halal premium Jepang.",
+   929→    },
+   930→    {
+   931→      flag: "🇬🇧",
+   932→      country: "Inggris",
+   933→      detail: "Standar perlindungan konsumen & asuransi tur Eropa.",
+   934→    },
+   935→    {
+   936→      flag: "🇺🇸",
+   937→      country: "Amerika Serikat",
+   938→      detail:
+   939→        "Dukungan kepatuhan regulasi & verifikasi paket wisata religi Amerika.",
+   940→    },
+   941→    {
+   942→      flag: "🇰🇷",
+   943→      country: "Korea Selatan",
+   944→      detail: "Sertifikasi paket premium wisata halal Korea.",
+   945→    },
+   946→  ],
+   947→};
+   948→
