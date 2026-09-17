@@ -515,3 +515,15 @@ export const postContact = (body: ContactBody) =>
 
 // 10. GET /api/global
 export const getGlobal = () => apiRequest<GlobalResp>("/api/global");
+
+// 11. POST /api/newsletter
+export interface NewsletterResult {
+  subscribed: boolean;
+  already?: boolean;
+}
+
+export const subscribeNewsletter = (email: string) =>
+  apiRequest<NewsletterResult>("/api/newsletter", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });

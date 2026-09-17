@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, Search, ShieldAlert, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,37 @@ export function VerifySection() {
     return () => clearInterval(timer);
   }, [loadActivity]);
 
+  // Deep-link ?cert=NOMOR — isi otomatis, scroll ke section, lalu verifikasi.
+  const deepLinkDone = useRef(false);
+  useEffect(() => {
+    if (deepLinkDone.current) return;
+    deepLinkDone.current = true;
+    const cert = new URLSearchParams(window.location.search).get("cert");
+    if (!cert?.trim()) return;
+    const normalized = cert.trim().toUpperCase();
+    const timer = window.setTimeout(() => {
+      setValue(normalized);
+      document
+        .getElementById("verifikasi")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Scroll ulang setelah verifikasi selesai — konten async di atas
+      // (direktori, pakar, statistik) melebar dan menggeser posisi target.
+      void verify(normalized).then(() => {
+        window.setTimeout(() => {
+          document
+            .getElementById("verifikasi")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      });
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+      deepLinkDone.current = false; // reset agar StrictMode remount tetap berjalan sekali
+    };
+  }, [verify]);
+
   return (
-    <section id="verifikasi" className="scroll-mt-20 bg-stone-50 py-16 sm:py-20">
+    <section id="verifikasi" className="scroll-mt-20 bg-stone-50 py-16 dark:bg-stone-950 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Verifikasi Publik"
@@ -70,7 +99,7 @@ export function VerifySection() {
         <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
           {/* kiri: form verifikasi */}
           <FadeIn className="lg:col-span-3">
-            <Card className="border-stone-200 shadow-sm">
+            <Card className="border-border shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Search className="h-5 w-5 text-emerald-700" aria-hidden />
@@ -115,7 +144,7 @@ export function VerifySection() {
                   </Button>
                 </form>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span>Nomor contoh:</span>
                   {EXAMPLE_CERT_NUMBERS.map((num) => (
                     <button
@@ -125,7 +154,7 @@ export function VerifySection() {
                         setValue(num);
                         void verify(num);
                       }}
-                      className="min-h-8 rounded-md border border-stone-200 bg-stone-50 px-2 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                      className="min-h-8 rounded-md border border-border bg-muted px-2 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
                     >
                       {num}
                     </button>
@@ -133,7 +162,7 @@ export function VerifySection() {
                 </div>
 
                 {error ? (
-                  <p className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                  <p className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
                     <XCircle className="h-4 w-4 shrink-0" aria-hidden />
                     {error}
                   </p>
@@ -147,7 +176,7 @@ export function VerifySection() {
                 ) : result ? (
                   result.valid ? (
                     <div className="mt-6">
-                      <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                      <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                         <CheckCircle2 className="h-5 w-5" aria-hidden />
                         Sertifikat ditemukan — status VALID
                       </p>
@@ -155,21 +184,27 @@ export function VerifySection() {
                         institution={result.institution}
                         programName={result.program?.name ?? null}
                       />
+                      <p className="mt-3 truncate text-xs text-muted-foreground">
+                        Tautan permanen:{" "}
+                        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                          {`${window.location.origin}/?cert=${result.institution.certNumber}`}
+                        </code>
+                      </p>
                     </div>
                   ) : (
-                    <div className="mt-6 flex flex-col items-center gap-2 rounded-xl border border-red-200 bg-red-50 py-10 text-center">
+                    <div className="mt-6 flex flex-col items-center gap-2 rounded-xl border border-red-200 bg-red-50 py-10 text-center dark:border-red-900/60 dark:bg-red-950/40">
                       <XCircle className="h-10 w-10 text-red-500" aria-hidden />
-                      <p className="font-display text-lg font-bold text-red-700">
+                      <p className="font-display text-lg font-bold text-red-700 dark:text-red-300">
                         Sertifikat Tidak Ditemukan
                       </p>
-                      <p className="max-w-sm text-sm text-red-600/80">
+                      <p className="max-w-sm text-sm text-red-600/80 dark:text-red-400/80">
                         Nomor yang Anda masukkan tidak terdaftar pada basis data PUSAKA.
                         Periksa kembali penulisan atau hubungi sekretariat.
                       </p>
                     </div>
                   )
                 ) : (
-                  <p className="mt-6 rounded-xl border border-dashed border-stone-300 bg-stone-100/60 px-4 py-8 text-center text-sm text-stone-400">
+                  <p className="mt-6 rounded-xl border border-dashed border-border bg-muted/50 px-4 py-8 text-center text-sm text-muted-foreground">
                     Hasil verifikasi akan muncul di sini dalam bentuk kartu sertifikat digital.
                   </p>
                 )}
@@ -179,7 +214,7 @@ export function VerifySection() {
 
           {/* kanan: aktivitas real-time */}
           <FadeIn delay={0.15} className="lg:col-span-2">
-            <Card className="h-full border-emerald-100 bg-white/70 shadow-sm">
+            <Card className="h-full border-border bg-card/70 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <span className="relative flex h-2.5 w-2.5">
@@ -188,7 +223,7 @@ export function VerifySection() {
                   </span>
                   Aktivitas Verifikasi Real-time
                 </CardTitle>
-                <p className="text-xs text-stone-500">Diperbarui otomatis setiap 10 detik</p>
+                <p className="text-xs text-muted-foreground">Diperbarui otomatis setiap 10 detik</p>
               </CardHeader>
               <CardContent>
                 {activityLoading ? (
@@ -198,7 +233,7 @@ export function VerifySection() {
                     ))}
                   </div>
                 ) : activity.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-stone-300 py-8 text-center text-sm text-stone-400">
+                  <p className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
                     Belum ada aktivitas verifikasi terbaru.
                   </p>
                 ) : (
@@ -212,7 +247,7 @@ export function VerifySection() {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -24 }}
                           transition={{ duration: 0.3 }}
-                          className="flex items-center justify-between gap-3 rounded-lg border border-stone-100 bg-stone-50/80 px-3 py-2.5"
+                          className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2.5"
                         >
                           <span className="flex min-w-0 items-center gap-2">
                             {item.result === "VALID" ? (
@@ -220,7 +255,7 @@ export function VerifySection() {
                             ) : (
                               <XCircle className="h-4 w-4 shrink-0 text-red-500" aria-hidden />
                             )}
-                            <span className="truncate font-mono text-xs font-semibold text-stone-700">
+                            <span className="truncate font-mono text-xs font-semibold text-foreground">
                               {item.certNumber}
                             </span>
                           </span>
@@ -232,7 +267,7 @@ export function VerifySection() {
                             >
                               ✓ {item.result}
                             </span>
-                            <span className="text-[10px] text-stone-400">
+                            <span className="text-[10px] text-muted-foreground">
                               {timeAgo(item.at)}
                             </span>
                           </span>

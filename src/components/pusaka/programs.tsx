@@ -85,42 +85,42 @@ function ProgramDetailDialog({
                   <DialogDescription className="sr-only">
                     Detail program sertifikasi {program.shortName}
                   </DialogDescription>
-                  <p className="mt-1 text-sm text-stone-500">{program.tagline}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{program.tagline}</p>
                 </div>
               </div>
             </DialogHeader>
 
             <div className="space-y-5">
-              <p className="text-sm leading-relaxed text-stone-600">{program.description}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{program.description}</p>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Investasi</p>
-                  <p className="mt-0.5 text-sm font-bold text-emerald-700">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Investasi</p>
+                  <p className="mt-0.5 text-sm font-bold text-emerald-700 dark:text-emerald-300">
                     {formatIDR(program.price)}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Durasi</p>
-                  <p className="mt-0.5 text-sm font-bold text-stone-800">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Durasi</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">
                     {program.durationDays} Hari
                   </p>
                 </div>
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     Tingkat Kelulusan
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-amber-600">{program.passRate}%</p>
+                  <p className="mt-0.5 text-sm font-bold text-amber-600 dark:text-amber-400">{program.passRate}%</p>
                 </div>
               </div>
 
               <div>
-                <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-stone-500">
+                <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                   Persyaratan
                 </h4>
                 <ul className="space-y-1.5">
                   {requirements.map((r) => (
-                    <li key={r} className="flex items-start gap-2 text-sm text-stone-600">
+                    <li key={r} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
                       {r}
                     </li>
@@ -129,12 +129,12 @@ function ProgramDetailDialog({
               </div>
 
               <div>
-                <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-stone-500">
+                <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                   Manfaat Sertifikasi
                 </h4>
                 <ul className="space-y-1.5">
                   {benefits.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm text-stone-600">
+                    <li key={b} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
                       {b}
                     </li>
@@ -144,7 +144,7 @@ function ProgramDetailDialog({
 
               {accreditation.length > 0 ? (
                 <div>
-                  <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-stone-500">
+                  <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                     Diakui &amp; Diakreditasi oleh
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -152,7 +152,7 @@ function ProgramDetailDialog({
                       <Badge
                         key={a}
                         variant="outline"
-                        className="border-emerald-200 bg-emerald-50 text-emerald-800"
+                        className="border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
                       >
                         {a}
                       </Badge>
@@ -163,23 +163,23 @@ function ProgramDetailDialog({
 
               {countries.length > 0 ? (
                 <div>
-                  <h4 className="mb-2 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-stone-500">
-                    <Globe2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+                  <h4 className="mb-2 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                    <Globe2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />
                     Cakupan Internasional
                   </h4>
                   <ul>
                     {countries.map((c) => (
                       <li
                         key={`${c.country}-${c.detail}`}
-                        className="flex items-start gap-2.5 border-b border-stone-100 py-2 last:border-b-0"
+                        className="flex items-start gap-2.5 border-b border-border/60 py-2 last:border-b-0"
                       >
                         <span className="mt-0.5 text-lg leading-none" aria-hidden>
                           {c.flag}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-stone-800">{c.country}</p>
+                          <p className="text-sm font-semibold text-foreground">{c.country}</p>
                           {c.detail ? (
-                            <p className="text-sm leading-snug text-stone-600">{c.detail}</p>
+                            <p className="text-sm leading-snug text-muted-foreground">{c.detail}</p>
                           ) : null}
                         </div>
                       </li>
@@ -232,7 +232,7 @@ export function Programs() {
   );
 
   return (
-    <section id="program" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="program" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Program Sertifikasi"
@@ -242,7 +242,7 @@ export function Programs() {
 
         <FadeIn delay={0.1} className="mt-8 flex justify-center">
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="h-11 bg-stone-100 p-1">
+            <TabsList className="h-11 bg-muted p-1">
               {CATEGORY_TABS.map((t) => (
                 <TabsTrigger
                   key={t.value}
@@ -278,9 +278,9 @@ export function Programs() {
             ))}
           </div>
         ) : error ? (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-stone-300 bg-stone-50 py-14 text-center">
+          <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-muted/40 py-14 text-center">
             <X className="h-8 w-8 text-red-400" aria-hidden />
-            <p className="text-sm text-stone-500">{error}</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setTab(tab)}>
               Coba muat ulang
             </Button>
@@ -291,7 +291,7 @@ export function Programs() {
               const Icon = PROGRAM_ICON[p.code] ?? Globe2;
               return (
                 <FadeIn key={p.id} delay={Math.min(idx * 0.05, 0.3)}>
-                  <Card className="group h-full border-stone-200 p-0 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-900/10">
+                  <Card className="group h-full border-border p-0 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-900/10">
                     <CardContent className="flex h-full flex-col p-5">
                       <div className="flex items-start justify-between gap-3">
                         <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-700 to-emerald-600 text-white shadow-md shadow-emerald-900/20 transition-transform group-hover:scale-105">
@@ -299,19 +299,19 @@ export function Programs() {
                         </span>
                         <Badge
                           variant="outline"
-                          className="border-emerald-200 bg-emerald-50 text-[10px] font-bold uppercase tracking-wider text-emerald-800"
+                          className="border-emerald-600/30 bg-emerald-500/10 text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
                         >
                           {CATEGORY_LABEL[p.category] ?? p.category}
                         </Badge>
                       </div>
 
-                      <h3 className="font-display mt-4 text-lg font-bold text-stone-900">
+                      <h3 className="font-display mt-4 text-lg font-bold text-foreground">
                         {p.shortName}
                       </h3>
-                      <p className="mt-0.5 line-clamp-2 text-sm text-stone-500">{p.tagline}</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
 
-                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-500">
-                        <span className="font-semibold text-emerald-700">
+                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-300">
                           {formatIDR(p.price)}
                         </span>
                         <span className="flex items-center gap-1">
@@ -322,7 +322,7 @@ export function Programs() {
                           <Users className="h-3.5 w-3.5" aria-hidden />
                           {formatNumber(p.holderCount)} pemegang
                         </span>
-                        <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">
+                        <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-medium text-amber-700 dark:text-amber-400">
                           Lolos {p.passRate}%
                         </span>
                       </div>
@@ -330,7 +330,7 @@ export function Programs() {
                       <div className="mt-auto pt-5">
                         <Button
                           variant="outline"
-                          className="h-10 w-full border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                          className="h-10 w-full border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 hover:text-emerald-900 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:text-emerald-200"
                           onClick={() => setSelected(p)}
                         >
                           Lihat Detail
@@ -345,7 +345,7 @@ export function Programs() {
         )}
 
         {!loading && !error && filtered.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-stone-500">
+          <p className="mt-10 text-center text-sm text-muted-foreground">
             Belum ada program pada kategori ini.
           </p>
         ) : null}

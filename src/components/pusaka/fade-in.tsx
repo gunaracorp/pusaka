@@ -40,12 +40,12 @@ export function SectionHeading({
   const alignClass = align === "center" ? "text-center mx-auto" : "text-left";
   return (
     <FadeIn className={`max-w-3xl ${alignClass}`}>
-      <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-700">
+      <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-600/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-300">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
         {eyebrow}
       </p>
-      <h2 className="font-display text-3xl font-extrabold text-stone-900 sm:text-4xl">{title}</h2>
-      {subtitle ? <p className="mt-3 text-base leading-relaxed text-stone-600">{subtitle}</p> : null}
+      <h2 className="font-display text-3xl font-extrabold text-foreground sm:text-4xl">{title}</h2>
+      {subtitle ? <p className="mt-3 text-base leading-relaxed text-muted-foreground">{subtitle}</p> : null}
     </FadeIn>
   );
 }

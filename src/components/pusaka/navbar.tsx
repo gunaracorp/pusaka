@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { NAV_LINKS } from "@/lib/pusaka";
 import { useAdminStore } from "@/lib/admin-store";
+import { ThemeToggle } from "@/components/pusaka/theme-toggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -35,7 +36,7 @@ export function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md transition-shadow ${
-        scrolled ? "border-stone-200 shadow-sm" : "border-transparent"
+        scrolled ? "border-border shadow-sm" : "border-transparent"
       }`}
     >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -45,10 +46,10 @@ export function Navbar() {
             P
           </span>
           <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-extrabold tracking-tight text-stone-900">
+            <span className="font-display text-lg font-extrabold tracking-tight text-foreground">
               PUSAKA
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-widest text-emerald-700">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
               Sertifikasi &amp; Akreditasi
             </span>
           </span>
@@ -60,7 +61,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-stone-600 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
             >
               {link.label}
             </a>
@@ -68,10 +69,11 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 text-stone-400 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
+            className="h-10 w-10 text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
             aria-label="Panel Admin"
             onClick={openAdminPanel}
           >
@@ -112,15 +114,19 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-stone-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
+                  className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
                 >
                   {link.label}
                 </a>
               ))}
               <div className="mt-4 border-t pt-4">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-sm font-medium text-foreground">Tampilan</span>
+                  <ThemeToggle />
+                </div>
                 <Button
                   variant="outline"
-                  className="mb-2 h-11 w-full gap-2 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  className="mb-2 h-11 w-full gap-2 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 dark:border-emerald-500/40 dark:text-emerald-300"
                   onClick={() => {
                     setOpen(false);
                     openAdminPanel();

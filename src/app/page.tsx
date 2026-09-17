@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { TopTicker } from "@/components/pusaka/top-ticker";
+import { SakaChat } from "@/components/pusaka/saka-chat";
 import { Navbar } from "@/components/pusaka/navbar";
 import { Hero } from "@/components/pusaka/hero";
 import { TrustMarquee } from "@/components/pusaka/trust-marquee";
@@ -45,6 +47,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <TopTicker />
       <Navbar />
       <main className="flex-1">
         <Hero />
@@ -65,6 +68,7 @@ export default function Home() {
         <ContactCTA />
       </main>
       <Footer />
+      <SakaChat />
       <AdminLoginDialog />
     </div>
   );

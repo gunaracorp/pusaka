@@ -63,7 +63,7 @@ export function Experts() {
   );
 
   return (
-    <section id="dewan-pakar" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="dewan-pakar" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Dewan Pakar"
@@ -83,14 +83,14 @@ export function Experts() {
                 className={`flex min-h-11 items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-wider transition-all ${
                   active
                     ? "border-emerald-700 bg-emerald-700 text-white shadow-md shadow-emerald-900/20"
-                    : "border-stone-200 bg-white text-stone-600 hover:border-emerald-300 hover:bg-emerald-50"
+                    : "border-border bg-card text-muted-foreground hover:border-emerald-500/40 hover:bg-emerald-500/10"
                 }`}
                 aria-pressed={active}
               >
                 {c === "SEMUA" ? "Semua" : c}
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                    active ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500"
+                    active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {c === "SEMUA" ? experts.length : counts[c] ?? 0}
@@ -114,22 +114,22 @@ export function Experts() {
             ))}
           </div>
         ) : error ? (
-          <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-stone-300 py-14 text-center">
-            <Loader2 className="h-8 w-8 text-stone-300" aria-hidden />
-            <p className="text-sm text-stone-500">{error}</p>
+          <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-14 text-center">
+            <Loader2 className="h-8 w-8 text-muted-foreground/50" aria-hidden />
+            <p className="text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setCategory("SEMUA")}>
               Coba muat ulang
             </Button>
           </div>
         ) : (
           <div className="mx-auto mt-8 max-w-5xl">
-            <div className="max-h-[600px] space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50/70 p-4 shadow-inner">
+            <div className="max-h-[600px] space-y-3 overflow-y-auto rounded-2xl border border-border bg-muted/40 p-4 shadow-inner">
               {filtered.map((e) => (
                 <button
                   key={e.id}
                   type="button"
                   onClick={() => setSelected(e)}
-                  className="flex w-full items-center gap-4 rounded-xl border border-stone-200 bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
+                  className="flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:shadow-md"
                 >
                   <span
                     className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-700 via-emerald-600 to-amber-500 font-display text-base font-black text-white shadow-md"
@@ -138,21 +138,21 @@ export function Experts() {
                     {e.initials}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-display truncate text-sm font-bold text-stone-900">
+                    <p className="font-display truncate text-sm font-bold text-foreground">
                       {e.name}
                     </p>
-                    <p className="truncate text-xs text-stone-500">
+                    <p className="truncate text-xs text-muted-foreground">
                       {e.field} — {e.organization}
                     </p>
-                    <p className="mt-0.5 font-mono text-[10px] text-stone-400">{e.licenseNo}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{e.licenseNo}</p>
                   </div>
-                  <Badge className="shrink-0 border-transparent bg-amber-100 text-[10px] font-bold text-amber-800">
+                  <Badge className="shrink-0 border-transparent bg-amber-500/15 text-[10px] font-bold text-amber-800 dark:text-amber-300">
                     {e.experienceYears} Thn
                   </Badge>
                 </button>
               ))}
               {filtered.length === 0 ? (
-                <p className="py-10 text-center text-sm text-stone-400">
+                <p className="py-10 text-center text-sm text-muted-foreground">
                   Tidak ada pakar pada kategori ini.
                 </p>
               ) : null}
@@ -178,14 +178,14 @@ export function Experts() {
                     <DialogTitle className="font-display text-left text-xl font-bold">
                       {selected.name}
                     </DialogTitle>
-                    <p className="text-sm text-stone-500">
+                    <p className="text-sm text-muted-foreground">
                       {selected.field} • {selected.organization}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-[10px] text-emerald-800">
+                      <Badge variant="outline" className="border-emerald-600/30 bg-emerald-500/10 text-[10px] text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300">
                         {selected.category}
                       </Badge>
-                      <Badge className="border-transparent bg-amber-100 text-[10px] font-bold text-amber-800">
+                      <Badge className="border-transparent bg-amber-500/15 text-[10px] font-bold text-amber-800 dark:text-amber-300">
                         {selected.experienceYears} Tahun Pengalaman
                       </Badge>
                     </div>
@@ -194,28 +194,28 @@ export function Experts() {
               </DialogHeader>
 
               <div className="space-y-4">
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     Nomor Lisensi Dewan Pakar
                   </p>
-                  <p className="mt-0.5 font-mono text-sm font-bold text-emerald-700">
+                  <p className="mt-0.5 font-mono text-sm font-bold text-emerald-700 dark:text-emerald-300">
                     {selected.licenseNo}
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1.5 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-stone-500">
+                  <h4 className="mb-1.5 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                     <GraduationCap className="h-4 w-4" aria-hidden />
                     Pendidikan
                   </h4>
-                  <p className="text-sm leading-relaxed text-stone-600">{selected.education}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{selected.education}</p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1.5 text-sm font-bold uppercase tracking-widest text-stone-500">
+                  <h4 className="mb-1.5 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                     Ruang Lingkup Keahlian
                   </h4>
-                  <p className="text-sm leading-relaxed text-stone-600">{selected.expertise}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{selected.expertise}</p>
                 </div>
               </div>
             </>

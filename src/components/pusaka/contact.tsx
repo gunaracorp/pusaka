@@ -74,7 +74,7 @@ export function ContactCTA() {
   }
 
   return (
-    <section id="kontak" className="scroll-mt-20 bg-stone-50 py-16 sm:py-20">
+    <section id="kontak" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* kiri: CTA gelap */}
@@ -128,10 +128,10 @@ export function ContactCTA() {
 
           {/* kanan: form kontak */}
           <FadeIn delay={0.12}>
-            <Card className="h-full border-stone-200 shadow-sm">
+            <Card className="h-full border-border shadow-sm">
               <CardContent className="p-6 sm:p-8">
-                <h3 className="font-display text-xl font-bold text-stone-900">Kirim Pesan</h3>
-                <p className="mt-1 text-sm text-stone-500">
+                <h3 className="font-display text-xl font-bold text-foreground">Kirim Pesan</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Pertanyaan seputar program, biaya, atau jadwal audit — kami siap membantu.
                 </p>
 

@@ -1,6 +1,23 @@
 "use client";
 
-import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Twitter, Youtube } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import {
+  CheckCircle2,
+  Facebook,
+  Instagram,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Send,
+  ShieldCheck,
+  Twitter,
+  Youtube,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { subscribeNewsletter } from "@/lib/pusaka";
 import { useAdminStore } from "@/lib/admin-store";
 
 const PROGRAM_LINKS = [
@@ -26,19 +43,47 @@ const SOCIALS = [
   { icon: Youtube, label: "YouTube PUSAKA" },
 ];
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function Footer() {
   const setLoginOpen = useAdminStore((s) => s.setLoginOpen);
   const setShowAdmin = useAdminStore((s) => s.setShowAdmin);
+  const [email, setEmail] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
   const openAdminPanel = () => {
     const authed = useAdminStore.getState().status === "authed";
     if (authed) setShowAdmin(true);
     else setLoginOpen(true);
   };
 
+  async function handleSubscribe(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!EMAIL_RE.test(trimmed)) {
+      toast.error("Masukkan alamat email yang valid.");
+      return;
+    }
+    if (subscribing) return;
+    setSubscribing(true);
+    try {
+      const data = await subscribeNewsletter(trimmed);
+      toast.success(
+        data?.already ? "Email Anda sudah terdaftar." : "Berhasil berlangganan! Terima kasih.",
+      );
+      setEmail("");
+      setSubscribed(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Gagal berlangganan. Coba lagi nanti.");
+    } finally {
+      setSubscribing(false);
+    }
+  }
+
   return (
     <footer className="mt-auto bg-emerald-950 pb-safe text-emerald-100">
       <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* brand */}
           <div>
             <div className="flex items-center gap-3">
@@ -131,6 +176,54 @@ export function Footer() {
                 +62 21 350 5075
               </li>
             </ul>
+          </div>
+
+          {/* newsletter */}
+          <div>
+            <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
+              Newsletter
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-emerald-200/70">
+              Pengumuman kuota, regulasi terbaru, dan jadwal asesmen — langsung ke email Anda.
+            </p>
+            <form className="mt-4 flex gap-2" onSubmit={handleSubscribe} noValidate>
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (subscribed) setSubscribed(false);
+                }}
+                placeholder="nama@email.com"
+                aria-label="Alamat email"
+                autoComplete="email"
+                disabled={subscribing}
+                className="h-11 flex-1 rounded-lg border-emerald-800 bg-emerald-900/40 text-white placeholder:text-emerald-300/40"
+              />
+              <Button
+                type="submit"
+                aria-label="Berlangganan newsletter"
+                disabled={subscribing}
+                className="h-11 shrink-0 gap-1.5 rounded-lg bg-amber-500 px-3 font-bold text-emerald-950 hover:bg-amber-600"
+              >
+                {subscribing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Send className="h-4 w-4" aria-hidden />
+                )}
+                <span className="hidden sm:inline">Kirim</span>
+              </Button>
+            </form>
+            {subscribed ? (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-300">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                Terdaftar — terima kasih!
+              </p>
+            ) : null}
+            <p className="mt-2 text-[11px] text-emerald-300/50">
+              Kami menghormati privasi Anda. Berhenti kapan saja.
+            </p>
           </div>
         </div>
       </div>

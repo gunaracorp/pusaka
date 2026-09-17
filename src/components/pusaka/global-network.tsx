@@ -115,7 +115,7 @@ function NodeDetailDialog({
             <DialogHeader>
               <div className="flex items-start gap-3 pr-8">
                 <span
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-4xl leading-none"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-4xl leading-none"
                   aria-hidden
                 >
                   {node.flag}
@@ -123,7 +123,7 @@ function NodeDetailDialog({
                 <div className="min-w-0">
                   <DialogTitle className="font-display text-left text-xl font-bold">
                     {node.country}
-                    <span className="ml-2 text-sm font-semibold text-stone-500">{node.city}</span>
+                    <span className="ml-2 text-sm font-semibold text-muted-foreground">{node.city}</span>
                   </DialogTitle>
                   {statusMeta ? (
                     <Badge variant="outline" className={`mt-1.5 ${statusMeta.badgeClass}`}>
@@ -138,51 +138,51 @@ function NodeDetailDialog({
             </DialogDescription>
 
             <div className="space-y-5">
-              <p className="font-display text-base font-bold text-emerald-800">{node.title}</p>
-              <p className="-mt-3 text-sm font-medium text-stone-500">{node.orgName}</p>
-              <p className="text-sm leading-relaxed text-stone-600">{node.description}</p>
+              <p className="font-display text-base font-bold text-emerald-800 dark:text-emerald-300">{node.title}</p>
+              <p className="-mt-3 text-sm font-medium text-muted-foreground">{node.orgName}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{node.description}</p>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Kawasan</p>
-                  <p className="mt-0.5 text-sm font-bold text-stone-800">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kawasan</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">
                     {GLOBAL_REGION_LABEL[node.region] ?? node.region}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Kota</p>
-                  <p className="mt-0.5 text-sm font-bold text-stone-800">{node.city}</p>
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kota</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.city}</p>
                 </div>
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Jenis</p>
-                  <p className="mt-0.5 text-sm font-bold text-stone-800">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Jenis</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">
                     {GLOBAL_KIND_LABEL[node.kind] ?? node.kind}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-stone-50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     Beroperasi Sejak
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-stone-800">{node.since}</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.since}</p>
                 </div>
-                <div className="col-span-2 rounded-lg border bg-stone-50 p-3 sm:col-span-1">
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Kontak</p>
+                <div className="col-span-2 rounded-lg border bg-muted/50 p-3 sm:col-span-1">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kontak</p>
                   {node.contact ? (
                     <a
                       href={`mailto:${node.contact}`}
-                      className="mt-0.5 block break-all text-sm font-bold text-emerald-700 underline-offset-2 hover:underline"
+                      className="mt-0.5 block break-all text-sm font-bold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
                     >
                       {node.contact}
                     </a>
                   ) : (
-                    <p className="mt-0.5 text-sm font-bold text-stone-400">—</p>
+                    <p className="mt-0.5 text-sm font-bold text-muted-foreground">—</p>
                   )}
                 </div>
               </div>
 
               {scope.length > 0 ? (
                 <div>
-                  <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-stone-500">
+                  <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                     Cakupan Program
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -190,7 +190,7 @@ function NodeDetailDialog({
                       <Badge
                         key={code}
                         variant="outline"
-                        className="border-emerald-200 bg-emerald-50 text-emerald-800"
+                        className="border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
                       >
                         {PROGRAM_LABELS[code] ?? code}
                       </Badge>
@@ -210,7 +210,7 @@ function NodeDetailDialog({
                   <Button
                     asChild
                     variant="outline"
-                    className="h-12 border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                    className="h-12 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 hover:text-emerald-900 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:text-emerald-200"
                   >
                     <a href={`mailto:${node.contact}`} aria-label={`Email kantor ${node.country}`}>
                       Hubungi Kantor

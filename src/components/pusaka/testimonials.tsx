@@ -63,7 +63,7 @@ export function Testimonials() {
   const t = TESTIMONIALS[index];
 
   return (
-    <section id="testimoni" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="testimoni" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Testimoni"
@@ -73,10 +73,10 @@ export function Testimonials() {
 
         <FadeIn delay={0.1} className="mt-10">
           <div className="relative">
-            <Card className="overflow-hidden border-stone-200 shadow-lg shadow-emerald-900/5">
+            <Card className="overflow-hidden border-border shadow-lg shadow-emerald-900/5">
               <CardContent className="relative min-h-[300px] p-8 sm:p-10">
                 <Quote
-                  className="absolute right-6 top-6 h-16 w-16 text-emerald-100"
+                  className="absolute right-6 top-6 h-16 w-16 text-emerald-500/15"
                   aria-hidden
                 />
                 <AnimatePresence mode="wait" custom={direction}>
@@ -95,13 +95,13 @@ export function Testimonials() {
                           className={`h-4 w-4 ${
                             i < t.rating
                               ? "fill-amber-400 text-amber-400"
-                              : "fill-stone-200 text-stone-200"
+                              : "fill-muted-foreground/25 text-muted-foreground/25"
                           }`}
                           aria-hidden
                         />
                       ))}
                     </div>
-                    <blockquote className="mt-4 text-base leading-relaxed text-stone-700 sm:text-lg">
+                    <blockquote className="mt-4 text-base leading-relaxed text-foreground/90 sm:text-lg">
                       &ldquo;{t.quote}&rdquo;
                     </blockquote>
                     <div className="mt-6 flex items-center gap-3">
@@ -117,12 +117,12 @@ export function Testimonials() {
                           .join("")}
                       </span>
                       <div>
-                        <p className="font-display text-sm font-bold text-stone-900">{t.name}</p>
+                        <p className="font-display text-sm font-bold text-foreground">{t.name}</p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-[10px] text-emerald-800">
+                          <Badge variant="outline" className="border-emerald-600/30 bg-emerald-500/10 text-[10px] text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300">
                             {t.role}
                           </Badge>
-                          <span className="text-xs text-stone-400">{t.city}</span>
+                          <span className="text-xs text-muted-foreground">{t.city}</span>
                         </div>
                       </div>
                     </div>
@@ -152,7 +152,7 @@ export function Testimonials() {
                       setIndex(i);
                     }}
                     className={`h-2 rounded-full transition-all ${
-                      i === index ? "w-6 bg-emerald-700" : "w-2 bg-stone-300 hover:bg-emerald-300"
+                      i === index ? "w-6 bg-emerald-700" : "w-2 bg-muted-foreground/30 hover:bg-emerald-500/50"
                     }`}
                     aria-label={`Ke testimoni ${i + 1}`}
                   />

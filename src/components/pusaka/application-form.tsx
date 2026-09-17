@@ -184,34 +184,34 @@ export function ApplicationForm() {
   // ---------- LAYAR SUKSES ----------
   if (successCode) {
     return (
-      <section id="pendaftaran" className="scroll-mt-20 bg-white py-16 sm:py-20">
+      <section id="pendaftaran" className="scroll-mt-20 bg-card py-16 sm:py-20">
         <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <Card className="border-emerald-200 shadow-xl shadow-emerald-900/10">
+            <Card className="border-emerald-600/30 shadow-xl shadow-emerald-900/10 dark:border-emerald-500/30">
               <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:p-12">
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
                   <PartyPopper className="h-8 w-8" aria-hidden />
                 </span>
                 <div>
-                  <h2 className="font-display text-2xl font-black text-stone-900 sm:text-3xl">
+                  <h2 className="font-display text-2xl font-black text-foreground sm:text-3xl">
                     Pendaftaran Berhasil Dikirim
                   </h2>
-                  <p className="mt-2 text-sm text-stone-500">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     Tim admisi kami akan memverifikasi berkas dalam 1 × 24 jam. Simpan kode
                     pelacakan berikut untuk memantau status pendaftaran Anda.
                   </p>
                 </div>
 
-                <div className="w-full rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 p-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+                <div className="w-full rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/10 p-6">
+                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                     Kode Pelacakan Anda
                   </p>
-                  <p className="mt-2 font-mono text-3xl font-black tracking-wider text-emerald-800 sm:text-4xl">
+                  <p className="mt-2 font-mono text-3xl font-black tracking-wider text-emerald-800 sm:text-4xl dark:text-emerald-300">
                     {successCode}
                   </p>
                   <Button
                     variant="outline"
-                    className="mt-4 border-emerald-300 text-emerald-800 hover:bg-emerald-100"
+                    className="mt-4 border-emerald-500/40 text-emerald-800 hover:bg-emerald-500/10 dark:text-emerald-300"
                     onClick={() => {
                       void navigator.clipboard
                         .writeText(successCode)
@@ -250,7 +250,7 @@ export function ApplicationForm() {
 
   // ---------- FORM MULTI-STEP ----------
   return (
-    <section id="pendaftaran" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="pendaftaran" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Pendaftaran"
@@ -274,14 +274,14 @@ export function ApplicationForm() {
                           ? "border-emerald-600 bg-emerald-600 text-white"
                           : active
                             ? "border-amber-500 bg-amber-500 text-white shadow-md shadow-amber-500/30"
-                            : "border-stone-300 bg-white text-stone-400"
+                            : "border-border bg-card text-muted-foreground"
                       }`}
                     >
                       {done ? <CheckCircle2 className="h-5 w-5" aria-hidden /> : n}
                     </span>
                     <span
                       className={`text-center text-[10px] font-semibold uppercase tracking-wider sm:text-xs ${
-                        active ? "text-emerald-800" : "text-stone-400"
+                        active ? "text-emerald-800 dark:text-emerald-300" : "text-muted-foreground"
                       }`}
                     >
                       {label}
@@ -290,7 +290,7 @@ export function ApplicationForm() {
                   {n < 3 ? (
                     <div
                       className={`mx-2 h-0.5 flex-1 rounded-full sm:mx-4 ${
-                        step > n ? "bg-emerald-600" : "bg-stone-200"
+                        step > n ? "bg-emerald-600" : "bg-border"
                       }`}
                       aria-hidden
                     />
@@ -303,7 +303,7 @@ export function ApplicationForm() {
         </FadeIn>
 
         <FadeIn delay={0.15} className="mt-6">
-          <Card className="border-stone-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="p-6 sm:p-8">
               {/* LANGKAH 1 */}
               {step === 1 ? (
@@ -328,17 +328,17 @@ export function ApplicationForm() {
                             htmlFor={`type-${opt.value}`}
                             className={`flex min-h-20 cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-colors ${
                               form.applicantType === opt.value
-                                ? "border-emerald-600 bg-emerald-50"
-                                : "border-stone-200 hover:border-emerald-300"
+                                ? "border-emerald-600 bg-emerald-500/10"
+                                : "border-border hover:border-emerald-500/40"
                             }`}
                           >
                             <RadioGroupItem value={opt.value} id={`type-${opt.value}`} className="mt-1" />
                             <span>
-                              <span className="flex items-center gap-1.5 text-sm font-bold text-stone-900">
-                                <Icon className="h-4 w-4 text-emerald-700" aria-hidden />
+                              <span className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                                <Icon className="h-4 w-4 text-emerald-700 dark:text-emerald-300" aria-hidden />
                                 {opt.label}
                               </span>
-                              <span className="mt-0.5 block text-xs text-stone-500">{opt.desc}</span>
+                              <span className="mt-0.5 block text-xs text-muted-foreground">{opt.desc}</span>
                             </span>
                           </Label>
                         );
@@ -434,32 +434,32 @@ export function ApplicationForm() {
                   </div>
 
                   {selectedProgram ? (
-                    <div className="grid grid-cols-1 gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 sm:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 rounded-xl border border-emerald-600/30 bg-emerald-500/10 p-4 sm:grid-cols-3">
                       <div>
-                        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                           <FileText className="h-3 w-3" aria-hidden /> Investasi
                         </p>
-                        <p className="mt-1 font-display text-lg font-black text-emerald-700">
+                        <p className="mt-1 font-display text-lg font-black text-emerald-700 dark:text-emerald-300">
                           {formatIDR(selectedProgram.price)}
                         </p>
                       </div>
                       <div>
-                        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                           <CalendarDays className="h-3 w-3" aria-hidden /> Durasi
                         </p>
-                        <p className="mt-1 font-display text-lg font-black text-stone-800">
+                        <p className="mt-1 font-display text-lg font-black text-foreground">
                           {selectedProgram.durationDays} Hari
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                           Tingkat Kelulusan
                         </p>
-                        <p className="mt-1 font-display text-lg font-black text-amber-600">
+                        <p className="mt-1 font-display text-lg font-black text-amber-600 dark:text-amber-400">
                           {selectedProgram.passRate}%
                         </p>
                       </div>
-                      <p className="text-xs leading-relaxed text-stone-500 sm:col-span-3">
+                      <p className="text-xs leading-relaxed text-muted-foreground sm:col-span-3">
                         {selectedProgram.tagline}
                       </p>
                     </div>
@@ -470,8 +470,8 @@ export function ApplicationForm() {
               {/* LANGKAH 3 */}
               {step === 3 ? (
                 <div className="space-y-5">
-                  <div className="rounded-xl border bg-stone-50 p-4">
-                    <h4 className="font-display text-sm font-bold uppercase tracking-widest text-stone-500">
+                  <div className="rounded-xl border bg-muted/50 p-4">
+                    <h4 className="font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
                       Ringkasan Pendaftaran
                     </h4>
                     <dl className="mt-3 space-y-2 text-sm">
@@ -489,9 +489,9 @@ export function ApplicationForm() {
                             : form.programCode,
                         ],
                       ].map(([k, v]) => (
-                        <div key={k} className="flex justify-between gap-4 border-b border-stone-200/70 pb-2 last:border-0">
-                          <dt className="shrink-0 text-stone-500">{k}</dt>
-                          <dd className="text-right font-medium text-stone-800">{v}</dd>
+                        <div key={k} className="flex justify-between gap-4 border-b border-border/70 pb-2 last:border-0">
+                          <dt className="shrink-0 text-muted-foreground">{k}</dt>
+                          <dd className="text-right font-medium text-foreground">{v}</dd>
                         </div>
                       ))}
                     </dl>
@@ -508,14 +508,14 @@ export function ApplicationForm() {
                     />
                   </div>
 
-                  <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
                     <Checkbox
                       id="agree"
                       checked={form.agree}
                       onCheckedChange={(v) => set("agree", v === true)}
                       className="mt-0.5"
                     />
-                    <Label htmlFor="agree" className="cursor-pointer text-xs leading-relaxed text-stone-600">
+                    <Label htmlFor="agree" className="cursor-pointer text-xs leading-relaxed text-muted-foreground">
                       Saya menyatakan data yang diisi benar & menyetujui syarat dan ketentuan
                       sertifikasi PUSAKA, termasuk kebijakan biaya, jadwal audit, dan kode etik
                       lembaga terakreditasi.

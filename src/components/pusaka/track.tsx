@@ -49,7 +49,7 @@ export function TrackSection() {
   }
 
   return (
-    <section id="lacak" className="scroll-mt-20 bg-stone-50 py-16 sm:py-20">
+    <section id="lacak" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Lacak Status"
@@ -58,7 +58,7 @@ export function TrackSection() {
         />
 
         <FadeIn delay={0.1} className="mt-8">
-          <Card className="border-stone-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Kode Pelacakan</CardTitle>
             </CardHeader>
@@ -100,12 +100,12 @@ export function TrackSection() {
                 </Button>
               </form>
 
-              <div className="mt-3 flex items-center gap-2 text-xs text-stone-500">
+              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                 <span>Contoh:</span>
                 <button
                   type="button"
                   onClick={() => void track(EXAMPLE_TRACK_CODE)}
-                  className="min-h-8 rounded-md border border-stone-200 bg-stone-50 px-2 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                  className="min-h-8 rounded-md border border-border bg-muted px-2 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:border-emerald-500/40 hover:bg-emerald-500/10 dark:text-emerald-300"
                 >
                   {EXAMPLE_TRACK_CODE}
                 </button>
@@ -123,7 +123,7 @@ export function TrackSection() {
               exit={{ opacity: 0 }}
               className="mt-6"
             >
-              <Card className="border-stone-200">
+              <Card className="border-border">
                 <CardContent className="space-y-4 p-6">
                   <Skeleton className="h-5 w-1/3" />
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -146,11 +146,11 @@ export function TrackSection() {
               exit={{ opacity: 0 }}
               className="mt-6"
             >
-              <Card className="border-dashed border-red-200 bg-red-50/50">
+              <Card className="border-dashed border-red-500/30 bg-red-500/10">
                 <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
                   <SearchX className="h-10 w-10 text-red-400" aria-hidden />
-                  <p className="font-display text-lg font-bold text-red-700">Kode Tidak Ditemukan</p>
-                  <p className="max-w-sm text-sm text-red-600/80">
+                  <p className="font-display text-lg font-bold text-red-700 dark:text-red-300">Kode Tidak Ditemukan</p>
+                  <p className="max-w-sm text-sm text-red-600/80 dark:text-red-300/80">
                     Pastikan penulisan kode sesuai (format PSK-2025-XXXXX). Bila lupa, hubungi
                     sekretariat dengan menyertakan email pendaftaran.
                   </p>
@@ -165,24 +165,24 @@ export function TrackSection() {
               exit={{ opacity: 0 }}
               className="mt-6"
             >
-              <Card className="border-emerald-200 shadow-md shadow-emerald-900/5">
-                <CardHeader className="border-b border-stone-100 pb-4">
+              <Card className="border-emerald-600/30 shadow-md shadow-emerald-900/5 dark:border-emerald-500/30">
+                <CardHeader className="border-b border-border pb-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <CardTitle className="font-mono text-xl font-black text-emerald-800">
+                      <CardTitle className="font-mono text-xl font-black text-emerald-800 dark:text-emerald-300">
                         {data.trackingCode}
                       </CardTitle>
-                      <p className="mt-1 text-sm text-stone-500">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {data.fullName} — program {data.programCode}
                       </p>
                     </div>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-muted-foreground">
                       Didaftarkan {formatDate(data.createdAt)}
                     </p>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <ol className="relative space-y-0 border-l-2 border-stone-200 pl-6">
+                  <ol className="relative space-y-0 border-l-2 border-border pl-6">
                     {data.statusHistory.map((h, idx) => {
                       const Icon = STEP_ICONS[idx] ?? CheckCircle2;
                       const current = !h.done && idx > 0 && (data.statusHistory[idx - 1]?.done ?? false);
@@ -194,7 +194,7 @@ export function TrackSection() {
                                 ? "border-emerald-600 bg-emerald-600 text-white"
                                 : current
                                   ? "animate-pulse-amber border-amber-500 bg-amber-500 text-white"
-                                  : "border-stone-300 bg-white text-stone-300"
+                                  : "border-border bg-card text-muted-foreground/50"
                             }`}
                           >
                             {h.done ? (
@@ -206,17 +206,21 @@ export function TrackSection() {
                           <div className="pt-1">
                             <p
                               className={`text-sm font-bold ${
-                                h.done ? "text-emerald-800" : current ? "text-amber-700" : "text-stone-400"
+                                h.done
+                                  ? "text-emerald-800 dark:text-emerald-300"
+                                  : current
+                                    ? "text-amber-700 dark:text-amber-300"
+                                    : "text-muted-foreground"
                               }`}
                             >
                               {h.label}
                               {current ? (
-                                <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                                <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
                                   Sedang Diproses
                                 </span>
                               ) : null}
                             </p>
-                            <p className="mt-0.5 text-xs text-stone-400">
+                            <p className="mt-0.5 text-xs text-muted-foreground">
                               {h.at ? formatDate(h.at) : h.done ? "Selesai" : "Menunggu tahap sebelumnya"}
                             </p>
                           </div>

@@ -1,0 +1,290 @@
+     1→# Worklog — Proyek PUSAKA
+     2→
+     3→---
+     4→
+     5→Task ID: 1
+     6→Agent: Main Orchestrator (Z.ai)
+     7→Task: Setup fondasi proyek PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi (PIHK, PPIU, BPW, IATA, Izin Umrah/Haji) dengan 46 Dewan Pakar Lintas Bidang.
+     8→
+     9→Work Log:
+    10→- Eksplorasi struktur proyek Next.js 16 + shadcn/ui + Prisma (SQLite).
+    11→- Membuat `prisma/schema.prisma` dengan 7 model: Program, Institution, Expert, Application, VerifyLog, NewsArticle, ContactMessage. Sudah di-push via `bun run db:push`.
+    12→- Membuat dan menjalankan `prisma/seed.ts` — hasil: 7 program sertifikasi, 24 institusi terakreditasi, 46 dewan pakar, 6 berita, 4 aplikasi contoh (tracking codes: PSK-2025-83012 s/d 83015), 22 verify logs.
+    13→- Branding: **PUSAKA** (Pusat Sertifikasi & Akreditasi Kompetensi). Tagline: "Lembaga Sertifikasi & Akreditasi Industri Perjalanan Wisata, Umrah & Haji".
+    14→- Palet warna: EMERALD (primary) + GOLD/AMBER (aksen premium). DILARANG memakai indigo/blue. Dark hero + light body.
+    15→
+    16→Stage Summary:
+    17→- Database siap di `db/custom.db` (DATABASE_URL=file:/home/z/my-project/db/custom.db).
+    18→- Kontrak API di bawah — WAJIB dipatuhi agent backend & frontend.
+    19→
+    20→## KONTRAK API (src/app/api/...)
+    21→
+    22→Semua route mengembalikan `{ ok: true, data: ... }` atau `{ ok: false, error: string }`.
+    23→
+    24→1. **GET /api/stats** → data:
+    25→   ```ts
+    26→   {
+    27→     totals: { certificateHolders: number, institutions: number, experts: number, programs: number, verificationsToday: number, applicationsThisMonth: number },
+    28→     programDistribution: { code: string, holders: number }[], // dari Program.holderCount
+    29→     tierDistribution: { tier: string, count: number }[],      // SILVER/GOLD/PLATINUM dari Institution
+    30→     recentActivity: { certNumber: string, result: string, at: string }[], // 8 terbaru dari VerifyLog desc
+    31→     topProvinces: { province: string, count: number }[]       // 6 teratas dari Institution
+    32→   }
+    33→   ```
+    34→
+    35→2. **GET /api/programs** → `data: Program[]` (semua field model Program; `requirements` & `benefits` & `accreditation` berupa string JSON — parse di client).
+    36→
+    37→3. **POST /api/verify** body `{ certNumber: string }` → cari Institution by certNumber (case-insensitive, trim):
+    38→   - ditemukan → `{ ok: true, data: { valid: true, institution: Institution, program: { code, name } | null } }` + simpan VerifyLog VALID.
+    39→   - tidak → `{ ok: true, data: { valid: false } }` + simpan VerifyLog INVALID.
+    40→   - body kosong → `{ ok: false, error: "..." }` HTTP 400.
+    41→
+    42→4. **GET /api/directory?q=&type=&tier=&city=** → `data: Institution[]` (filter opsional; q = nama ATAU certNumber contains; sorted tier PLATINUM>GOLD>SILVER lalu score desc; max 50).
+    43→
+    44→5. **GET /api/experts** → `data: Expert[]` (46 pakar, sorted featured desc, name asc).
+    45→
+    46→6. **GET /api/news** → `data: NewsArticle[]` desc by publishedAt.
+    47→
+    48→7. **POST /api/applications** body `{ applicantType, programCode, fullName, email, phone, institution?, city, message? }`:
+    49→   - Validasi zod: fullName>=3, email valid, phone>=9 digit, programCode harus ada di tabel Program.
+    50→   - Generate trackingCode `PSK-2025-{5 digit acak}` (unique check loop).
+    51→   - Simpan status default SUBMITTED → `{ ok: true, data: { trackingCode, status } }`.
+    52→
+    53→8. **GET /api/applications?code=PSK-2025-XXXXX** → cari by trackingCode (case-insensitive):
+    54→   - ditemukan → `{ ok: true, data: { trackingCode, programCode, status, fullName, createdAt, statusHistory: [{ label, at, done: boolean }] } }` — statusHistory di-generate berdasarkan tahap SUBMITTED→REVIEW→VERIFIKASI→ASSESSMENT→APPROVED.
+    55→   - tidak → `{ ok: false, error: "..." }` HTTP 404.
+    56→
+    57→9. **POST /api/contact** body `{ name, email, subject, message }` → simpan ContactMessage → `{ ok: true, data: { received: true } }`.
+    58→
+    59→Catatan penting untuk agent backend:
+    60→- gunakan `import { db } from '@/lib/db'`.
+    61→- LARANG menulis test. LARANG memakai server actions — pakai route handlers (`export async function GET/POST(req: Request)`).
+    62→- File route hanya boleh di `src/app/api/<name>/route.ts` (jangan ubah page.tsx).
+    63→- `export const dynamic = 'force-dynamic'` di setiap route agar data selalu fresh.
+    64→
+    65→---
+    66→Task ID: 2-a
+    67→Agent: Backend API Agent
+    68→Task: Membangun 9 API route PUSAKA
+    69→
+    70→Work Log:
+    71→- Membaca worklog.md + prisma/schema.prisma sebagai acuan kontrak & model data.
+    72→- Membuat 8 file route (9 handler) di `src/app/api/`: stats, programs, verify, directory, experts, news, applications (GET+POST), contact.
+    73→- Semua route: `export const dynamic = 'force-dynamic'`, import `db` dari `@/lib/db`, NextResponse JSON `{ ok, data | error }`, try/catch + console.error, HTTP 400/404/500 sesuai kontrak.
+    74→- `/api/stats`: Promise.all paralel — certificateHolders = sum Program.holderCount (23.498), verificationsToday (sejak awal hari), applicationsThisMonth (sejak awal bulan), programDistribution (sorted holders desc), tierDistribution (SILVER/GOLD/PLATINUM, count 0 tetap muncul), recentActivity 8 VerifyLog terakhir, topProvinces 6 teratas (group by province).
+    75→- `/api/verify`: zod validasi certNumber; normalisasi trim+toUpperCase (SQLite tidak punya mode insensitive); findUnique by certNumber; simpan VerifyLog VALID/INVALID; program di-resolve dari institution.programCode → `{ code, name }` atau null.
+    76→- `/api/directory`: fetch semua → filter in-memory (q = nama/certNumber contains case-insensitive; type/tier/city case-insensitive) → sort tier PLATINUM(3)>GOLD(2)>SILVER(1) lalu score desc → slice(0,50).
+    77→- `/api/applications` POST: zod v4 (applicantType enum, fullName>=3, z.email, phone>=9 digit + regex angka, city wajib; programCode dicek ke tabel Program → 400 jika tidak ada); generate `PSK-2025-{5 digit}` via loop unique-check findUnique (max 25 attempt); simpan status SUBMITTED. GET `?code=`: case-insensitive (toUpperCase), 404 jika tidak ada, statusHistory 5 tahap SUBMITTED→REVIEW→VERIFIKASI→ASSESSMENT→APPROVED dengan `{ label, stage, at, done }` — at = createdAt utk tahap done, null untuk belum; field `stage` (raw status) ditambahkan sebagai bonus utk frontend.
+    78→- `/api/contact`: zod (name>=2, email, subject>=3, message>=1), simpan ContactMessage → `{ received: true }`.
+    79→- Verifikasi: semua 15 curl test sukses (200 sukses, 400 body invalid/program tak ada, 404 code tak ditemukan; verify lowercase `ppu-2025-0001` → valid:true; `FAKE-9999` → valid:false dengan HTTP 200; tracking `psk-2025-83012` → ASSESSMENT dengan statusHistory 4 done 1 pending; POST applications → PSK-2025-88338 dan bisa dilacak). `tsc --noEmit` bersih untuk src/app/api (error TSC hanya di folder examples/ bawaan sandbox). Tidak ada error kompilasi di dev.log.
+    80→
+    81→Stage Summary:
+    82→- Endpoint tersedia: GET /api/stats, GET /api/programs, POST /api/verify, GET /api/directory(?q&type&tier&city), GET /api/experts, GET /api/news, POST+GET /api/applications(?code=), POST /api/contact — semua teruji via curl dan siap dipakai frontend.
+    83→- Format response konsisten `{ ok: true, data }` / `{ ok: false, error }`; status HTTP: 200 sukses, 400 body/tidak valid, 404 tidak ditemukan, 500 server error.
+    84→- Catatan kontrak tambahan: GET /api/applications menyertakan `stage` (raw status code) di tiap item statusHistory selain `label` yang human-readable; verify mengembalikan tanggal sebagai ISO string.
+    85→
+    86→---
+    87→Task ID: 2-b
+    88→Agent: Frontend UI Agent
+    89→Task: Membangun UI PUSAKA lengkap
+    90→
+    91→Work Log:
+    92→- Membaca kontrak API & schema.prisma; memetakan 9 endpoint ke fetcher typed di src/lib/pusaka.ts (apiRequest generik parsing {ok,data}/{ok,error}, relative path, cache no-store).
+    93→- Design system: override token shadcn di globals.css → --primary emerald-700 oklch(0.51 0.096 186), --ring emerald-600, chart-1..5 emerald/amber/teal/lime/orange, accent amber; smooth scroll, selection emerald, custom scrollbar tipis emerald, utility .font-display & .pb-safe, keyframes marquee + shine-sweep + float-soft + pulse-amber.
+    94→- layout.tsx: Plus_Jakarta_Sans (--font-jakarta) + Geist_Mono, lang="id", metadata SEO Indonesia "PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi | PIHK, PPIU, BPW, IATA", Toaster sonner (richColors, top-center).
+    95→- Membuat 19 komponen section di src/components/pusaka/: navbar (glassmorphism + Sheet mobile), hero (emerald-950 + hero-bg.png + kartu sertifikat 3D-tilt shine + 4 animated counter), trust-marquee (CSS infinite, pause on hover), quick-verify (POST /api/verify inline + hint chip), programs (Tabs kategori, dialog detail requirements/benefits/accreditation, CustomEvent pusaka:select-program + scroll ke #pendaftaran), verify-section (kartu sertifikat digital premium border gold + QR pattern 5x5 deterministic + panel aktivitas real-time refresh 10s AnimatePresence), process (5 langkah + garis progress animated), directory (search debounce 400ms, filter jenis/tier, skor audit progress, skeleton, list max-h scroll), experts (chip filter 9 kategori + counter, dialog profil, grid max-h-600), stats-section (4 counter + Recharts BarChart programDistribution & PieChart tierDistribution), application-form (multi-step 3 langkah: data pemohon radio-card → pilih program via Select + listener CustomEvent → ringkasan + persetujuan; validasi manual + toast; sukses menampilkan tracking code besar + copy clipboard), track (stepper vertikal statusHistory done/current/future, error state elegan, hint kode), news (featured + list, gambar per slug, dialog konten whitespace-pre-line), faq (Accordion 8 item), testimonials (carousel manual AnimatePresence prev/next + dot), contact (CTA gelap + form POST /api/contact), footer (mt-auto sticky bawah, pb-safe, 4 kolom + bar ISO badge).
+    96→- Rakit src/app/page.tsx sebagai SPA: wrapper min-h-screen flex flex-col, 16 section berurutan sesuai spek, footer mt-auto.
+    97→- Data & format: seluruh angka/tanggal via Intl id-ID (formatNumber/formatIDR/formatDate/timeAgo), safeParseJsonArray untuk kolom JSON string, fallback FALLBACK_STATS saat /api/stats gagal.
+    98→- bun run lint: 0 error 0 warning (memperbaiki 1 parsing error formatter Recharts di stats-section.tsx). dev.log: GET / 200, semua API 200, tanpa error kompilasi.
+    99→
+   100→Stage Summary:
+   101→- Komponen dibuat: fade-in.tsx, animated-counter.tsx, navbar.tsx, hero.tsx, trust-marquee.tsx, quick-verify.tsx, certificate-card.tsx, programs.tsx, verify-section.tsx, process.tsx, directory.tsx, experts.tsx, stats-section.tsx, application-form.tsx, track.tsx, news.tsx, faq.tsx, testimonials.tsx, contact.tsx, footer.tsx + lib/pusaka.ts + page.tsx + globals.css + layout.tsx. Total 16 section + navbar + footer.
+   102→- Fitur utama terpasang & teruji terhadap backend live: verifikasi cepat & lengkap (kartu digital VALID/INVALID), direktori (filter debounce), form multi-step 3 langkah (tracking code + copy), pelacakan status (stepper 5 tahap), dewan pakar 46 (chip kategori + dialog), statistik recharts, marquee mitra, berita, FAQ, testimoni, kontak.
+   103→- Catatan: hanya menyentuh page.tsx/layout/globals/lib/pusaka components — tidak mengubah src/app/api/** maupun prisma. Semua fetch relative path. Warna: emerald + gold/amber, tanpa indigo/blue.
+   104→
+   105→---
+   106→Task ID: 3
+   107→Agent: Main Orchestrator (Z.ai)
+   108→Task: Integrasi final + perbaikan konsistensi tanggal + verifikasi end-to-end Agent Browser.
+   109→
+   110→Work Log:
+   111→- Menemukan jam sistem sandbox = 2026-09-13 sedangkan seed hardcode 2025 → sertifikat bisa "AKTIF" padahal sudah kedaluwarsa.
+   112→- Memperbaiki: seed dibuat relatif thd tanggal aktual (issued=now-(3+i) bulan, expires=+3 thn; KADALUARSA dibuat lewat masa berlaku), generateTrackingCode pakai tahun dinamis, footer © pakai new Date().getFullYear().
+   113→- Re-seed database sukses.
+   114→- Agent Browser E2E (desktop 1280px & mobile 390px): hero, marquee mitra, QuickVerify (VALID PPU-2025-0001 → PT Zahra Tour Indonesia PLATINUM), kartu sertifikat digital IAT-2025-0201 (skor 94, QR, AKTIF), direktori 24 lembaga sorted tier/skor, 46 pakar + chip kategori (total=46), form multi-step 3 langkah → submit → tracking PSK-2026-74403 → lacak stepper (Pengajuan Diterima ✓ / Review Berkas SEDANG DIPROSES), berita + gambar AI, FAQ, footer sticky + badge ISO/BNSP, menu mobile Sheet.
+   115→- `bun run lint` → 0 error. `dev.log` tanpa error.
+   116→
+   117→Stage Summary:
+   118→- Website PUSAKA lengkap & terverifikasi end-to-end di http://localhost:3000 (preview panel).
+   119→- 9 API endpoint + 18 komponen section + 5 gambar AI (hero-bg, news-qr, news-iata, news-health, munas).
+   120→- Demo: verifikasi PPU-2025-0001 / BPW-2025-0102 / IAT-2025-0201; lacak PSK-2025-83012.
+   121→
+   122→---
+   123→Task ID: 4 (perencanaan CMS)
+   124→Agent: Main Orchestrator (Z.ai)
+   125→Task: Menyiapkan fondasi CMS Admin PUSAKA.
+   126→
+   127→Work Log:
+   128→- Menambah model `AdminUser` ke prisma/schema.prisma (username unique, name, passwordHash scrypt format "salt:hash", role SUPERADMIN|STAFF, lastLoginAt). Sudah db:push.
+   129→- Seed 2 akun: `admin`/`Pusaka2026!` (SUPERADMIN) dan `editor`/`Editor2026!` (STAFF) — bisa di-override via env ADMIN_PASSWORD/EDITOR_PASSWORD.
+   130→- Dev server di-restart agar Prisma client baru termuat.
+   131→
+   132→Stage Summary:
+   133→- Kredensial CMS: admin/Pusaka2026! dan editor/Editor2026!
+   134→- Kontrak API CMS di bawah — WAJIB dipatuhi agent 4-a & 4-b.
+   135→
+   136→## KONTRAK API CMS (src/app/api/...)
+   137→
+   138→Autentikasi: cookie httpOnly `pusaka_admin_session` berisi token HMAC (`base64url(payload).sig`), payload {username, name, role, exp}. Secret default "pusaka-super-secret-key-2026" (env SESSION_SECRET). Semua route /api/admin/* WAJIB guard session → 401 {ok:false, error:"Tidak terautentikasi"} jika invalid/expired.
+   139→
+   140→1. **POST /api/auth/login** body {username, password} → verifikasi terhadap AdminUser (scrypt). Sukses: 200 {ok:true,data:{user:{username,name,role}}} + Set-Cookie (maxAge 24 jam, httpOnly, sameSite lax, path /) + update lastLoginAt. Gagal: 401 {ok:false,error:"User ID atau password salah"}. Body kosong: 400.
+   141→2. **POST /api/auth/logout** → hapus cookie → {ok:true,data:{loggedOut:true}}.
+   142→3. **GET /api/auth/me** → {ok:true,data:{user:{username,name,role}}} ATAU {ok:true,data:null} (tanpa session — tetap HTTP 200).
+   143→
+   144→Semua admin routes pakai pattern dynamic `[id]`:
+   145→4. **GET /api/admin/stats** → { totals:{programs,institutions,experts,news,applications,applicationsPending,verificationsToday,contactMessages,contactUnread}, recentApplications:Application[5] desc createdAt, recentVerifications:VerifyLog[8] desc, monthlyApplications:[{month:"Sep 2026",count}] 6 bulan terakhir dari createdAt Application }
+   146→5. **/api/admin/programs**: GET (list) + POST (create). **/api/admin/programs/[id]**: PUT + DELETE.
+   147→6. **/api/admin/institutions**: GET + POST. **/api/admin/institutions/[id]**: PUT + DELETE.
+   148→7. **/api/admin/experts**: GET + POST. **/api/admin/experts/[id]**: PUT + DELETE.
+   149→8. **/api/admin/news**: GET + POST. **/api/admin/news/[id]**: PUT + DELETE.
+   150→9. **/api/admin/applications**: GET (all desc, include program name lookup optional) . **/api/admin/applications/[id]**: PATCH {status} (valid enum) + DELETE.
+   151→10. **/api/admin/messages**: GET desc. **/api/admin/messages/[id]**: PATCH {handled:boolean} + DELETE.
+   152→11. **/api/admin/verify-logs**: GET (desc, limit 200, join count). Read-only.
+   153→
+   154→Aturan teknis:
+   155→- Semua response { ok, data } / { ok, error } + try/catch + HTTP status tepat (400 zod, 401 auth, 404 not found, 409 unique conflict, 500 server).
+   156→- `export const dynamic = 'force-dynamic'`.
+   157→- Parse cookie dari `request.headers.get('cookie')` manual (JANGAN next/headers). Set cookie via NextResponse `res.cookies.set(...)`.
+   158→- zod v4 validasi body. Password JANGAN pernah di-log atau dikirim balik.
+   159→- Untuk POST/PUT program: requirements/benefits/accreditation boleh berupa string[] ATAU string JSON → simpan sebagai JSON string konsisten dengan data public (JSON.stringify). Frontend public sudah men-parse JSON string.
+   160→- Kredensial tidak boleh dikembalikan dalam response apapun selain {user:{username,name,role}}.
+   161→
+   162→---
+   163→Task ID: 4-a
+   164→Agent: Backend Auth & Admin API Agent
+   165→Task: Membangun auth CMS + 15 admin API routes
+   166→
+   167→Work Log:
+   168→- Membaca worklog.md (KONTRAK API CMS + KONTRAK API lama), prisma/schema.prisma, dan route contoh (verify, applications, experts, programs) agar gaya konsisten.
+   169→- Membuat `src/lib/auth.ts`: hashPassword scrypt ("salt:hash" hex, randomBytes 16 byte), verifyPassword timing-safe (crypto.timingSafeEqual, keylen = panjang hash tersimpan), createSessionToken (JSON → base64url → HMAC-SHA256 secret env SESSION_SECRET ?? "pusaka-super-secret-key-2026" → format `payload.sig`), verifySessionToken (cek signature timing-safe + exp epoch ms ATAU ISO string), getAdminSession (parse header cookie manual split "; " — tanpa next/headers, decodeURIComponent aman), konstanta SESSION_COOKIE='pusaka_admin_session' & SESSION_MAX_AGE=86400, tipe SessionPayload {username,name,role,exp}.
+   170→- Membuat `src/lib/admin-validation.ts`: skema zod v4 bersama (program/institution/expert/news create+update partial, applicationPatch, messagePatch) + helper formatZodError, isUniqueConstraintError (Prisma P2002 → 409), normalizeJsonList (array → JSON.stringify; string JSON array valid → biarkan; string biasa → pecah per baris baru), slugify, parseIsoDate. Field code/certNumber/licenseNo/initials/programCode di-trim + di-uppercase via transform; score 0-100, experienceYears 0-60, initials max 4; featured optional (default false di handler).
+   171→- 3 route auth: POST /api/auth/login (zod min 1, cari AdminUser by username trim, verifyPassword, sukses → token exp now+24jam + update lastLoginAt + Set-Cookie httpOnly/sameSite lax/path=/ maxAge 86400; salah → 401 "User ID atau password salah" (pesan identik utk user tak ada); body invalid → 400; password tidak pernah di-log), POST /api/auth/logout (cookie kosong maxAge 0 → {loggedOut:true}), GET /api/auth/me (valid → data.user; tidak ada/expired → data:null HTTP 200).
+   172→- 12 route admin (semua diawal guard getAdminSession → 401 "Tidak terautentikasi"): /admin/stats (9 totals + recentApplications 5 + recentVerifications 8 + monthlyApplications 6 bulan label Indonesia ["Jan".."Des"] + tahun), /admin/programs GET+POST & [id] PUT+DELETE (409 code duplikat, normalisasi requirements/benefits/accreditation), /admin/institutions GET+POST & [id] PUT+DELETE (certNumber unique 409, ISO date → Date, contact/phone optional), /admin/experts GET+POST & [id] PUT+DELETE (licenseNo unique 409), /admin/news GET+POST & [id] PUT+DELETE (slug auto-generate dari title bila kosong, unique 409, publishedAt default now), /admin/applications GET (desc + programName di-resolve manual via map — tanpa relasi FK) & [id] PATCH status enum + DELETE, /admin/messages GET desc & [id] PATCH handled + DELETE, /admin/verify-logs GET (desc take 200 + header X-Total-Count).
+   173→- Semua route: `export const dynamic = 'force-dynamic'`, import { db } dari '@/lib/db', params Promise di-await (`await ctx.params`, Next 16), try/catch + console.error, format {ok,data}/{ok,error}, HTTP 400/401/404/409/500. Tidak menyentuh page.tsx/layout/globals/components/schema.
+   174→- Verifikasi curl sequential (semua sukses): login admin → 200 + cookie; me → user SUPERADMIN; stats tanpa cookie → 401; login password salah → 401; POST news → slug auto "uji-coba-cms-test-artikel"; PUT news → featured:true, category REGULASI; DELETE news → {id}; GET applications → 4 item + programName terisi; logout → me data:null.
+   175→- Uji lanjutan: POST programs code "test-x1" → tersimpan "TEST-X1" (uppercase), requirements array & benefits multiline & accreditation JSON-string → JSON array konsisten, "30" → int 30 (coerce); duplicate code → 409; PUT partial (featured+seatsLeft "35"→35) tanpa mengubah field lain; DELETE + PUT id hilang → 404. POST institutions certNumber "uji-2026-9001" → "UJI-2026-9001" + programCode "ppiu" → "PPIU" + score "88" → 88; duplicate → 409; verifikasi publik /api/verify terhadap sertifikat baru → valid:true; PUT tier/score; DELETE. POST experts licenseNo "pak-2026-7777" → uppercase, initials "uc" → "UC", "12" → 12; duplicate 409; PUT; DELETE. PATCH application status APPROVED (lalu dikembalikan VERIFIKASI) + status invalid → 400; POST /api/contact → GET messages → PATCH handled:true → DELETE. verify-logs 23 log + X-Total-Count. Tamper token → 401. Login editor (username " editor " dengan spasi) → STAFF 200. Login {} → 400, bukan JSON → 400.
+   176→- Bunx tsc --noEmit: 0 error untuk src/app/api/** + src/lib/auth.ts + src/lib/admin-validation.ts (error tersisa hanya di skills/ bawaan sandbox & komponen CMS agent 4-b yang masih dikerjakan paralel). dev.log bersih tanpa error kompilasi. lastLoginAt kedua akun ter-update. Data uji dibersihkan (news/institution/expert/message/program uji dihapus, status aplikasi dikembalikan).
+   177→
+   178→Stage Summary:
+   179→- Endpoint live & teruji: POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me, GET /api/admin/stats, GET+POST /api/admin/programs, PUT+DELETE /api/admin/programs/[id], GET+POST /api/admin/institutions, PUT+DELETE /api/admin/institutions/[id], GET+POST /api/admin/experts, PUT+DELETE /api/admin/experts/[id], GET+POST /api/admin/news, PUT+DELETE /api/admin/news/[id], GET /api/admin/applications, PATCH+DELETE /api/admin/applications/[id], GET /api/admin/messages, PATCH+DELETE /api/admin/messages/[id], GET /api/admin/verify-logs.
+   180→- Mekanisme cookie: token HMAC-SHA256 `base64url(payload).sig` di cookie httpOnly `pusaka_admin_session` (sameSite lax, path /, maxAge 86400, secret env SESSION_SECRET ?? "pusaka-super-secret-key-2026"); cookie diparse manual dari request header (tanpa next/headers) sehingga aman utk route handler; guard 401 terbukti bekerja (cookie salah/kosong/tampered, token palsu, setelah logout).
+   181→- Catatan utk agent frontend CMS (4-b): semua GET admin mengembalikan array (kecuali stats = objek {totals, recentApplications, recentVerifications, monthlyApplications}); /api/admin/applications menyertakan `programName`; /api/admin/verify-logs menyertakan header X-Total-Count; requirements/benefits/accreditation berupa string JSON array (parse di client); slug di-generate otomatis jika tidak dikirim; field unik konflik → HTTP 409; kode/nomor sertifikat/lisensi/initials otomatis di-uppercase.
+   182→
+   183→---
+   184→Task ID: 4-b
+   185→Agent: Frontend CMS Agent
+   186→Task: Membangun CMS admin (login + dashboard CRUD)
+   187→
+   188→Work Log:
+   189→- Membaca worklog.md (KONTRAK API CMS), page.tsx, lib/pusaka.ts, navbar/footer, prisma schema, dan inventaris komponen shadcn/ui.
+   190→- Membuat `src/lib/admin-store.ts` (zustand v5): state {user, status: loading|authed|guest, loginOpen, showAdmin} + action init() (GET /api/auth/me → set user/status), login() (POST /api/auth/login → sukses set user+authed+close dialog return true; gagal return false), logout() (POST /api/auth/logout → guest), setLoginOpen(), setShowAdmin(). Semua fetch relative via apiRequest.
+   191→- Membuat `src/lib/admin-api.ts`: fetcher typed seluruh endpoint admin (auth/me, admin/stats, programs, institutions, experts, news, applications GET/PATCH/DELETE, messages GET/PATCH/DELETE, verify-logs dengan normalizer toleran array|{logs}); payload types Program/Institution/Expert/News; konstanta APPLICATION_STATUS_META (SUBMITTED stone, REVIEW amber, VERIFIKASI cyan, ASSESSMENT orange, APPROVED emerald) + APPLICATION_STATUSES.
+   192→- Membuat 10 komponen di `src/components/pusaka/admin/`:
+   193→  1) admin-login-dialog.tsx — dialog "Panel Admin PUSAKA", field User ID/Password + toggle mata, tombol Masuk loading spinner, error inline merah, kotak hint border emerald kredensial demo (admin/Pusaka2026! & editor/Editor2026!) klik-isi-otomatis; ikon LogIn/Eye/EyeOff/ShieldCheck; reset error via pola adjust-state-during-render (bebas lint set-state-in-effect).
+   194→  2) admin-dashboard.tsx — shell fixed inset-0 z-[60]: sidebar emerald-950 w-64 (logo PUSAKA + badge CMS, 8 menu ber-ikon, aktif bg-emerald-800/50 border-l amber, footer "Sesi aman • HMAC cookie"), topbar (judul section, tombol Lihat Situs → setShowAdmin(false), avatar inisial + nama + role + tombol Keluar → logout), mobile hamburger → Sheet kiri berisi menu sama + pb-safe, konten overflow-y-auto p-4/6.
+   195→  3) admin-dashboard-home.tsx — 8 kartu statistik (grid 2/4: Total Program, Institusi, Dewan Pakar, Sertifikat Terbit dari GET /api/stats certificateHolders, Pengajuan + badge pending, Verifikasi Hari Ini, Pesan + badge unread, Berita), BarChart Recharts monthlyApplications (emerald #059669), daftar 5 pengajuan terbaru + 8 verifikasi terbaru (badge VALID/INVALID), skeleton + empty/error state + Promise.allSettled.
+   196→  4) admin-programs.tsx — CRUD penuh: tabel (Kode mono, Nama, badge Kategori, formatIDR, Pemegang, star unggulan, edit/hapus), Dialog form semua field kontrak (code, name, shortName, category Select, tagline, description, requirements/benefits/accreditation textarea satu-per-baris → dikirim sebagai array string, durationDays/price/seatsLeft/holderCount/passRate number, accentColor Select 7 warna, featured Switch), POST/PUT/DELETE + AlertDialog konfirmasi + toast.
+   197→  5) admin-institutions.tsx — tabel (certNumber mono, Nama, badge Type/Tier/Status via meta publik, Kota, Progress skor), form: name, certNumber, type Select, programCode Select dari /api/programs, tier/status Select, city/province, score 0-100, issuedAt/expiresAt input date (konversi ISO ↔ yyyy-MM-dd), contact/phone.
+   198→  6) admin-experts.tsx — tabel (avatar inisial, Nama+organisasi, Bidang, badge Kategori 9 bidang, Lisensi mono, Pengalaman, star, aksi), count badge dinamis "46 Pakar", form lengkap (name, field, expertise, category Select, licenseNo, experienceYears, organization, education, initials auto-fallback dari nama, featured Switch).
+   199→  7) admin-news.tsx — tabel (judul bold + slug mono, badge kategori, penulis, tanggal, star, aksi), form: title, slug placeholder "otomatis dari judul" (+slugify client), excerpt, content Textarea besar rows 10, category Select, author, featured Switch, publishedAt date opsional.
+   200→  8) admin-applications.tsx — tabel (trackingCode mono, pemohon+email, badge PERUSAHAAN/INDIVIDU, programName||programCode, kota, tanggal, badge status berwarna + Select inline PATCH ubah status dengan spinner), filter Select status, tombol refresh, delete berkonfirmasi.
+   201→  9) admin-messages.tsx — kartu pesan (nama+mailto, subjek bold, isi, tanggal lengkap, badge "Belum dibaca", toggle Mail/MailOpen PATCH handled, delete), tombol refresh, highlight kartu belum dibaca.
+   202→  10) admin-verify-logs.tsx — read-only: certNumber mono, badge VALID emerald/INVALID merah, waktu relatif (timeAgo) + lengkap (formatDateTime), counter badge VALID/INVALID, refresh, max-h-[70vh] scroll dengan scrollbar tipis global.
+   203→- Pola kualitas lintas section: tabel dibungkus max-h-[70vh] overflow-auto (min-w agar horizontal scroll di mobile), baris hover emerald, header sticky, skeleton loading, empty state ikon+teks, toast sonner sukses/error, tombol icon aria-label, label htmlFor, focus-visible ring, palet emerald+amber tanpa indigo/blue.
+   204→- Integrasi page.tsx: tambah useEffect init() via useAdminStore((s)=>s.init); jika status==='authed' && showAdmin → render <AdminDashboard/> SAJA (+AdminLoginDialog); selain itu situs publik penuh + <AdminLoginDialog/> selalu dirender. Navbar: tombol ikon Shield ghost aria-label "Panel Admin" sebelum CTA (desktop) + tombol "Panel Admin" di Sheet mobile. Footer: button "Panel Admin" opacity rendah di bar bawah.
+   205→- bun run lint → 0 error 0 warning (memperbaiki 1 error react-hooks/set-state-in-effect di login dialog). dev.log: GET / 200, GET /api/auth/me 200, tanpa error kompilasi. Smoke curl: POST /api/auth/login (admin) → {ok:true,data:{user}}; GET /api/admin/stats & /api/admin/verify-logs dengan cookie → 200 sesuai kontrak; /api/admin/stats tanpa sesi → 401 (guard jalan). Tidak menyentuh src/app/api/**, prisma, atau komponen publik lain.
+   206→
+   207→Stage Summary:
+   208→- CMS Admin PUSAKA lengkap: login dialog + dashboard shell (sidebar 8 menu, topbar, mobile Sheet) + 8 section (Dashboard statistik, Pengajuan, Program CRUD, Institusi CRUD, Dewan Pakar CRUD, Berita CRUD, Pesan, Log Verifikasi read-only) — semua mengikuti KONTRAK API CMS dengan response {ok,data}.
+   209→- Store: useAdminStore (zustand) di src/lib/admin-store.ts; fetcher admin di src/lib/admin-api.ts.
+   210→- Cara akses: situs publik → ikon perisai di navbar (desktop) / tombol "Panel Admin" di menu mobile / tautan "Panel Admin" di footer → dialog login (klik kartu kredensial demo untuk isi otomatis) → masuk → dashboard menggantikan situs (showAdmin); tombol "Lihat Situs" kembali ke publik; Keluar mengakhiri sesi. Kredensial: admin/Pusaka2026! (SUPERADMIN), editor/Editor2026! (STAFF).
+   211→
+   212→---
+   213→Task ID: 5
+   214→Agent: Main Orchestrator (Z.ai)
+   215→Task: Integrasi final CMS + verifikasi E2E Agent Browser.
+   216→
+   217→Work Log:
+   218→- Menemukan bug UX: saat masih authed di tampilan publik, trigger "Panel Admin" membuka dialog login lagi. Diperbaiki di navbar.tsx & footer.tsx: helper openAdminPanel() → jika status authed setShowAdmin(true), else setLoginOpen(true).
+   219→- Agent Browser E2E lengkap: login via kartu kredensial demo → dashboard (7 program, 24 institusi, 46 pakar, 23.498 sertifikat, pengajuan pending, verifikasi hari ini) → Pengajuan: ubah status inline PSK-2025-83013 → Asesmen (toast sukses) → Berita: tulis artikel baru (slug otomatis) → tampil di tabel CMS DAN situs publik (sinkron) → reload browser: sesi persist (cookie HMAC httpOnly) → "Lihat Situs" → logout → kembali publik dengan toast.
+   220→- `bun run lint` → 0 error. dev.log bersih.
+   221→
+   222→Stage Summary:
+   223→- CMS PUSAKA lengkap & terverifikasi E2E. Kredensial: admin/Pusaka2026! (SUPERADMIN), editor/Editor2026! (STAFF).
+   224→- 18 file backend (auth + 15 admin routes + lib auth/validation), 10 komponen CMS + admin-store + admin-api.
+   225→- Akses: ikon perisai di navbar / link "Panel Admin" di footer.
+   226→
+   227→---
+   228→Task ID: 6-a
+   229→Agent: Backend Global Network Agent
+   230→Task: Backend fitur Jaringan Global PUSAKA — model GlobalNode + Program.countries, seed 33 node, API publik /api/global, field global di /api/stats, CRUD admin global-nodes.
+   231→
+   232→Work Log:
+   233→- prisma/schema.prisma: tambah model GlobalNode (kind, country, countryCode ISO-2 non-unique, region 8 nilai, city, flag, title, orgName, description, scope JSON string, status AKTIF|MOU|APLIKASI, since, contact?, order, timestamps) + field `countries String?` di Program (JSON array of {flag,country,detail}). `bun run db:push` sukses (additive, data aman).
+   234→- prisma/seed.ts: import `globalNodes` & `programCountries` dari ./data/globalNodes; `prisma.globalNode.deleteMany()` bersama deleteMany lain; seed 33 node dengan `scope: JSON.stringify(node.scope)`; setelah create tiap program di-update `countries: JSON.stringify(programCountries[p.code] ?? [])`. Semua seed existing (programs, institutions 24, experts 46, news 6, applications 4, admin 2 akun, verify logs 22) dan logika tanggal relatif `new Date()` dipertahankan. Seed dijalankan via `bun prisma/seed.ts` — sukses.
+   235→- API publik GET /api/global (`src/app/api/global/route.ts`): `dynamic force-dynamic`, query opsional `region` (exact, case-insensitive), `kind` (exact), `q` (contains case-insensitive pada country/city/title/orgName), filter in-memory, sort order asc. `scope` dikembalikan sebagai JSON STRING. Response `data: { nodes, summary }` — summary dihitung dari SELURUH dataset: totalCountries (distinct countryCode), totalNodes, offices (KANTOR_PERWAKILAN), partners (MITRA_INTERNASIONAL), regionCounts urutan tetap [TIMUR_TENGAH, ASIA_TENGGARA, ASIA_SELATAN, ASIA_TIMUR, EROPA, AFRIKA, AMERIKA, OSEANIA].
+   236→- /api/stats ADDITIVE: field baru di level `data` (luar `totals`): `globalCountries` (distinct countryCode) & `globalPartners` (count kind=MITRA_INTERNASIONAL) — query dalam try/catch terpisah, default 0 jika tabel kosong; field existing tidak berubah. Interface StatsData ditambah 2 field.
+   237→- /api/programs: sudah pakai `findMany()` tanpa select eksplisit → field `countries` otomatis ikut (JSON string), tanpa perubahan route.
+   238→- src/lib/admin-validation.ts: tambah `countryCodeField` (trim+uppercase, tepat 2 huruf ISO-2), `globalNodeCreateSchema` (kind enum 2, region enum 8, status enum 3, country/city/title/orgName/description min 2, flag min 1, scope stringListField → normalizeJsonList → JSON.stringify di handler, since regex tahun 4 digit, contact optional+nullable, order coerce int >= 0 default 0) + `globalNodeUpdateSchema` = create.extend({order optional TANPA default}).partial() — override ini penting agar PUT partial tidak mereset order ke 0 (default zod tetap berjalan meski key tidak dikirim).
+   239→- API admin CRUD: `/api/admin/global-nodes` GET (list order asc) + POST; `/api/admin/global-nodes/[id]` PUT (partial) + DELETE. Semua guard `getAdminSession` → 401 "Tidak terautentikasi", `await ctx.params` (Next 16), body JSON invalid → 400, id tak ada → 404, tanpa unique field (tanpa 409), try/catch + console.error, format {ok,data}/{ok,error}.
+   240→- Restart dev server (kill port 3000 + pkill next) karena singleton Prisma client lama tidak punya `globalNode` ("Cannot read properties of undefined") — setelah restart aman.
+   241→- Verifikasi curl lengkap (semuanya lolos): GET /api/global → 200, 33 nodes, summary {totalCountries:32, totalNodes:33, offices:7, partners:26, regionCounts: TT10/ATenggara6/ASelatan3/ATimur3/EROPA4/AFRIKA4/AMERIKA2/OSEANIA1}, scope JSON string, terurut order asc. Filter: ?region=EROPA → 4 (London, Jenewa, Frankfurt, Roma; summary tetap full dataset), ?kind=KANTOR_PERWAKILAN → 7, ?q=nusuk → 1 (juga q=NUSUK → 1). /api/stats → globalCountries 32, globalPartners 26, totals lama utuh (certificateHolders 23.498, institutions 24, experts 46, programs 7). /api/programs → data[0].countries JSON.parse berisi array {flag,country,detail} untuk 7/7 program. Admin: GET tanpa cookie → 401; login admin → 200; POST node uji → countryCode " uj "→"UJ", order "99"→99 (coerce), scope array→JSON string, contact default null; GET list → 34 item order asc; PUT partial (status/city/contact tanpa order) → order 99 PRESERVED, scope multiline string → JSON array; PUT/DELETE id tidak ada → 404; POST body invalid (kind/status/region salah, countryCode 3 huruf, since "20x5") → 400 dengan pesan per-field; PUT order -3 → 400; POST bukan JSON → 400; DELETE node uji → kembali 33 node; logout → GET list 401 lagi. Data uji dibersihkan.
+   242→- bunx tsc --noEmit: 0 error untuk semua file backend yang dibuat (api/global, api/admin/global-nodes, api/stats, admin-validation, prisma/seed). Error TS tersisa hanya di src/components/pusaka/global-network.tsx (file frontend agent 6-b, di luar lingkup task ini).
+   243→
+   244→Stage Summary:
+   245→- Backend Jaringan Global live & teruji: GET /api/global (filter region/kind/q + summary), /api/stats +globalCountries/globalPartners, CRUD admin /api/admin/global-nodes (+[id] PUT/DELETE), 33 node ter-seed, Program.countries terisi untuk 7 program.
+   246→- Kontrak utk agent frontend (6-b): GET /api/global → `data.nodes` = array GlobalNode dengan `scope` JSON STRING (parse di client, isi kode program) dan `contact` bisa null; `data.summary` = {totalCountries, totalNodes, offices, partners, regionCounts:{region,count}[] urutan tetap 8 kawasan} — summary SELALU full dataset meski ada filter. /api/stats → `data.globalCountries` & `data.globalPartners` berada di LEVEL data (sejajar `totals`), jadi BUKAN bagian dari totals — inilah sebab error TS di global-network.tsx (340): frontend mengirim summary.regionCounts ke prop number; sesuaikan tipe ke {region,count}[]. /api/programs → setiap program kini punya `countries?: string` (JSON array of {flag,country,detail} — kosong bila tidak ada). Admin: /api/admin/global-nodes GET mengembalikan array order asc; POST wajib semua field kecuali contact (nullable) & order (default 0); PUT partial; tidak ada 409 (tanpa field unique); countryCode otomatis trim+uppercase.
+   247→---
+   248→Task ID: 6-b
+   249→Agent: Frontend Global Network Agent
+   250→Task: Menambahkan fitur Jaringan Global (32 negara) ke UI publik + CMS sesuai kontrak API frozen Task 6-a.
+   251→
+   252→Work Log:
+   253→- Membaca worklog.md, admin-programs.tsx, hero.tsx (referensi gaya dark), trust-marquee.tsx (pola marquee), globals.css (keyframes marquee), programs.tsx, stats-section.tsx, admin-api.ts, admin-dashboard.tsx, page.tsx, fade-in/animated-counter.
+   254→- src/lib/pusaka.ts: tambah tipe `GlobalNodeT`, `ProgramCountryDetail`, `GlobalResp`; extends `ProgramT` dgn `countries: string | null` & `StatsT` dgn `globalCountries`/`globalPartners`; FALLBACK_STATS +32/+26; fetcher `getGlobal()`; helper `safeParseCountryList()`; konstanta GLOBAL_REGION_LABEL, GLOBAL_REGION_ORDER, GLOBAL_KIND_LABEL, GLOBAL_STATUS_META, PROGRAM_LABELS; NAV_LINKS + item `#jaringan-global` "Jaringan" setelah Program.
+   255→- Komponen baru global-network.tsx ("use client"): section dark premium id="jaringan-global" (bg-emerald-950 + ornamen blur emerald-900/amber + heading custom varian dark — SectionHeading light tidak dipakai langsung krn warnanya untuk bg terang, dibuat heading selaras dgn FadeIn agar aman); 4 stat pill glass (Globe2/Network/Landmark/Handshake, AnimatedCounter id-ID, fallback summary dihitung dari nodes); flag marquee 32 negara (reuse .animate-marquee + .marquee-hover-pause, array diduplikasi utk loop mulus, tepi pudar emerald-950); kontrol filter: input pencarian (negara/kota/mitra), Select jenis 3 opsi, chip kawasan overflow-x-auto dgn count dari regionCounts (aktif bg-amber-400 text-emerald-950); grid kartu glass 1/2/3/4 kolom (flag text-4xl, badge jenis amber outline, country+MapPin city, title line-clamp-2, orgName line-clamp-1, chips scope maks 4 + "+N", footer badge status GLOBAL_STATUS_META + "sejak {since}"), seluruh kartu button aria-label → Dialog; FadeIn stagger delay bertingkat; skeleton grid 8 kartu, empty state dgn reset filter, error state dgn tombol Coba Lagi (pola reloadKey agar bebas react-hooks/set-state-in-effect); Dialog detail (max-h-[85vh] scroll): header flag+country+city+badge status, title, orgName, deskripsi, grid info Kawasan/Kota/Jenis/Beroperasi Sejak/Kontak (mailto), semua chips scope PROGRAM_LABELS, Button emerald "Ajukan Sertifikasi di Kawasan Ini" → CustomEvent pusaka:select-program (scope[0]) + scroll #pendaftaran + tutup dialog, Button outline "Hubungi Kantor" mailto; DialogDescription sr-only utk a11y.
+   256→- programs.tsx: blok "Cakupan Internasional" di ProgramDetailDialog setelah accreditation & sebelum CTA (Globe2 kecil + heading uppercase tracking-widest, baris flag+country bold+detail text-sm stone-600 dipisah border-b, render hanya jika safeParseCountryList > 0).
+   257→- stats-section.tsx: counters 4 → 6 (tambah Globe2 "Negara Mitra" s.globalCountries ?? 32 & Handshake "Mitra Internasional" s.globalPartners ?? 26), grid → grid-cols-2 sm:grid-cols-3 lg:grid-cols-6.
+   258→- src/lib/admin-api.ts: GlobalNodePayload + listAdminGlobalNodes/createAdminGlobalNode/updateAdminGlobalNode/deleteAdminGlobalNode (pola file ts, scope string[] array biasa).
+   259→- Komponen baru admin/admin-global-nodes.tsx (pola admin-programs.tsx): tabel min-w-[900px] max-h-[70vh] overflow-auto (flag, country+city+kawasan, title+org, badge jenis, badge status, N scope, order, aksi edit/hapus aria-label); Dialog form: Select jenis(2)/status(3)/kawasan(8), country, countryCode ISO-2 auto-uppercase maxLength 2, flag emoji, city, title, orgName, description Textarea, scope 7 checkbox PROGRAM_LABELS, since tahun 4 digit, contact nullable, order number; validasi client selaras zod backend (negara/kota/judul/org/deskripsi min 2 char, kode negara tepat 2 huruf, tahun 4 digit, order ≥ 0); AlertDialog konfirmasi hapus + toast sonner + skeleton/empty state.
+   260→- admin-dashboard.tsx: menu "Jaringan Global" (Globe2) setelah Dewan Pakar + renderSection case "global".
+   261→- page.tsx: import & render <GlobalNetwork /> tepat setelah <Programs />.
+   262→- QA: lint 0 error 0 warning (perbaiki 1 react-hooks/set-state-in-effect: pindah setLoading ke handler retry; perbaiki hydration error div-in-p dengan memindah Skeleton keluar dari <p>); tsc --noEmit bersih; browser E2E: section render 33 kartu & marquee 64 item, dialog detail + CTA dispatch event "PIHK" + scroll ke #pendaftaran + dialog tertutup, search "Jakarta"→1 kartu, chip Eropa→4 kartu (Inggris/Swiss/Jerman/Italia), empty state, Select Mitra Internasional→26 kartu, stats 6 counter dgn grid lg:grid-cols-6, dialog program menampilkan blok Cakupan Internasional (🇸🇦🇮🇩🇲🇾…), mobile 390px chip scroll horizontal & grid 1 kolom (kartu 358px); CMS E2E: login admin → menu Jaringan Global 33 baris → form create (3 Select + 7 checkbox scope) → POST sukses 34 baris → edit status ke MoU → delete via AlertDialog → kembali 33 baris; fresh load 0 console error.
+   263→- Backend 6-a ternyata sudah live & sesuai kontrak (33 nodes, summary 32/33/7/26, 8 kawasan; /api/stats globalCountries 32 & globalPartners 26; /api/programs punya countries; /api/admin/global-nodes guard 401) — frontend diverifikasi langsung terhadapnya; node uji (5 buah dari probe + 1 create UI) sudah dihapus semua via API, DB kembali 33 node.
+   264→- Tidak menyentuh src/app/api/**, prisma/**, schema, seed, footer, atau fade-in.tsx.
+   265→
+   266→Stage Summary:
+   267→- Fitur Jaringan Global lengkap 2 sisi: section publik dark premium (#jaringan-global, masuk navbar "Jaringan") dgn marquee 32 bendera, 4 stat, filter search/jenis/kawasan client-side, grid 33 kartu, dialog detail + CTA ke form pendaftaran; blok "Cakupan Internasional" di dialog program; stats-section kini 6 counter.
+   268→- CMS: menu "Jaringan Global" CRUD penuh (list/create/edit/delete + validasi selaras zod backend + toast + konfirmasi), fetcher typed di admin-api.ts.
+   269→- bun run lint 0 error 0 warning; tsc bersih; terverifikasi E2E browser desktop & 390px terhadap API live; tanpa indigo/blue, emerald+amber konsisten.
+   270→
+   271→---
+   272→Task ID: 6-c
+   273→Agent: Main Orchestrator (Z.ai)
+   274→Task: Verifikasi E2E independen Jaringan Global + perbaikan bug z-index dialog/sheet pada shell CMS.
+   275→
+   276→Work Log:
+   277→- Grounding ulang: worklog menunjukkan CMS (Task 4/4-a/4-b/5) sudah selesai sebelumnya; fokus Task 6 = Jaringan Global. Author data sumber tunggal `prisma/data/globalNodes.ts` (33 node, 32 negara, 8 kawasan + programCountries 7 program) sebelum launch subagent.
+   278→- E2E Agent Browser desktop 1440px: section #jaringan-global render (4 stat pill 32/33/7/26, marquee bendera, chip kawasan dgn count, grid kartu); klik kartu Arab Saudi Makkah → dialog detail lengkap (info grid, chips scope 4 program, CTA); CTA "Ajukan Sertifikasi di Kawasan Ini" → CustomEvent pusaka:select-program "PIHK" + scroll #pendaftaran + wizard lompat ke langkah Pilih Program dengan PIHK ter-pilih; filter chip "Eropa (4)" → tepat 4 kartu (Inggris/Swiss/Jerman/Italia); pencarian "nusuk" → 1 kartu (Aliansi Platform Nusuk); kombinasi filter kosong → empty state + tombol Reset Filter; counter "Menampilkan X dari 33 node jaringan".
+   279→- Dialog program PIHK: blok "Cakupan Internasional" tampil 8 negara (flag + country + detail). Stats-section kini 6 counter (Negara Mitra 32, Mitra Internasional 26).
+   280→- **BUG DITEMUKAN (fungsional)**: Dialog "Tambah Node" CMS tidak terlihat — shell admin `fixed inset-0 z-[60]` menutupi Dialog/AlertDialog portal Radix (z-50). Sheet menu mobile admin (z-50) berpotensi sama. **FIX**: naikkan z-50 → z-[100] pada overlay+content `src/components/ui/dialog.tsx`, `alert-dialog.tsx`, `sheet.tsx` (aman utk situs publik: dialog memang seharusnya di atas navbar z-50; toast sonner tetap paling atas). Re-verify: form "Tambah Node Jaringan" kini tampil penuh (2 Select, 3 input identitas negara, 7 checkbox scope, kontak/urutan).
+   281→- E2E CRUD CMS visual penuh: create "Negara Uji" (order 99) → baris muncul di tabel → AlertDialog konfirmasi hapus tampil → Hapus → baris hilang. Console bersih.
+   282→- A11y polish: tambah DialogDescription sr-only di ProgramDetailDialog (programs.tsx) untuk menghilangkan warning "Missing Description/aria-describedby".
+   283→- Mobile 390px: hero, section jaringan (stat 2x2, chip scroll horizontal, grid 1 kolom), kartu, menu Sheet navbar (item "Jaringan" baru tampil) — semua ok.
+   284→- Final: `bun run lint` 0 error; dev.log tanpa error; curl akhir — /api/global 33 node summary 32/33/7/26 regionCounts TT10/AT6/AS3/ATi3/E4/Af4/Am2/O1; /api/stats globalCountries 32 globalPartners 26; /api/admin/global-nodes tanpa sesi → 401.
+   285→
+   286→Stage Summary:
+   287→- Fitur Jaringan Global PUSAKA SELESAI & terverifikasi end-to-end (publik + CMS): 32 negara, 33 node (7 kantor perwakilan + 26 mitra internasional), 8 kawasan; Cakupan Internasional 7 program; statistik 6 counter.
+   288→- Perbaikan lintas-fitur: z-index Dialog/AlertDialog/Sheet → z-[100] (bug tersembunyi sejak Task 4-b; semua form CMS kini benar-benar terlihat).
+   289→- Data master di prisma/data/globalNodes.ts — seed idempotent; CMS bisa CRUD node tanpa sentuh seed.
+   290→

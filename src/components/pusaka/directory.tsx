@@ -27,18 +27,18 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
   const expired = inst.status === "KADALUARSA";
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-emerald-300 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-emerald-500/40 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-display truncate text-sm font-bold text-stone-900">{inst.name}</p>
+          <p className="font-display truncate text-sm font-bold text-foreground">{inst.name}</p>
           {typeMeta ? (
             <Badge variant="outline" className={`text-[10px] ${typeMeta.badgeClass}`}>
               {typeMeta.label}
             </Badge>
           ) : null}
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
-          <span className="font-mono font-semibold text-emerald-700">{inst.certNumber}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">{inst.certNumber}</span>
           <span className="flex items-center gap-1">
             <MapPin className="h-3 w-3" aria-hidden />
             {inst.city}, {inst.province}
@@ -52,9 +52,9 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
           {tierMeta.label}
         </Badge>
         <div className="w-28">
-          <div className="mb-1 flex items-center justify-between text-[10px] text-stone-400">
+          <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
             <span>Skor Audit</span>
-            <span className="font-mono font-bold text-stone-600">{inst.score}</span>
+            <span className="font-mono font-bold text-foreground">{inst.score}</span>
           </div>
           <Progress
             value={inst.score}
@@ -64,7 +64,7 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
         {statusMeta ? (
           <Badge
             variant="outline"
-            className={`text-[10px] font-bold ${expired ? statusMeta.badgeClass : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
+            className={`text-[10px] font-bold ${expired ? statusMeta.badgeClass : "border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-300"}`}
           >
             {statusMeta.label}
           </Badge>
@@ -116,7 +116,7 @@ export function Directory() {
   );
 
   return (
-    <section id="direktori" className="scroll-mt-20 bg-stone-50 py-16 sm:py-20">
+    <section id="direktori" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Direktori Nasional"
@@ -126,9 +126,9 @@ export function Directory() {
 
         {/* toolbar */}
         <FadeIn delay={0.1} className="mt-8">
-          <div className="flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm md:flex-row md:items-center">
+          <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm md:flex-row md:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" aria-hidden />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -140,7 +140,7 @@ export function Directory() {
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-stone-400 hover:bg-stone-100"
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
                   aria-label="Bersihkan pencarian"
                 >
                   <X className="h-4 w-4" />
@@ -175,10 +175,10 @@ export function Directory() {
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-stone-500">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted-foreground">
             <span>
               Menampilkan{" "}
-              <strong className="text-stone-700">{summary.total}</strong> lembaga
+              <strong className="text-foreground">{summary.total}</strong> lembaga
               {loading ? " — memuat…" : ""}
             </span>
             <span>
@@ -189,7 +189,7 @@ export function Directory() {
 
         {/* daftar */}
         <FadeIn delay={0.15} className="mt-4">
-          <div className="max-h-[560px] space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-white/60 p-4 shadow-inner">
+          <div className="max-h-[560px] space-y-3 overflow-y-auto rounded-2xl border border-border bg-card/60 p-4 shadow-inner">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex items-center justify-between gap-4 rounded-xl border p-4">
@@ -203,19 +203,19 @@ export function Directory() {
               ))
             ) : error ? (
               <div className="flex flex-col items-center gap-3 py-14 text-center">
-                <Loader2 className="h-8 w-8 text-stone-300" aria-hidden />
-                <p className="text-sm text-stone-500">{error}</p>
+                <Loader2 className="h-8 w-8 text-muted-foreground/50" aria-hidden />
+                <p className="text-sm text-muted-foreground">{error}</p>
                 <Button variant="outline" size="sm" onClick={() => void load()}>
                   Muat ulang
                 </Button>
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-14 text-center">
-                <SearchX className="h-10 w-10 text-stone-300" aria-hidden />
-                <p className="font-display text-base font-bold text-stone-600">
+                <SearchX className="h-10 w-10 text-muted-foreground/50" aria-hidden />
+                <p className="font-display text-base font-bold text-foreground">
                   Tidak ada lembaga yang cocok
                 </p>
-                <p className="text-sm text-stone-400">
+                <p className="text-sm text-muted-foreground">
                   Ubah kata kunci atau reset filter jenis &amp; tier.
                 </p>
               </div>

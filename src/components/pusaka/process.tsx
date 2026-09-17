@@ -45,7 +45,7 @@ const STEPS = [
 
 export function Process() {
   return (
-    <section id="alur" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="alur" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Prosedur"
@@ -55,7 +55,7 @@ export function Process() {
 
         <div className="relative mt-14">
           {/* garis progress desktop */}
-          <div className="absolute left-0 right-0 top-7 hidden h-0.5 rounded-full bg-stone-200 lg:block" aria-hidden>
+          <div className="absolute left-0 right-0 top-7 hidden h-0.5 rounded-full bg-border lg:block" aria-hidden>
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-amber-500"
               initial={{ width: "0%" }}
@@ -79,24 +79,24 @@ export function Process() {
                 >
                   {/* titik langkah */}
                   <div className="relative z-10 flex items-center gap-4 lg:flex-col lg:items-start">
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-emerald-600 bg-white shadow-md shadow-emerald-900/10">
-                      <Icon className="h-6 w-6 text-emerald-700" aria-hidden />
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-emerald-600 bg-card shadow-md shadow-emerald-900/10">
+                      <Icon className="h-6 w-6 text-emerald-700 dark:text-emerald-400" aria-hidden />
                     </span>
                     <span className="flex items-center gap-2 lg:mt-3">
-                      <span className="font-mono text-xs font-bold text-amber-600">
+                      <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
                         LANGKAH {idx + 1}
                       </span>
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
                         {step.duration}
                       </span>
                     </span>
                   </div>
 
                   <div className="mt-3 lg:mt-2 lg:pl-0">
-                    <h3 className="font-display text-base font-bold text-stone-900">
+                    <h3 className="font-display text-base font-bold text-foreground">
                       {step.title}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-stone-500">{step.desc}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
                   </div>
                 </motion.li>
               );

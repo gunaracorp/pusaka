@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="scroll-mt-20 bg-stone-50 py-16 sm:py-20">
+    <section id="faq" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Tanya Jawab"
@@ -60,12 +60,12 @@ export function FAQ() {
               <AccordionItem
                 key={item.q}
                 value={`faq-${i}`}
-                className="rounded-xl border border-stone-200 bg-white px-5 shadow-sm last:border-b"
+                className="rounded-xl border border-border bg-card px-5 shadow-sm last:border-b"
               >
-                <AccordionTrigger className="py-4 text-left text-sm font-bold text-stone-800 hover:no-underline hover:text-emerald-800 [&[data-state=open]>svg]:text-emerald-700">
+                <AccordionTrigger className="py-4 text-left text-sm font-bold text-foreground hover:no-underline hover:text-emerald-700 dark:hover:text-emerald-300 [&[data-state=open]>svg]:text-emerald-700 dark:[&[data-state=open]>svg]:text-emerald-300">
                   {item.q}
                 </AccordionTrigger>
-                <AccordionContent className="pb-5 text-sm leading-relaxed text-stone-600">
+                <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
                   {item.a}
                 </AccordionContent>
               </AccordionItem>
@@ -74,7 +74,7 @@ export function FAQ() {
         </FadeIn>
 
         {/* ikon accordion default hanya plus/minus; beri petunjuk visual tambahan */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-stone-400" aria-hidden>
+        <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-muted-foreground" aria-hidden>
           <Plus className="h-3 w-3" />
           <Minus className="h-3 w-3" />
           <span>klik pertanyaan untuk membuka jawaban</span>

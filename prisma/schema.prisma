@@ -133,6 +133,13 @@ model NewsArticle {
   publishedAt DateTime @default(now())
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
 model ContactMessage {
   id        String   @id @default(cuid())
   name      String

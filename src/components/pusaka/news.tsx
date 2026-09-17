@@ -68,7 +68,7 @@ export function News() {
   }, [articles]);
 
   return (
-    <section id="berita" className="scroll-mt-20 bg-white py-16 sm:py-20">
+    <section id="berita" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Ruang Berita"
@@ -86,12 +86,12 @@ export function News() {
             </div>
           </div>
         ) : error ? (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-stone-300 py-14 text-center">
-            <X className="h-8 w-8 text-stone-300" aria-hidden />
-            <p className="text-sm text-stone-500">{error}</p>
+          <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-14 text-center">
+            <X className="h-8 w-8 text-muted-foreground/50" aria-hidden />
+            <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         ) : !featured ? (
-          <p className="mt-10 text-center text-sm text-stone-400">Belum ada berita diterbitkan.</p>
+          <p className="mt-10 text-center text-sm text-muted-foreground">Belum ada berita diterbitkan.</p>
         ) : (
           <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* featured */}
@@ -101,25 +101,25 @@ export function News() {
                 onClick={() => setSelected(featured)}
                 className="group block w-full text-left"
               >
-                <Card className="h-full overflow-hidden border-stone-200 p-0 transition-all hover:-translate-y-1 hover:shadow-xl">
+                <Card className="h-full overflow-hidden border-border p-0 transition-all hover:-translate-y-1 hover:shadow-xl">
                   <div className="relative h-64 w-full overflow-hidden sm:h-72">
                     <NewsImage article={featured} large />
                     <Badge
                       className={`absolute left-4 top-4 border-transparent ${
-                        NEWS_CATEGORY_META[featured.category] ?? "bg-stone-100 text-stone-700"
+                        NEWS_CATEGORY_META[featured.category] ?? "bg-muted text-muted-foreground"
                       }`}
                     >
                       {featured.category}
                     </Badge>
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="font-display text-xl font-bold leading-snug text-stone-900 transition-colors group-hover:text-emerald-800">
+                    <h3 className="font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
                       {featured.title}
                     </h3>
-                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-stone-500">
+                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                       {featured.excerpt}
                     </p>
-                    <div className="mt-4 flex items-center gap-4 text-xs text-stone-400">
+                    <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <CalendarDays className="h-3.5 w-3.5" aria-hidden />
                         {formatDate(featured.publishedAt)}
@@ -139,7 +139,7 @@ export function News() {
               {rest.map((a, idx) => (
                 <FadeIn key={a.id} delay={idx * 0.06}>
                   <button type="button" onClick={() => setSelected(a)} className="group block w-full text-left">
-                    <Card className="overflow-hidden border-stone-200 p-0 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                    <Card className="overflow-hidden border-border p-0 transition-all hover:-translate-y-0.5 hover:shadow-lg">
                       <CardContent className="flex gap-4 p-4">
                         <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
                           <NewsImage article={a} />
@@ -147,16 +147,16 @@ export function News() {
                         <div className="min-w-0 flex-1">
                           <Badge
                             className={`border-transparent text-[10px] ${
-                              NEWS_CATEGORY_META[a.category] ?? "bg-stone-100 text-stone-700"
+                              NEWS_CATEGORY_META[a.category] ?? "bg-muted text-muted-foreground"
                             }`}
                           >
                             {a.category}
                           </Badge>
-                          <h4 className="font-display mt-1.5 line-clamp-2 text-sm font-bold leading-snug text-stone-900 transition-colors group-hover:text-emerald-800">
+                          <h4 className="font-display mt-1.5 line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
                             {a.title}
                           </h4>
-                          <p className="mt-1.5 line-clamp-1 text-xs text-stone-400">{a.excerpt}</p>
-                          <p className="mt-1.5 text-[11px] text-stone-400">
+                          <p className="mt-1.5 line-clamp-1 text-xs text-muted-foreground">{a.excerpt}</p>
+                          <p className="mt-1.5 text-[11px] text-muted-foreground">
                             {formatDate(a.publishedAt)}
                           </p>
                         </div>
@@ -178,7 +178,7 @@ export function News() {
               <DialogHeader>
                 <Badge
                   className={`w-fit border-transparent ${
-                    NEWS_CATEGORY_META[selected.category] ?? "bg-stone-100 text-stone-700"
+                    NEWS_CATEGORY_META[selected.category] ?? "bg-muted text-muted-foreground"
                   }`}
                 >
                   {selected.category}
@@ -186,7 +186,7 @@ export function News() {
                 <DialogTitle className="font-display pt-2 text-left text-xl font-bold leading-snug">
                   {selected.title}
                 </DialogTitle>
-                <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-stone-400">
+                <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <CalendarDays className="h-3.5 w-3.5" aria-hidden />
                     {formatDate(selected.publishedAt)}
@@ -200,7 +200,7 @@ export function News() {
               <div className="relative mb-4 h-48 w-full overflow-hidden rounded-xl sm:h-60">
                 <NewsImage article={selected} large />
               </div>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-stone-600">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                 {selected.content}
               </p>
             </>

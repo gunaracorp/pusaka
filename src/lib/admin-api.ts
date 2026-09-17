@@ -282,3 +282,26 @@ export const updateAdminGlobalNode = (id: string, body: GlobalNodePayload) =>
 
 export const deleteAdminGlobalNode = (id: string) =>
   apiRequest<{ deleted: boolean }>(`/api/admin/global-nodes/${id}`, { method: "DELETE" });
+
+// ---------- NEWSLETTER (pelanggan) ----------
+
+export interface NewsletterT {
+  id: string;
+  email: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+/** GET /api/admin/newsletter — array pelanggan desc createdAt + header X-Total-Count. */
+export const listAdminNewsletter = () => apiRequest<NewsletterT[]>("/api/admin/newsletter");
+
+/** PATCH /api/admin/newsletter/[id] — toggle status aktif. */
+export const toggleAdminNewsletter = (id: string, isActive: boolean) =>
+  apiRequest<NewsletterT>(`/api/admin/newsletter/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ isActive }),
+  });
+
+/** DELETE /api/admin/newsletter/[id]. */
+export const deleteAdminNewsletter = (id: string) =>
+  apiRequest<{ deleted: boolean }>(`/api/admin/newsletter/${id}`, { method: "DELETE" });

@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LogOut,
   Mail,
+  MailPlus,
   Menu,
   Newspaper,
   ScanSearch,
@@ -32,6 +33,7 @@ import { AdminInstitutions } from "@/components/pusaka/admin/admin-institutions"
 import { AdminExperts } from "@/components/pusaka/admin/admin-experts";
 import { AdminNews } from "@/components/pusaka/admin/admin-news";
 import { AdminMessages } from "@/components/pusaka/admin/admin-messages";
+import { AdminNewsletter } from "@/components/pusaka/admin/admin-newsletter";
 import { AdminVerifyLogs } from "@/components/pusaka/admin/admin-verify-logs";
 import { AdminGlobalNodes } from "@/components/pusaka/admin/admin-global-nodes";
 
@@ -44,6 +46,7 @@ type MenuKey =
   | "global"
   | "news"
   | "messages"
+  | "newsletter"
   | "verify-logs";
 
 interface MenuItem {
@@ -61,6 +64,7 @@ const MENU: MenuItem[] = [
   { key: "global", label: "Jaringan Global", icon: Globe2 },
   { key: "news", label: "Berita", icon: Newspaper },
   { key: "messages", label: "Pesan", icon: Mail },
+  { key: "newsletter", label: "Newsletter", icon: MailPlus },
   { key: "verify-logs", label: "Log Verifikasi", icon: ScanSearch },
 ];
 
@@ -136,6 +140,8 @@ function renderSection(key: MenuKey) {
       return <AdminNews />;
     case "messages":
       return <AdminMessages />;
+    case "newsletter":
+      return <AdminNewsletter />;
     case "verify-logs":
       return <AdminVerifyLogs />;
   }

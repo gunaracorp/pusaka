@@ -7,6 +7,16 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
 } from "@/lib/auth";
+import {
+  peekRateLimit,
+  hitRateLimit,
+  resetRateLimit,
+  getClientIp,
+} from "@/lib/rate-limit";
+
+/** Batas percobaan gagal: 5 per 15 menit per IP. */
+const LOGIN_RATE_LIMIT = 5;
+const LOGIN_RATE_WINDOW_MS = 15 * 60_000;
 
 export const dynamic = "force-dynamic";
 
@@ -45,14 +55,32 @@ export async function POST(request: Request) {
       );
     }
 
+    // Rate limit: cek TANPA menambah counter (counter hanya naik saat gagal).
+    const rateKey = `login:${getClientIp(request)}`;
+    const rate = peekRateLimit(rateKey, LOGIN_RATE_LIMIT, LOGIN_RATE_WINDOW_MS);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Terlalu banyak percobaan. Coba lagi dalam 15 menit.",
+        },
+        { status: 429 }
+      );
+    }
+
     const admin = await db.adminUser.findUnique({ where: { username } });
     // Pesan error identik utk user tak ditemukan / password salah (jangan bocorkan)
     if (!admin || !verifyPassword(password, admin.passwordHash)) {
+      // Hitung hanya percobaan yang GAGAL.
+      hitRateLimit(rateKey, LOGIN_RATE_LIMIT, LOGIN_RATE_WINDOW_MS);
       return NextResponse.json(
         { ok: false, error: "User ID atau password salah" },
         { status: 401 }
       );
     }
+
+    // Login sukses → reset counter percobaan gagal utk IP ini.
+    resetRateLimit(rateKey);
 
     const token = createSessionToken({
       username: admin.username,
