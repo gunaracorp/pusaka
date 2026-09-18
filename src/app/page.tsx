@@ -21,6 +21,7 @@ import { FAQ } from "@/components/pusaka/faq";
 import { Testimonials } from "@/components/pusaka/testimonials";
 import { ContactCTA } from "@/components/pusaka/contact";
 import { Footer } from "@/components/pusaka/footer";
+import { MemberPortal } from "@/components/pusaka/member-portal";
 import { AdminDashboard } from "@/components/pusaka/admin/admin-dashboard";
 import { AdminLoginDialog } from "@/components/pusaka/admin/admin-login-dialog";
 import { useAdminStore } from "@/lib/admin-store";
@@ -69,6 +70,7 @@ export default function Home() {
       </main>
       <Footer />
       <SakaChat />
+      <MemberPortal />
       <AdminLoginDialog />
     </div>
   );

@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/provider";
 
 /**
  * Deteksi "sudah ter-mount" tanpa setState di dalam effect
@@ -18,6 +19,7 @@ const getServerSnapshot = () => false;
 export function ThemeToggle() {
   const mounted = useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
   const { resolvedTheme, setTheme } = useTheme();
+  const { t } = useI18n();
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
@@ -25,7 +27,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       className="h-10 w-10 text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
-      aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+      aria-label={isDark ? t("common.theme.toLight") : t("common.theme.toDark")}
       aria-hidden={!mounted || undefined}
       tabIndex={mounted ? 0 : -1}
       disabled={!mounted}

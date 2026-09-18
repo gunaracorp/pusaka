@@ -9,22 +9,29 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CertificateCard } from "@/components/pusaka/certificate-card";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
+import { useI18n } from "@/lib/i18n/provider";
 import {
   EXAMPLE_CERT_NUMBERS,
   getStats,
   postVerify,
-  timeAgo,
   type StatsT,
   type VerifyData,
 } from "@/lib/pusaka";
 
 export function VerifySection() {
+  const { t, timeAgo } = useI18n();
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activity, setActivity] = useState<StatsT["recentActivity"]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
+
+  // Ref agar identitas verify tetap stabil (deps []) — deep-link ?cert= tidak ikut terpicu ulang saat ganti bahasa.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const verify = useCallback(async (certNumber: string) => {
     if (!certNumber.trim()) return;
@@ -35,7 +42,7 @@ export function VerifySection() {
       setResult(data);
     } catch (e) {
       setResult(null);
-      setError(e instanceof Error ? e.message : "Gagal memverifikasi sertifikat.");
+      setError(e instanceof Error ? e.message : tRef.current("verifySection.errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -91,9 +98,9 @@ export function VerifySection() {
     <section id="verifikasi" className="scroll-mt-20 bg-stone-50 py-16 dark:bg-stone-950 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Verifikasi Publik"
-          title="Verifikasi Sertifikat Digital"
-          subtitle="Setiap sertifikat PUSAKA dilengkapi tanda tangan digital & kode QR. Masukkan nomor sertifikat untuk melihat keaslian, status, dan skor audit lembaga."
+          eyebrow={t("verifySection.eyebrow")}
+          title={t("verifySection.title")}
+          subtitle={t("verifySection.subtitle")}
         />
 
         <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
@@ -103,7 +110,7 @@ export function VerifySection() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Search className="h-5 w-5 text-emerald-700" aria-hidden />
-                  Masukkan Nomor Sertifikat
+                  {t("verifySection.inputTitle")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -115,13 +122,13 @@ export function VerifySection() {
                   }}
                 >
                   <label htmlFor="verify-input" className="sr-only">
-                    Nomor sertifikat
+                    {t("verifySection.inputSrLabel")}
                   </label>
                   <Input
                     id="verify-input"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder="Contoh: PPU-2025-0001"
+                    placeholder={t("verifySection.placeholder", { code: EXAMPLE_CERT_NUMBERS[0] })}
                     className="h-12 flex-1 font-mono uppercase"
                     autoComplete="off"
                   />
@@ -133,19 +140,19 @@ export function VerifySection() {
                     {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        Memeriksa…
+                        {t("verifySection.checkInProgress")}
                       </>
                     ) : (
                       <>
                         <ShieldAlert className="h-4 w-4" aria-hidden />
-                        Verifikasi Sekarang
+                        {t("verifySection.verifyNow")}
                       </>
                     )}
                   </Button>
                 </form>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span>Nomor contoh:</span>
+                  <span>{t("verifySection.examplesLabel")}</span>
                   {EXAMPLE_CERT_NUMBERS.map((num) => (
                     <button
                       key={num}
@@ -178,14 +185,14 @@ export function VerifySection() {
                     <div className="mt-6">
                       <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                         <CheckCircle2 className="h-5 w-5" aria-hidden />
-                        Sertifikat ditemukan — status VALID
+                        {t("verifySection.validMessage")}
                       </p>
                       <CertificateCard
                         institution={result.institution}
                         programName={result.program?.name ?? null}
                       />
                       <p className="mt-3 truncate text-xs text-muted-foreground">
-                        Tautan permanen:{" "}
+                        {t("verifySection.permalink")}{" "}
                         <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
                           {`${window.location.origin}/?cert=${result.institution.certNumber}`}
                         </code>
@@ -195,17 +202,16 @@ export function VerifySection() {
                     <div className="mt-6 flex flex-col items-center gap-2 rounded-xl border border-red-200 bg-red-50 py-10 text-center dark:border-red-900/60 dark:bg-red-950/40">
                       <XCircle className="h-10 w-10 text-red-500" aria-hidden />
                       <p className="font-display text-lg font-bold text-red-700 dark:text-red-300">
-                        Sertifikat Tidak Ditemukan
+                        {t("verifySection.invalidTitle")}
                       </p>
                       <p className="max-w-sm text-sm text-red-600/80 dark:text-red-400/80">
-                        Nomor yang Anda masukkan tidak terdaftar pada basis data PUSAKA.
-                        Periksa kembali penulisan atau hubungi sekretariat.
+                        {t("verifySection.invalidBody")}
                       </p>
                     </div>
                   )
                 ) : (
                   <p className="mt-6 rounded-xl border border-dashed border-border bg-muted/50 px-4 py-8 text-center text-sm text-muted-foreground">
-                    Hasil verifikasi akan muncul di sini dalam bentuk kartu sertifikat digital.
+                    {t("verifySection.emptyResult")}
                   </p>
                 )}
               </CardContent>
@@ -221,9 +227,9 @@ export function VerifySection() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
                   </span>
-                  Aktivitas Verifikasi Real-time
+                  {t("verifySection.activity.title")}
                 </CardTitle>
-                <p className="text-xs text-muted-foreground">Diperbarui otomatis setiap 10 detik</p>
+                <p className="text-xs text-muted-foreground">{t("verifySection.activity.subtitle")}</p>
               </CardHeader>
               <CardContent>
                 {activityLoading ? (
@@ -234,10 +240,13 @@ export function VerifySection() {
                   </div>
                 ) : activity.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-                    Belum ada aktivitas verifikasi terbaru.
+                    {t("verifySection.activity.empty")}
                   </p>
                 ) : (
-                  <ul className="max-h-96 space-y-2 overflow-y-auto pr-1">
+                  <ul
+                    aria-label={t("verifySection.activity.latest")}
+                    className="max-h-96 space-y-2 overflow-y-auto pe-1"
+                  >
                     <AnimatePresence initial={false}>
                       {activity.map((item, idx) => (
                         <motion.li
@@ -265,7 +274,10 @@ export function VerifySection() {
                                 item.result === "VALID" ? "text-emerald-700" : "text-red-600"
                               }`}
                             >
-                              ✓ {item.result}
+                              ✓{" "}
+                              {item.result === "VALID"
+                                ? t("verifySection.result.valid")
+                                : t("verifySection.result.invalid")}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
                               {timeAgo(item.at)}

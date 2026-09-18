@@ -1,6 +1,7 @@
 "use client";
 
 import { ShieldCheck } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 const PARTNERS = [
   "Kemenag RI",
@@ -14,11 +15,12 @@ const PARTNERS = [
 ];
 
 export function TrustMarquee() {
+  const { t } = useI18n();
   const items = [...PARTNERS, ...PARTNERS];
   return (
     <div
       className="marquee-hover-pause relative overflow-hidden border-y border-border bg-muted py-4"
-      aria-label="Mitra dan lembaga kemitraan PUSAKA"
+      aria-label={t("trustMarquee.ariaLabel")}
     >
       <div className="animate-marquee flex w-max items-center gap-10">
         {items.map((name, i) => (
@@ -29,13 +31,19 @@ export function TrustMarquee() {
           >
             <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />
             {name}
-            <span className="ml-6 h-1.5 w-1.5 rounded-full bg-amber-500/60" aria-hidden />
+            <span className="ms-6 h-1.5 w-1.5 rounded-full bg-amber-500/60" aria-hidden />
           </span>
         ))}
       </div>
       {/* tepi pudar */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-muted to-transparent" aria-hidden />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-muted to-transparent" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-y-0 start-0 w-20 bg-gradient-to-r from-muted to-transparent rtl:bg-gradient-to-l"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 end-0 w-20 bg-gradient-to-l from-muted to-transparent rtl:bg-gradient-to-r"
+        aria-hidden
+      />
     </div>
   );
 }

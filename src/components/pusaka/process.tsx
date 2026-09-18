@@ -9,48 +9,26 @@ import {
   QrCode,
 } from "lucide-react";
 import { SectionHeading } from "@/components/pusaka/fade-in";
+import { useI18n } from "@/lib/i18n/provider";
 
-const STEPS = [
-  {
-    icon: FileSignature,
-    title: "Pendaftaran Online",
-    duration: "± 15 menit",
-    desc: "Isi formulir pendaftaran dan unggah dokumen persyaratan melalui portal resmi PUSAKA.",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "Verifikasi Berkas",
-    duration: "1 × 24 jam",
-    desc: "Tim admisi memeriksa kelengkapan & keabsahan dokumen, lalu menerbitkan surat penugasan asesor.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Pelatihan & Ujian Kompetensi",
-    duration: "3–7 hari",
-    desc: "Kurikulum standar Dewan Pakar: kelas intensif, ujian tertulis, dan praktik wawancara.",
-  },
-  {
-    icon: Hourglass,
-    title: "Audit Lapangan / Assessment",
-    duration: "2–5 hari",
-    desc: "Asesor independen melakukan penilaian lapangan bagi perusahaan atau uji simulasi bagi individu.",
-  },
-  {
-    icon: QrCode,
-    title: "Sertifikat Terbit QR-Verified",
-    duration: "1 hari kerja",
-    desc: "Sertifikat digital diterbitkan dengan QR-verified dan tercatat permanen pada basis data nasional.",
-  },
+const STEPS: { key: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "register", icon: FileSignature },
+  { key: "verification", icon: ClipboardCheck },
+  { key: "training", icon: GraduationCap },
+  { key: "audit", icon: Hourglass },
+  { key: "certificate", icon: QrCode },
 ];
 
 export function Process() {
+  const { t } = useI18n();
+
   return (
     <section id="alur" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Prosedur"
-          title="Alur Sertifikasi 5 Langkah"
-          subtitle="Proses transparan dari pendaftaran hingga terbitnya sertifikat digital QR-verified — dipantau penuh oleh Dewan Pakar."
+          eyebrow={t("process.eyebrow")}
+          title={t("process.title")}
+          subtitle={t("process.subtitle")}
         />
 
         <div className="relative mt-14">
@@ -70,7 +48,7 @@ export function Process() {
               const Icon = step.icon;
               return (
                 <motion.li
-                  key={step.title}
+                  key={step.key}
                   initial={{ opacity: 0, y: 28 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
@@ -84,19 +62,21 @@ export function Process() {
                     </span>
                     <span className="flex items-center gap-2 lg:mt-3">
                       <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
-                        LANGKAH {idx + 1}
+                        {t("process.stepLabel", { n: idx + 1 })}
                       </span>
                       <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
-                        {step.duration}
+                        {t(`process.steps.${step.key}.duration`)}
                       </span>
                     </span>
                   </div>
 
                   <div className="mt-3 lg:mt-2 lg:pl-0">
                     <h3 className="font-display text-base font-bold text-foreground">
-                      {step.title}
+                      {t(`process.steps.${step.key}.title`)}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                      {t(`process.steps.${step.key}.desc`)}
+                    </p>
                   </div>
                 </motion.li>
               );

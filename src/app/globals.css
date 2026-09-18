@@ -127,6 +127,34 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* ====== I18N: font Arab saat bahasa AR (RTL) ====== */
+  html[dir="rtl"] body {
+    font-family:
+      "Noto Naskh Arabic",
+      "Amiri",
+      "Scheherazade New",
+      "Traditional Arabic",
+      "Segoe UI",
+      Tahoma,
+      var(--font-jakarta),
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+  }
+  html[dir="rtl"] .font-display {
+    font-family:
+      "Noto Naskh Arabic",
+      "Amiri",
+      "Scheherazade New",
+      "Traditional Arabic",
+      Tahoma,
+      var(--font-jakarta),
+      sans-serif;
+  }
+  html[dir="rtl"] input,
+  html[dir="rtl"] textarea {
+    text-align: start;
+  }
   ::selection {
     background: oklch(0.696 0.17 162.48 / 0.35);
   }

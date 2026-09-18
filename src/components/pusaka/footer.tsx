@@ -19,33 +19,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { subscribeNewsletter } from "@/lib/pusaka";
 import { useAdminStore } from "@/lib/admin-store";
+import { useI18n } from "@/lib/i18n/provider";
 
+/** Tautan kolom Program — label diterjemahkan via footer.links.*. */
 const PROGRAM_LINKS = [
-  { href: "#program", label: "Akreditasi PPIU" },
-  { href: "#program", label: "Akreditasi BPW" },
-  { href: "#program", label: "Sertifikasi PIHK" },
-  { href: "#program", label: "Sertifikasi IATA" },
-  { href: "#program", label: "Izin Umrah & Haji" },
-];
+  { href: "#program", key: "ppiu" },
+  { href: "#program", key: "bpw" },
+  { href: "#program", key: "pihk" },
+  { href: "#program", key: "iata" },
+  { href: "#program", key: "umrahHaji" },
+] as const;
 
+/** Tautan kolom Layanan — label diterjemahkan via footer.links.*. */
 const SERVICE_LINKS = [
-  { href: "#verifikasi", label: "Verifikasi Sertifikat" },
-  { href: "#direktori", label: "Direktori Lembaga" },
-  { href: "#lacak", label: "Lacak Pendaftaran" },
-  { href: "#dewan-pakar", label: "Dewan Pakar" },
-  { href: "#faq", label: "Tanya Jawab" },
-];
+  { href: "#verifikasi", key: "verify" },
+  { href: "#direktori", key: "directory" },
+  { href: "#lacak", key: "track" },
+  { href: "#dewan-pakar", key: "experts" },
+  { href: "#faq", key: "faq" },
+] as const;
 
 const SOCIALS = [
-  { icon: Facebook, label: "Facebook PUSAKA" },
-  { icon: Instagram, label: "Instagram PUSAKA" },
-  { icon: Twitter, label: "Twitter / X PUSAKA" },
-  { icon: Youtube, label: "YouTube PUSAKA" },
-];
+  { icon: Facebook, key: "facebook" },
+  { icon: Instagram, key: "instagram" },
+  { icon: Twitter, key: "twitter" },
+  { icon: Youtube, key: "youtube" },
+] as const;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Footer() {
+  const { t } = useI18n();
   const setLoginOpen = useAdminStore((s) => s.setLoginOpen);
   const setShowAdmin = useAdminStore((s) => s.setShowAdmin);
   const [email, setEmail] = useState("");
@@ -61,7 +65,7 @@ export function Footer() {
     e.preventDefault();
     const trimmed = email.trim();
     if (!EMAIL_RE.test(trimmed)) {
-      toast.error("Masukkan alamat email yang valid.");
+      toast.error(t("footer.newsletter.invalidEmail"));
       return;
     }
     if (subscribing) return;
@@ -69,12 +73,12 @@ export function Footer() {
     try {
       const data = await subscribeNewsletter(trimmed);
       toast.success(
-        data?.already ? "Email Anda sudah terdaftar." : "Berhasil berlangganan! Terima kasih.",
+        data?.already ? t("footer.newsletter.already") : t("footer.newsletter.success"),
       );
       setEmail("");
       setSubscribed(true);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Gagal berlangganan. Coba lagi nanti.");
+    } catch {
+      toast.error(t("footer.newsletter.failed"));
     } finally {
       setSubscribing(false);
     }
@@ -93,23 +97,21 @@ export function Footer() {
               <div>
                 <p className="font-display text-lg font-extrabold text-white">PUSAKA</p>
                 <p className="text-[10px] uppercase tracking-widest text-emerald-400">
-                  Sertifikasi &amp; Akreditasi
+                  {t("footer.brand.tagline")}
                 </p>
               </div>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-emerald-200/70">
-              Pusat Sertifikasi &amp; Akreditasi Kompetensi untuk industri perjalanan wisata,
-              umrah &amp; haji Indonesia — dengan Dewan Pakar 46 lintas bidang dan sertifikat
-              digital QR-verified.
+              {t("footer.brand.description")}
             </p>
             <div className="mt-5 flex gap-2">
               {SOCIALS.map((s) => {
                 const Icon = s.icon;
                 return (
                   <a
-                    key={s.label}
+                    key={s.key}
                     href="#beranda"
-                    aria-label={s.label}
+                    aria-label={t(`footer.socials.${s.key}`)}
                     className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-800 bg-emerald-900/40 text-emerald-300 transition-colors hover:border-amber-500/60 hover:text-amber-400"
                   >
                     <Icon className="h-4 w-4" aria-hidden />
@@ -120,18 +122,18 @@ export function Footer() {
           </div>
 
           {/* program */}
-          <nav aria-label="Tautan program">
+          <nav aria-label={t("footer.nav.programAria")}>
             <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
-              Program
+              {t("footer.nav.program")}
             </h3>
             <ul className="mt-4 space-y-2.5">
               {PROGRAM_LINKS.map((l) => (
-                <li key={l.label}>
+                <li key={l.key}>
                   <a
                     href={l.href}
                     className="text-sm text-emerald-200/75 transition-colors hover:text-white"
                   >
-                    {l.label}
+                    {t(`footer.links.${l.key}`)}
                   </a>
                 </li>
               ))}
@@ -139,18 +141,18 @@ export function Footer() {
           </nav>
 
           {/* layanan */}
-          <nav aria-label="Tautan layanan">
+          <nav aria-label={t("footer.nav.servicesAria")}>
             <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
-              Layanan
+              {t("footer.nav.services")}
             </h3>
             <ul className="mt-4 space-y-2.5">
               {SERVICE_LINKS.map((l) => (
-                <li key={l.label}>
+                <li key={l.key}>
                   <a
                     href={l.href}
                     className="text-sm text-emerald-200/75 transition-colors hover:text-white"
                   >
-                    {l.label}
+                    {t(`footer.links.${l.key}`)}
                   </a>
                 </li>
               ))}
@@ -160,7 +162,7 @@ export function Footer() {
           {/* kontak */}
           <div>
             <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
-              Kontak
+              {t("footer.nav.contact")}
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-emerald-200/75">
               <li className="flex items-start gap-2.5">
@@ -181,10 +183,10 @@ export function Footer() {
           {/* newsletter */}
           <div>
             <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
-              Newsletter
+              {t("footer.newsletter.title")}
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-emerald-200/70">
-              Pengumuman kuota, regulasi terbaru, dan jadwal asesmen — langsung ke email Anda.
+              {t("footer.newsletter.desc")}
             </p>
             <form className="mt-4 flex gap-2" onSubmit={handleSubscribe} noValidate>
               <Input
@@ -195,15 +197,15 @@ export function Footer() {
                   setEmail(e.target.value);
                   if (subscribed) setSubscribed(false);
                 }}
-                placeholder="nama@email.com"
-                aria-label="Alamat email"
+                placeholder={t("footer.newsletter.placeholder")}
+                aria-label={t("footer.newsletter.emailAria")}
                 autoComplete="email"
                 disabled={subscribing}
                 className="h-11 flex-1 rounded-lg border-emerald-800 bg-emerald-900/40 text-white placeholder:text-emerald-300/40"
               />
               <Button
                 type="submit"
-                aria-label="Berlangganan newsletter"
+                aria-label={t("footer.newsletter.subscribeAria")}
                 disabled={subscribing}
                 className="h-11 shrink-0 gap-1.5 rounded-lg bg-amber-500 px-3 font-bold text-emerald-950 hover:bg-amber-600"
               >
@@ -212,17 +214,17 @@ export function Footer() {
                 ) : (
                   <Send className="h-4 w-4" aria-hidden />
                 )}
-                <span className="hidden sm:inline">Kirim</span>
+                <span className="hidden sm:inline">{t("footer.newsletter.send")}</span>
               </Button>
             </form>
             {subscribed ? (
               <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-300">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                Terdaftar — terima kasih!
+                {t("footer.newsletter.subscribed")}
               </p>
             ) : null}
             <p className="mt-2 text-[11px] text-emerald-300/50">
-              Kami menghormati privasi Anda. Berhenti kapan saja.
+              {t("footer.newsletter.privacy")}
             </p>
           </div>
         </div>
@@ -231,9 +233,7 @@ export function Footer() {
       {/* bar bawah */}
       <div className="border-t border-emerald-900">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-emerald-300/60 sm:flex-row sm:px-6 lg:px-8">
-          <p>
-            © {new Date().getFullYear()} PUSAKA • Terdaftar &amp; Diawasi oleh Dewan Pakar Nasional
-          </p>
+          <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-md border border-emerald-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider">
               <ShieldCheck className="h-3 w-3 text-amber-400" aria-hidden />
@@ -246,10 +246,10 @@ export function Footer() {
             <button
               type="button"
               onClick={openAdminPanel}
-              aria-label="Buka Panel Admin PUSAKA"
+              aria-label={t("footer.admin.aria")}
               className="rounded-md px-2 py-1 text-[11px] text-emerald-300/30 transition-colors hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
             >
-              Panel Admin
+              {t("footer.admin.panel")}
             </button>
           </div>
         </div>

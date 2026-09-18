@@ -6,7 +6,7 @@
 // Data: GET /api/global (fetch sekali, filter di client-side).
 // ============================================================
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Building2,
   Globe2,
@@ -39,13 +39,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn } from "@/components/pusaka/fade-in";
 import { AnimatedCounter } from "@/components/pusaka/animated-counter";
+import { useI18n } from "@/lib/i18n/provider";
 import {
   GLOBAL_KIND_LABEL,
   GLOBAL_REGION_LABEL,
   GLOBAL_REGION_ORDER,
   GLOBAL_STATUS_META,
   PROGRAM_LABELS,
-  formatNumber,
   getGlobal,
   safeParseJsonArray,
   type GlobalNodeT,
@@ -56,14 +56,23 @@ import {
 
 const STAT_META: {
   key: "totalCountries" | "totalNodes" | "offices" | "partners";
-  label: string;
   icon: LucideIcon;
 }[] = [
-  { key: "totalCountries", label: "Negara Mitra", icon: Globe2 },
-  { key: "totalNodes", label: "Node Jaringan", icon: Network },
-  { key: "offices", label: "Kantor Perwakilan", icon: Landmark },
-  { key: "partners", label: "Mitra Internasional", icon: Handshake },
+  { key: "totalCountries", icon: Globe2 },
+  { key: "totalNodes", icon: Network },
+  { key: "offices", icon: Landmark },
+  { key: "partners", icon: Handshake },
 ];
+
+/** Terjemahan kunci dinamis; label meta jadi fallback bila kunci kamus tidak ada. */
+function metaT(
+  t: (path: string, vars?: Record<string, string | number>) => string,
+  key: string,
+  fallback: string
+): string {
+  const value = t(key);
+  return value === key ? fallback : value;
+}
 
 /** Summary cadangan bila backend belum mengirim objek summary. */
 function computeSummary(nodes: GlobalNodeT[]): GlobalResp["summary"] {
@@ -95,6 +104,7 @@ function NodeDetailDialog({
   node: GlobalNodeT | null;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const scope = safeParseJsonArray(node?.scope);
   const statusMeta = node ? GLOBAL_STATUS_META[node.status] : undefined;
 
@@ -121,20 +131,20 @@ function NodeDetailDialog({
                   {node.flag}
                 </span>
                 <div className="min-w-0">
-                  <DialogTitle className="font-display text-left text-xl font-bold">
+                  <DialogTitle className="font-display text-start text-xl font-bold">
                     {node.country}
-                    <span className="ml-2 text-sm font-semibold text-muted-foreground">{node.city}</span>
+                    <span className="ms-2 text-sm font-semibold text-muted-foreground">{node.city}</span>
                   </DialogTitle>
                   {statusMeta ? (
                     <Badge variant="outline" className={`mt-1.5 ${statusMeta.badgeClass}`}>
-                      {statusMeta.label}
+                      {metaT(t, `globalNetwork.status.${node.status}`, statusMeta.label)}
                     </Badge>
                   ) : null}
                 </div>
               </div>
             </DialogHeader>
             <DialogDescription className="sr-only">
-              Detail node jaringan global PUSAKA di {node.country}, {node.city}.
+              {t("globalNetwork.dialog.srDescription", { country: node.country, city: node.city })}
             </DialogDescription>
 
             <div className="space-y-5">
@@ -144,29 +154,37 @@ function NodeDetailDialog({
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kawasan</p>
-                  <p className="mt-0.5 text-sm font-bold text-foreground">
-                    {GLOBAL_REGION_LABEL[node.region] ?? node.region}
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("globalNetwork.dialog.region")}
                   </p>
-                </div>
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kota</p>
-                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.city}</p>
-                </div>
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Jenis</p>
                   <p className="mt-0.5 text-sm font-bold text-foreground">
-                    {GLOBAL_KIND_LABEL[node.kind] ?? node.kind}
+                    {metaT(t, `globalNetwork.region.${node.region}`, GLOBAL_REGION_LABEL[node.region] ?? node.region)}
                   </p>
                 </div>
                 <div className="rounded-lg border bg-muted/50 p-3">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Beroperasi Sejak
+                    {t("globalNetwork.dialog.city")}
+                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.city}</p>
+                </div>
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("globalNetwork.dialog.kind")}
+                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">
+                    {metaT(t, `globalNetwork.kind.${node.kind}`, GLOBAL_KIND_LABEL[node.kind] ?? node.kind)}
+                  </p>
+                </div>
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("globalNetwork.dialog.sinceLabel")}
                   </p>
                   <p className="mt-0.5 text-sm font-bold text-foreground">{node.since}</p>
                 </div>
                 <div className="col-span-2 rounded-lg border bg-muted/50 p-3 sm:col-span-1">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Kontak</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("globalNetwork.dialog.contact")}
+                  </p>
                   {node.contact ? (
                     <a
                       href={`mailto:${node.contact}`}
@@ -183,7 +201,7 @@ function NodeDetailDialog({
               {scope.length > 0 ? (
                 <div>
                   <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                    Cakupan Program
+                    {t("globalNetwork.dialog.scopeTitle")}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {scope.map((code) => (
@@ -204,7 +222,7 @@ function NodeDetailDialog({
                   onClick={handleApply}
                   className="h-12 flex-1 bg-emerald-700 text-base font-bold hover:bg-emerald-800"
                 >
-                  Ajukan Sertifikasi di Kawasan Ini
+                  {t("globalNetwork.dialog.applyRegion")}
                 </Button>
                 {node.contact ? (
                   <Button
@@ -212,8 +230,11 @@ function NodeDetailDialog({
                     variant="outline"
                     className="h-12 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 hover:text-emerald-900 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:text-emerald-200"
                   >
-                    <a href={`mailto:${node.contact}`} aria-label={`Email kantor ${node.country}`}>
-                      Hubungi Kantor
+                    <a
+                      href={`mailto:${node.contact}`}
+                      aria-label={t("globalNetwork.dialog.emailOfficeAria", { country: node.country })}
+                    >
+                      {t("globalNetwork.dialog.contactOffice")}
                     </a>
                   </Button>
                 ) : null}
@@ -229,6 +250,7 @@ function NodeDetailDialog({
 // ---------- section utama ----------
 
 export function GlobalNetwork() {
+  const { t, formatNumber } = useI18n();
   const [resp, setResp] = useState<GlobalResp | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -239,6 +261,12 @@ export function GlobalNetwork() {
   const [selected, setSelected] = useState<GlobalNodeT | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
+  // Ref agar fetch awal tidak perlu t sebagai dependency (identitas t berubah saat ganti bahasa).
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
   useEffect(() => {
     let alive = true;
     getGlobal()
@@ -246,7 +274,7 @@ export function GlobalNetwork() {
         if (alive) setResp(data);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Gagal memuat jaringan global.");
+        if (alive) setError(e instanceof Error ? e.message : tRef.current("globalNetwork.loadError"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -313,17 +341,16 @@ export function GlobalNetwork() {
         <FadeIn className="mx-auto max-w-3xl text-center">
           <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-300">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
-            Jaringan Global
+            {t("globalNetwork.eyebrow")}
           </p>
           <h2 className="font-display text-3xl font-extrabold text-white sm:text-4xl">
-            Layanan Sertifikasi di{" "}
+            {t("globalNetwork.titleBefore")}{" "}
             <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
-              32 Negara
+              {t("globalNetwork.titleHighlight")}
             </span>
           </h2>
           <p className="mt-3 text-base leading-relaxed text-emerald-100/80">
-            Kantor perwakilan dan mitra internasional PUSAKA tersebar lintas kawasan — temukan titik
-            layanan terdekat di negara Anda.
+            {t("globalNetwork.subtitle")}
           </p>
         </FadeIn>
 
@@ -346,7 +373,7 @@ export function GlobalNetwork() {
                       </p>
                     )}
                     <p className="truncate text-[11px] font-semibold uppercase tracking-widest text-emerald-200/70">
-                      {s.label}
+                      {t(`globalNetwork.stats.${s.key}`)}
                     </p>
                   </div>
                 </div>
@@ -360,7 +387,7 @@ export function GlobalNetwork() {
           <FadeIn delay={0.15}>
             <div
               className="marquee-hover-pause relative mt-8 overflow-hidden rounded-2xl border border-emerald-800/60 bg-emerald-900/30 py-4"
-              aria-label="Bendera negara-negara jaringan PUSAKA"
+              aria-label={t("globalNetwork.marqueeAria")}
             >
               <div className="animate-marquee flex w-max items-center gap-8 px-2">
                 {[...flags, ...flags].map((f, i) => (
@@ -395,35 +422,43 @@ export function GlobalNetwork() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-300/60"
+                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-300/60"
                 aria-hidden
               />
               <Input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cari negara, kota, atau mitra…"
-                aria-label="Cari negara, kota, atau mitra"
-                className="h-11 border-emerald-700/70 bg-emerald-900/40 pl-9 text-emerald-50 placeholder:text-emerald-300/50 focus-visible:ring-amber-400/60"
+                placeholder={t("globalNetwork.searchPlaceholder")}
+                aria-label={t("globalNetwork.searchPlaceholder")}
+                className="h-11 border-emerald-700/70 bg-emerald-900/40 ps-9 text-emerald-50 placeholder:text-emerald-300/50 focus-visible:ring-amber-400/60"
               />
             </div>
             <Select value={kind} onValueChange={setKind}>
               <SelectTrigger
-                aria-label="Filter jenis node"
+                aria-label={t("globalNetwork.filterKindAria")}
                 className="h-11 w-full border-emerald-700/70 bg-emerald-900/40 text-emerald-50 data-[placeholder]:text-emerald-300/50 sm:w-64"
               >
-                <SelectValue placeholder="Semua Jenis" />
+                <SelectValue placeholder={t("globalNetwork.kindAll")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SEMUA">Semua Jenis</SelectItem>
-                <SelectItem value="KANTOR_PERWAKILAN">Kantor Perwakilan</SelectItem>
-                <SelectItem value="MITRA_INTERNASIONAL">Mitra Internasional</SelectItem>
+                <SelectItem value="SEMUA">{t("globalNetwork.kindAll")}</SelectItem>
+                <SelectItem value="KANTOR_PERWAKILAN">
+                  {t("globalNetwork.kind.KANTOR_PERWAKILAN")}
+                </SelectItem>
+                <SelectItem value="MITRA_INTERNASIONAL">
+                  {t("globalNetwork.kind.MITRA_INTERNASIONAL")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* chip kawasan — horizontal scroll di mobile */}
-          <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" role="group" aria-label="Filter kawasan">
+          <div
+            className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+            role="group"
+            aria-label={t("globalNetwork.regionFilterAria")}
+          >
             <div className="flex w-max items-center gap-2 sm:w-auto sm:flex-wrap">
               <button
                 type="button"
@@ -435,7 +470,7 @@ export function GlobalNetwork() {
                     : "border border-emerald-700 text-emerald-100 hover:border-amber-400/60 hover:text-white"
                 }`}
               >
-                Semua ({formatNumber(summary.totalNodes)})
+                {t("globalNetwork.regionAll", { count: formatNumber(summary.totalNodes) })}
               </button>
               {GLOBAL_REGION_ORDER.map((r) => {
                 const count = regionCountMap[r] ?? nodes.filter((n) => n.region === r).length;
@@ -452,7 +487,8 @@ export function GlobalNetwork() {
                         : "border border-emerald-700 text-emerald-100 hover:border-amber-400/60 hover:text-white"
                     }`}
                   >
-                    {GLOBAL_REGION_LABEL[r] ?? r} ({formatNumber(count)})
+                    {metaT(t, `globalNetwork.region.${r}`, GLOBAL_REGION_LABEL[r] ?? r)} (
+                    {formatNumber(count)})
                   </button>
                 );
               })}
@@ -493,15 +529,14 @@ export function GlobalNetwork() {
               className="border-emerald-700 text-emerald-100 hover:bg-emerald-900 hover:text-white"
               onClick={retry}
             >
-              Coba Lagi
+              {t("globalNetwork.retry")}
             </Button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-emerald-800 bg-emerald-900/30 py-14 text-center">
             <Globe2 className="h-8 w-8 text-emerald-500" aria-hidden />
             <p className="max-w-md text-sm text-emerald-100/80">
-              Tidak ada node jaringan yang cocok dengan filter. Coba ubah kata kunci atau pilih
-              kawasan lain.
+              {t("globalNetwork.emptyFiltered")}
             </p>
             <Button
               variant="outline"
@@ -513,7 +548,7 @@ export function GlobalNetwork() {
                 setRegion("SEMUA");
               }}
             >
-              Reset Filter
+              {t("globalNetwork.resetFilter")}
             </Button>
           </div>
         ) : (
@@ -526,8 +561,8 @@ export function GlobalNetwork() {
                   <button
                     type="button"
                     onClick={() => setSelected(n)}
-                    aria-label={`Lihat detail ${n.orgName} — ${n.country}`}
-                    className="flex h-full w-full flex-col rounded-2xl border border-emerald-800/60 bg-emerald-900/40 p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-xl hover:shadow-emerald-950/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                    aria-label={t("globalNetwork.cardAria", { org: n.orgName, country: n.country })}
+                    className="flex h-full w-full flex-col rounded-2xl border border-emerald-800/60 bg-emerald-900/40 p-5 text-start transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-xl hover:shadow-emerald-950/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-4xl leading-none" aria-hidden>
@@ -537,7 +572,7 @@ export function GlobalNetwork() {
                         variant="outline"
                         className="shrink-0 border-amber-400/60 bg-amber-400/10 text-[10px] font-bold uppercase tracking-wider text-amber-300"
                       >
-                        {GLOBAL_KIND_LABEL[n.kind] ?? n.kind}
+                        {metaT(t, `globalNetwork.kind.${n.kind}`, GLOBAL_KIND_LABEL[n.kind] ?? n.kind)}
                       </Badge>
                     </div>
 
@@ -575,13 +610,13 @@ export function GlobalNetwork() {
                     <div className="mt-auto flex items-center justify-between gap-2 pt-4">
                       {statusMeta ? (
                         <Badge variant="outline" className={`${statusMeta.badgeClass} text-[10px]`}>
-                          {statusMeta.label}
+                          {metaT(t, `globalNetwork.status.${n.status}`, statusMeta.label)}
                         </Badge>
                       ) : (
                         <span />
                       )}
                       <span className="text-[10px] uppercase tracking-wider text-emerald-300/60">
-                        sejak {n.since}
+                        {t("globalNetwork.since", { year: n.since })}
                       </span>
                     </div>
                   </button>
@@ -593,14 +628,16 @@ export function GlobalNetwork() {
 
         {!loading && !error && filtered.length > 0 ? (
           <p className="mt-6 text-center text-xs text-emerald-300/60">
-            Menampilkan {formatNumber(filtered.length)} dari {formatNumber(nodes.length)} node
-            jaringan
+            {t("globalNetwork.showing", {
+              shown: formatNumber(filtered.length),
+              total: formatNumber(nodes.length),
+            })}
           </p>
         ) : null}
 
         {loading ? (
           <span className="sr-only" aria-live="polite">
-            <Loader2 className="animate-spin" /> Memuat jaringan global…
+            <Loader2 className="animate-spin" /> {t("globalNetwork.loadingAria")}
           </span>
         ) : null}
       </div>

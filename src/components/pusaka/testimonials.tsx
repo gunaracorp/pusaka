@@ -7,68 +7,42 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
+import { useI18n } from "@/lib/i18n/provider";
 
-const TESTIMONIALS = [
-  {
-    name: "H. Ahmad Fauzi Ridwan",
-    role: "Pemegang Sertifikat PPIU",
-    city: "Jakarta Selatan",
-    rating: 5,
-    quote:
-      "Proses auditnya ketat tapi sangat profesional. Setelah terakreditasi PPIU PLATINUM, tingkat kepercayaan jemaah meningkat drastis dan pendaftaran paket naik hingga 40%. Sertifikat digitalnya juga gampang diverifikasi calon jemaah lewat QR.",
-  },
-  {
-    name: "Siti Aminah Wibowo",
-    role: "Pendamping Haji Khusus PIHK",
-    city: "Surabaya",
-    rating: 5,
-    quote:
-      "Kurikulum dari Dewan Pakar benar-benar mendalami fiqih manasik dan penanganan jemaah lansia. Ujiannya menantang, tetapi setelah lulus saya merasa jauh lebih siap mendampingi jemaah di lapangan.",
-  },
-  {
-    name: "Ir. Bambang Setiawan",
-    role: "Direktur BPW Terakreditasi",
-    city: "Bandung",
-    rating: 5,
-    quote:
-      "Kami mengikuti alur 5 langkah tanpa kendala — verifikasi berkas hanya satu hari kerja. Asesor lapangannya paham benar industri perjalanan wisata. Laporan auditnya detail dan menjadi bahan perbaikan internal kami.",
-  },
-  {
-    name: "Rizky Pratama Halim",
-    role: "Owner Agen Tiket IATA",
-    city: "Makassar",
-    rating: 5,
-    quote:
-      "Sertifikasi IATA via PUSAKA membuka akses GDS Amadeus dan Sabre untuk kami. Tim pendampingan membantu menyiapkan dokumen teknis aviasi yang selama ini kami anggap rumit. Layanan kelas dunia.",
-  },
-  {
-    name: "Dra. Nurul Hidayati, M.M.",
-    role: "Komisaris PPIU GOLD",
-    city: "Yogyakarta",
-    rating: 4,
-    quote:
-      "Yang paling saya hargai adalah transparansi skor audit dan tier. Perusahaan kami tahu persis indikator apa yang harus ditingkatkan untuk meraih tier PLATINUM. Sistem akreditasinya modern dan terukur.",
-  },
+/** Nama & rating adalah data lokal (nama tidak diterjemahkan); role/city/quote via dict. */
+const TESTIMONIAL_META = [
+  { name: "H. Ahmad Fauzi Ridwan", rating: 5 },
+  { name: "Siti Aminah Wibowo", rating: 5 },
+  { name: "Ir. Bambang Setiawan", rating: 5 },
+  { name: "Rizky Pratama Halim", rating: 5 },
+  { name: "Dra. Nurul Hidayati, M.M.", rating: 4 },
 ];
 
+const TESTIMONIAL_COUNT = TESTIMONIAL_META.length;
+
 export function Testimonials() {
+  const { t, dir } = useI18n();
+  const rtl = dir === "rtl";
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
   function go(delta: number) {
     setDirection(delta);
-    setIndex((i) => (i + delta + TESTIMONIALS.length) % TESTIMONIALS.length);
+    setIndex((i) => (i + delta + TESTIMONIAL_COUNT) % TESTIMONIAL_COUNT);
   }
 
-  const t = TESTIMONIALS[index];
+  const item = TESTIMONIAL_META[index];
+  const n = index + 1;
+  const PrevIcon = rtl ? ChevronRight : ChevronLeft;
+  const NextIcon = rtl ? ChevronLeft : ChevronRight;
 
   return (
     <section id="testimoni" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Testimoni"
-          title="Cerita Para Pemegang Sertifikat"
-          subtitle="Pengalaman nyata lembaga dan profesional yang telah terakreditasi PUSAKA."
+          eyebrow={t("testimonials.eyebrow")}
+          title={t("testimonials.title")}
+          subtitle={t("testimonials.subtitle")}
         />
 
         <FadeIn delay={0.1} className="mt-10">
@@ -76,24 +50,27 @@ export function Testimonials() {
             <Card className="overflow-hidden border-border shadow-lg shadow-emerald-900/5">
               <CardContent className="relative min-h-[300px] p-8 sm:p-10">
                 <Quote
-                  className="absolute right-6 top-6 h-16 w-16 text-emerald-500/15"
+                  className="absolute end-6 top-6 h-16 w-16 text-emerald-500/15"
                   aria-hidden
                 />
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: direction * 60 }}
+                    initial={{ opacity: 0, x: direction * 60 * (rtl ? -1 : 1) }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: direction * -60 }}
+                    exit={{ opacity: 0, x: direction * -60 * (rtl ? -1 : 1) }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     className="relative"
                   >
-                    <div className="flex items-center gap-1" aria-label={`Rating ${t.rating} dari 5`}>
+                    <div
+                      className="flex items-center gap-1"
+                      aria-label={t("testimonials.ratingAria", { rating: item.rating })}
+                    >
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
                           className={`h-4 w-4 ${
-                            i < t.rating
+                            i < item.rating
                               ? "fill-amber-400 text-amber-400"
                               : "fill-muted-foreground/25 text-muted-foreground/25"
                           }`}
@@ -102,14 +79,14 @@ export function Testimonials() {
                       ))}
                     </div>
                     <blockquote className="mt-4 text-base leading-relaxed text-foreground/90 sm:text-lg">
-                      &ldquo;{t.quote}&rdquo;
+                      &ldquo;{t(`testimonials.items.${n}.quote`)}&rdquo;
                     </blockquote>
                     <div className="mt-6 flex items-center gap-3">
                       <span
                         className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-700 to-amber-500 font-display text-sm font-black text-white"
                         aria-hidden
                       >
-                        {t.name
+                        {item.name
                           .split(" ")
                           .filter((w) => /^[A-Z]/.test(w) && !w.includes("."))
                           .slice(0, 2)
@@ -117,12 +94,14 @@ export function Testimonials() {
                           .join("")}
                       </span>
                       <div>
-                        <p className="font-display text-sm font-bold text-foreground">{t.name}</p>
+                        <p className="font-display text-sm font-bold text-foreground">{item.name}</p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className="border-emerald-600/30 bg-emerald-500/10 text-[10px] text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300">
-                            {t.role}
+                            {t(`testimonials.items.${n}.role`)}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">{t.city}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {t(`testimonials.items.${n}.city`)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -138,12 +117,12 @@ export function Testimonials() {
                 size="icon"
                 className="h-11 w-11 rounded-full"
                 onClick={() => go(-1)}
-                aria-label="Testimoni sebelumnya"
+                aria-label={t("testimonials.prevAria")}
               >
-                <ChevronLeft className="h-5 w-5" />
+                <PrevIcon className="h-5 w-5" />
               </Button>
               <div className="flex items-center gap-1.5">
-                {TESTIMONIALS.map((_, i) => (
+                {TESTIMONIAL_META.map((_, i) => (
                   <button
                     key={i}
                     type="button"
@@ -154,7 +133,7 @@ export function Testimonials() {
                     className={`h-2 rounded-full transition-all ${
                       i === index ? "w-6 bg-emerald-700" : "w-2 bg-muted-foreground/30 hover:bg-emerald-500/50"
                     }`}
-                    aria-label={`Ke testimoni ${i + 1}`}
+                    aria-label={t("testimonials.goToAria", { count: i + 1 })}
                   />
                 ))}
               </div>
@@ -163,9 +142,9 @@ export function Testimonials() {
                 size="icon"
                 className="h-11 w-11 rounded-full"
                 onClick={() => go(1)}
-                aria-label="Testimoni berikutnya"
+                aria-label={t("testimonials.nextAria")}
               >
-                <ChevronRight className="h-5 w-5" />
+                <NextIcon className="h-5 w-5" />
               </Button>
             </div>
           </div>

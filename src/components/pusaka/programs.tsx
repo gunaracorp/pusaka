@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Building2,
   CalendarDays,
@@ -22,10 +22,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
+import { useI18n } from "@/lib/i18n/provider";
 import {
   CATEGORY_LABEL,
-  formatIDR,
-  formatNumber,
   getPrograms,
   safeParseCountryList,
   safeParseJsonArray,
@@ -42,12 +41,22 @@ const PROGRAM_ICON: Record<string, React.ComponentType<{ className?: string }>> 
   "BPW-PRO": UserCheck,
 };
 
-const CATEGORY_TABS = [
-  { value: "SEMUA", label: "Semua" },
-  { value: "PERUSAHAAN", label: "Perusahaan" },
-  { value: "PROFESI", label: "Profesi" },
-  { value: "IZIN", label: "Izin" },
+const CATEGORY_TABS: { value: string; key: string }[] = [
+  { value: "SEMUA", key: "all" },
+  { value: "PERUSAHAAN", key: "company" },
+  { value: "PROFESI", key: "profession" },
+  { value: "IZIN", key: "license" },
 ];
+
+/** Terjemahan kunci dinamis; label meta jadi fallback bila kunci kamus tidak ada. */
+function metaT(
+  t: (path: string, vars?: Record<string, string | number>) => string,
+  key: string,
+  fallback: string
+): string {
+  const value = t(key);
+  return value === key ? fallback : value;
+}
 
 function ProgramDetailDialog({
   program,
@@ -56,6 +65,7 @@ function ProgramDetailDialog({
   program: ProgramT | null;
   onClose: () => void;
 }) {
+  const { t, formatCurrency } = useI18n();
   const requirements = safeParseJsonArray(program?.requirements);
   const benefits = safeParseJsonArray(program?.benefits);
   const accreditation = safeParseJsonArray(program?.accreditation);
@@ -79,11 +89,11 @@ function ProgramDetailDialog({
                   <Icon className="h-6 w-6" aria-hidden />
                 </span>
                 <div>
-                  <DialogTitle className="font-display text-left text-xl font-bold">
+                  <DialogTitle className="font-display text-start text-xl font-bold">
                     {program.name}
                   </DialogTitle>
                   <DialogDescription className="sr-only">
-                    Detail program sertifikasi {program.shortName}
+                    {t("programs.dialog.srDescription", { name: program.shortName })}
                   </DialogDescription>
                   <p className="mt-1 text-sm text-muted-foreground">{program.tagline}</p>
                 </div>
@@ -95,20 +105,24 @@ function ProgramDetailDialog({
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Investasi</p>
-                  <p className="mt-0.5 text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                    {formatIDR(program.price)}
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("programs.dialog.investment")}
                   </p>
-                </div>
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Durasi</p>
-                  <p className="mt-0.5 text-sm font-bold text-foreground">
-                    {program.durationDays} Hari
+                  <p className="mt-0.5 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                    {formatCurrency(program.price)}
                   </p>
                 </div>
                 <div className="rounded-lg border bg-muted/50 p-3">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Tingkat Kelulusan
+                    {t("programs.dialog.duration")}
+                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">
+                    {t("programs.daysCount", { count: program.durationDays })}
+                  </p>
+                </div>
+                <div className="rounded-lg border bg-muted/50 p-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {t("programs.dialog.passRate")}
                   </p>
                   <p className="mt-0.5 text-sm font-bold text-amber-600 dark:text-amber-400">{program.passRate}%</p>
                 </div>
@@ -116,7 +130,7 @@ function ProgramDetailDialog({
 
               <div>
                 <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                  Persyaratan
+                  {t("programs.dialog.requirements")}
                 </h4>
                 <ul className="space-y-1.5">
                   {requirements.map((r) => (
@@ -130,7 +144,7 @@ function ProgramDetailDialog({
 
               <div>
                 <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                  Manfaat Sertifikasi
+                  {t("programs.dialog.benefits")}
                 </h4>
                 <ul className="space-y-1.5">
                   {benefits.map((b) => (
@@ -145,7 +159,7 @@ function ProgramDetailDialog({
               {accreditation.length > 0 ? (
                 <div>
                   <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                    Diakui &amp; Diakreditasi oleh
+                    {t("programs.dialog.accreditation")}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {accreditation.map((a) => (
@@ -165,7 +179,7 @@ function ProgramDetailDialog({
                 <div>
                   <h4 className="mb-2 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                     <Globe2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />
-                    Cakupan Internasional
+                    {t("programs.dialog.internationalScope")}
                   </h4>
                   <ul>
                     {countries.map((c) => (
@@ -192,7 +206,7 @@ function ProgramDetailDialog({
                 onClick={() => handleApply(program.code)}
                 className="h-12 w-full bg-emerald-700 text-base font-bold hover:bg-emerald-800"
               >
-                Daftar Program Ini
+                {t("programs.dialog.apply")}
               </Button>
             </div>
           </>
@@ -203,11 +217,18 @@ function ProgramDetailDialog({
 }
 
 export function Programs() {
+  const { t, formatCurrency, formatNumber } = useI18n();
   const [programs, setPrograms] = useState<ProgramT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState("SEMUA");
   const [selected, setSelected] = useState<ProgramT | null>(null);
+
+  // Ref agar fetch awal tidak perlu t sebagai dependency (identitas t berubah saat ganti bahasa).
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   useEffect(() => {
     let alive = true;
@@ -216,7 +237,7 @@ export function Programs() {
         if (alive) setPrograms(data);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Gagal memuat program.");
+        if (alive) setError(e instanceof Error ? e.message : tRef.current("programs.loadError"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -235,21 +256,21 @@ export function Programs() {
     <section id="program" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Program Sertifikasi"
-          title="7 Jalur Sertifikasi & Akreditasi Resmi"
-          subtitle="Dari pendamping haji khusus hingga agen tiket internasional — pilih jalur sertifikasi yang sesuai dengan profil lembaga atau profesi Anda."
+          eyebrow={t("programs.eyebrow")}
+          title={t("programs.title")}
+          subtitle={t("programs.subtitle")}
         />
 
         <FadeIn delay={0.1} className="mt-8 flex justify-center">
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="h-11 bg-muted p-1">
-              {CATEGORY_TABS.map((t) => (
+              {CATEGORY_TABS.map((c) => (
                 <TabsTrigger
-                  key={t.value}
-                  value={t.value}
+                  key={c.value}
+                  value={c.value}
                   className="min-h-9 px-4 data-[state=active]:bg-emerald-700 data-[state=active]:text-white"
                 >
-                  {t.label}
+                  {t(`programs.tabs.${c.key}`)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -282,7 +303,7 @@ export function Programs() {
             <X className="h-8 w-8 text-red-400" aria-hidden />
             <p className="text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setTab(tab)}>
-              Coba muat ulang
+              {t("programs.retryLoad")}
             </Button>
           </div>
         ) : (
@@ -301,7 +322,11 @@ export function Programs() {
                           variant="outline"
                           className="border-emerald-600/30 bg-emerald-500/10 text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
                         >
-                          {CATEGORY_LABEL[p.category] ?? p.category}
+                          {metaT(
+                            t,
+                            `programs.category.${p.category}`,
+                            CATEGORY_LABEL[p.category] ?? p.category
+                          )}
                         </Badge>
                       </div>
 
@@ -312,18 +337,18 @@ export function Programs() {
 
                       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         <span className="font-semibold text-emerald-700 dark:text-emerald-300">
-                          {formatIDR(p.price)}
+                          {formatCurrency(p.price)}
                         </span>
                         <span className="flex items-center gap-1">
                           <CalendarDays className="h-3.5 w-3.5" aria-hidden />
-                          {p.durationDays} Hari
+                          {t("programs.daysCount", { count: p.durationDays })}
                         </span>
                         <span className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" aria-hidden />
-                          {formatNumber(p.holderCount)} pemegang
+                          {t("programs.holders", { count: formatNumber(p.holderCount) })}
                         </span>
                         <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-medium text-amber-700 dark:text-amber-400">
-                          Lolos {p.passRate}%
+                          {t("programs.passRateChip", { rate: p.passRate })}
                         </span>
                       </div>
 
@@ -333,7 +358,7 @@ export function Programs() {
                           className="h-10 w-full border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 hover:text-emerald-900 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:text-emerald-200"
                           onClick={() => setSelected(p)}
                         >
-                          Lihat Detail
+                          {t("programs.viewDetail")}
                         </Button>
                       </div>
                     </CardContent>
@@ -346,7 +371,7 @@ export function Programs() {
 
         {!loading && !error && filtered.length === 0 ? (
           <p className="mt-10 text-center text-sm text-muted-foreground">
-            Belum ada program pada kategori ini.
+            {t("programs.emptyCategory")}
           </p>
         ) : null}
       </div>
@@ -354,7 +379,7 @@ export function Programs() {
       <ProgramDetailDialog program={selected} onClose={() => setSelected(null)} />
       {loading ? (
         <span className="sr-only" aria-live="polite">
-          <Loader2 className="animate-spin" /> Memuat program…
+          <Loader2 className="animate-spin" /> {t("programs.loadingAria")}
         </span>
       ) : null}
     </section>

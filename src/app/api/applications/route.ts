@@ -168,6 +168,15 @@ export async function GET(request: Request) {
       done: currentIndex >= 0 && idx <= currentIndex,
     }));
 
+    // Data pembayaran: harga program + invoice terbaru (jika ada)
+    const program = await db.program.findUnique({
+      where: { code: application.programCode },
+    });
+    const latestPayment = await db.payment.findFirst({
+      where: { trackingCode: application.trackingCode },
+      orderBy: { createdAt: "desc" },
+    });
+
     return NextResponse.json({
       ok: true,
       data: {
@@ -177,6 +186,22 @@ export async function GET(request: Request) {
         fullName: application.fullName,
         createdAt: application.createdAt.toISOString(),
         statusHistory,
+        paymentStatus: application.paymentStatus,
+        amountDue: program ? program.price : 0,
+        latestPayment: latestPayment
+          ? {
+              id: latestPayment.id,
+              invoiceNo: latestPayment.invoiceNo,
+              method: latestPayment.method,
+              methodId: latestPayment.methodId,
+              provider: latestPayment.provider,
+              total: latestPayment.total,
+              status: latestPayment.status,
+              reference: latestPayment.reference,
+              paidAt: latestPayment.paidAt ? latestPayment.paidAt.toISOString() : null,
+              expiredAt: latestPayment.expiredAt.toISOString(),
+            }
+          : null,
       },
     });
   } catch (error) {

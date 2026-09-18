@@ -9,25 +9,11 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Megaphone, MoonStar } from "lucide-react";
 import { getNews } from "@/lib/pusaka";
-
-const STATIC_ITEMS = [
-  "Pendaftaran batch sertifikasi 2026 resmi dibuka",
-  "Verifikasi sertifikat kini online 24/7",
-];
-
-// Dibungkus try/catch: bila kalender islamic-umalqura tak didukung, badge disembunyikan isinya.
-let hijriFmt: Intl.DateTimeFormat | null = null;
-try {
-  hijriFmt = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-} catch {
-  hijriFmt = null;
-}
+import { useI18n } from "@/lib/i18n/provider";
+import { LANG_LOCALES } from "@/lib/i18n/types";
 
 export function TopTicker() {
+  const { t, lang } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [newsTitles, setNewsTitles] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
@@ -58,13 +44,14 @@ export function TopTicker() {
     };
   }, []);
 
+  // Pengumuman statis dari kamus + judul berita dari DB (tidak diterjemahkan).
   const items = useMemo(() => {
-    const merged = [...STATIC_ITEMS];
+    const merged = [t("topTicker.items.batch2026"), t("topTicker.items.verify247")];
     for (const title of newsTitles) {
       if (!merged.includes(title)) merged.push(title);
     }
     return merged;
-  }, [newsTitles]);
+  }, [newsTitles, t]);
 
   // Rotasi tiap 4 detik.
   useEffect(() => {
@@ -75,20 +62,29 @@ export function TopTicker() {
     return () => window.clearInterval(timer);
   }, [items.length]);
 
+  // Kalender Hijriah mengikuti locale bahasa aktif — client-computed setelah
+  // mounted (bebas hydration mismatch). Dibungkus try/catch: bila kalender
+  // islamic-umalqura tak didukung, badge disembunyikan isinya.
   const hijriDate = useMemo(() => {
-    if (!mounted || !hijriFmt) return "—";
+    if (!mounted) return "—";
     try {
-      return `${hijriFmt.format(new Date())} H`;
+      const fmt = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+        calendar: "islamic-umalqura",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      return `${fmt.format(new Date())} ${t("topTicker.hijriSuffix")}`;
     } catch {
       return "";
     }
-  }, [mounted]);
+  }, [mounted, lang, t]);
 
   const current = items[index % items.length];
 
   return (
     <section
-      aria-label="Pengumuman PUSAKA"
+      aria-label={t("topTicker.ariaLabel")}
       aria-live="polite"
       className="w-full border-b border-emerald-900/60 bg-emerald-950 text-emerald-100"
     >
@@ -96,11 +92,15 @@ export function TopTicker() {
         {/* Kalender Hijriah — client-computed setelah mounted (bebas hydration mismatch) */}
         <span className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-emerald-800 bg-emerald-900/40 px-2.5 py-1 font-medium text-emerald-200 sm:flex">
           <MoonStar className="h-3.5 w-3.5 text-amber-400" aria-hidden />
+          <span className="sr-only">{t("topTicker.hijriLabel")}</span>
           {hijriDate}
         </span>
 
         {/* Pengumuman berputar */}
         <Megaphone className="h-4 w-4 shrink-0 text-amber-400" aria-hidden />
+        <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-widest text-amber-300/90 md:inline">
+          {t("topTicker.label")}
+        </span>
         <div className="relative min-w-0 flex-1">
           <AnimatePresence mode="wait" initial={false}>
             <motion.a

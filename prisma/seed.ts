@@ -482,12 +482,90 @@ async function main() {
   // Sample applications for tracking demo
   const sampleApps = [
     { trackingCode: 'PSK-2025-83012', applicantType: 'INDIVIDU', programCode: 'PIHK', fullName: 'Ahmad Fauzi Rahman', email: 'ahmad.fauzi@mail.com', phone: '+62 812-3344-5566', city: 'Jakarta', status: 'ASSESSMENT' },
-    { trackingCode: 'PSK-2025-83013', applicantType: 'PERUSAHAAN', programCode: 'PPIU', fullName: 'Siti Aminah', email: 'admin@rahmattour.co.id', phone: '+62 813-9988-7766', institution: 'PT Rahmat Tour Wisata', city: 'Solo', status: 'VERIFIKASI' },
+    { trackingCode: 'PSK-2025-83013', applicantType: 'PERUSAHAAN', programCode: 'PPIU', fullName: 'Siti Aminah', email: 'admin@amanahnusantara.co.id', phone: '+62 813-9988-7766', institution: 'PT Amanah Nusantara Wisata', city: 'Solo', status: 'VERIFIKASI' },
     { trackingCode: 'PSK-2025-83014', applicantType: 'INDIVIDU', programCode: 'BPW-PRO', fullName: 'Bunga Kirana', email: 'bunga.kirana@mail.com', phone: '+62 878-1234-9090', city: 'Bandung', status: 'APPROVED' },
     { trackingCode: 'PSK-2025-83015', applicantType: 'PERUSAHAAN', programCode: 'BPW', fullName: 'Deni Hermawan', email: 'corp@denitravel.id', phone: '+62 811-4455-2233', institution: 'CV Deni Travel Perkasa', city: 'Malang', status: 'REVIEW' },
   ]
   for (const a of sampleApps) await prisma.application.create({ data: a })
   console.log(`  ✓ ${sampleApps.length} sample applications`)
+
+  // ============ PORTAL ANGGOTA (MemberAccount) ============
+  // Password semua akun demo: pusaka123 (hash via hashPassword scrypt bawaan file ini)
+  const MEMBER_DEMO_PASSWORD = 'pusaka123'
+  const memberAccounts = [
+    { email: 'finance@zahratour.co.id', name: 'Hendra Wijaya', position: 'Direktur Keuangan', institutionName: 'PT Zahra Tour Indonesia' },
+    { email: 'admin@amanahnusantara.co.id', name: 'Siti Aminah', position: 'Manajer Admisi', institutionName: 'PT Amanah Nusantara Wisata' },
+    { email: 'corp@tic.co.id', name: 'Bambang Susilo', position: 'Kepala Operasional', institutionName: 'PT Tour Indonesia Cahaya (TIC)' },
+    { email: 'contact@garudaoriente.co.id', name: 'Rina Marlina', position: 'General Manager', institutionName: 'PT Garuda Oriente Trans' },
+  ]
+  for (const m of memberAccounts) {
+    const inst = await prisma.institution.findFirst({ where: { name: m.institutionName } })
+    if (!inst) continue
+    await prisma.memberAccount.create({
+      data: {
+        email: m.email,
+        passwordHash: hashPassword(MEMBER_DEMO_PASSWORD),
+        name: m.name,
+        position: m.position,
+        institutionId: inst.id,
+      },
+    })
+  }
+  console.log(`  ✓ member accounts (demo password: ${MEMBER_DEMO_PASSWORD})`)
+
+  // ============ PAYMENT GATEWAY (invoice contoh) ============
+  const programByCode: Record<string, number> = {}
+  for (const p of await prisma.program.findMany()) programByCode[p.code] = p.price
+
+  const seededPayments = [
+    // PSK-2025-83012 (PIHK) — sudah LUNAS via QRIS
+    { trackingCode: 'PSK-2025-83012', programCode: 'PIHK', methodId: 'QRIS', method: 'QRIS', provider: 'QRIS', status: 'BERHASIL', paymentStatus: 'LUNAS' },
+    // PSK-2025-83013 (PPIU) — menunggu pembayaran via VA BCA
+    { trackingCode: 'PSK-2025-83013', programCode: 'PPIU', methodId: 'VA-BCA', method: 'VIRTUAL_ACCOUNT', provider: 'BCA', status: 'MENUNGGU', paymentStatus: 'MENUNGGU' },
+    // PSK-2025-83014 (BPW-PRO) — sudah LUNAS via VA Mandiri
+    { trackingCode: 'PSK-2025-83014', programCode: 'BPW-PRO', methodId: 'VA-MANDIRI', method: 'VIRTUAL_ACCOUNT', provider: 'Mandiri', status: 'BERHASIL', paymentStatus: 'LUNAS' },
+  ]
+  let paySeq = 1
+  for (const sp of seededPayments) {
+    const app = await prisma.application.findUnique({ where: { trackingCode: sp.trackingCode } })
+    if (!app) continue
+    const amount = programByCode[sp.programCode] ?? 5_000_000
+    const fee = sp.method === 'QRIS' ? 2_500 : 4_000
+    const invoiceNo = `INV-20260901-${String(100000 + paySeq * 137).slice(0, 6)}`
+    paySeq++
+    const created = new Date(now)
+    if (sp.status === 'BERHASIL') {
+      created.setDate(created.getDate() - 12)
+    } else {
+      created.setMinutes(created.getMinutes() - 30) // invoice MENUNGGU masih hidup ~1,5 jam
+    }
+    await prisma.payment.create({
+      data: {
+        invoiceNo,
+        trackingCode: sp.trackingCode,
+        applicationId: app.id,
+        programCode: sp.programCode,
+        method: sp.method,
+        methodId: sp.methodId,
+        provider: sp.provider,
+        amount,
+        fee,
+        total: amount + fee,
+        status: sp.status,
+        vaNumber: sp.method === 'VIRTUAL_ACCOUNT' ? `8808${Math.floor(10_000_000_000 + Math.random() * 89_999_999_999)}` : null,
+        qrPayload: sp.method === 'QRIS' ? `PUSAKA-QRIS|INV:${invoiceNo}|AMT:${amount + fee}|MID:ID1024PUSAKA2026|CRC:04A1` : null,
+        reference: sp.status === 'BERHASIL' ? `PAY-SEED-${paySeq}${Math.random().toString(36).slice(2, 6).toUpperCase()}` : null,
+        paidAt: sp.status === 'BERHASIL' ? new Date(created.getTime() + 45 * 60_000) : null,
+        expiredAt: new Date(created.getTime() + 2 * 60 * 60 * 1000),
+        createdAt: created,
+      },
+    })
+    await prisma.application.update({
+      where: { id: app.id },
+      data: { paymentStatus: sp.paymentStatus },
+    })
+  }
+  console.log(`  ✓ ${seededPayments.length} sample payments (QRIS + Virtual Account)`)
 
   // Verify logs (simulasi aktivitas verifikasi publik)
   const validCerts = institutions.filter(x => x.status !== 'KADALUARSA')

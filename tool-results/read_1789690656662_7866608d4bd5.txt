@@ -1,0 +1,976 @@
+     1→"use client";
+     2→
+     3→// ============================================================
+     4→// PUSAKA — Portal Anggota Lembaga (dialog, Task 9-f)
+     5→// - Dibuka dari Navbar via CustomEvent "pusaka:open-portal".
+     6→// - Guest: form login (demo account siap isi otomatis).
+     7→// - Authed: header institusi + 4 tab (Sertifikat / Pengajuan /
+     8→//   Pembayaran / Profil).
+     9→// - Invoice MENUNGGU → tombol "Bayar Sekarang" mengirim event
+    10→//   "pusaka:autofill-track" { detail: trackingCode } lalu menutup
+    11→//   dialog; TrackSection (halaman lacak) mengisi & melacak otomatis.
+    12→// ============================================================
+    13→
+    14→import {
+    15→  useCallback,
+    16→  useEffect,
+    17→  useState,
+    18→  useSyncExternalStore,
+    19→  type FormEvent,
+    20→  type ReactNode,
+    21→} from "react";
+    22→import {
+    23→  Award,
+    24→  BadgeCheck,
+    25→  Copy,
+    26→  CreditCard,
+    27→  Eye,
+    28→  EyeOff,
+    29→  FileStack,
+    30→  Gauge,
+    31→  Inbox,
+    32→  KeyRound,
+    33→  Loader2,
+    34→  LogIn,
+    35→  LogOut,
+    36→  ReceiptText,
+    37→  ShieldCheck,
+    38→  UserRound,
+    39→  type LucideIcon,
+    40→} from "lucide-react";
+    41→import { toast } from "sonner";
+    42→import { Badge } from "@/components/ui/badge";
+    43→import { Button } from "@/components/ui/button";
+    44→import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+    45→import {
+    46→  Dialog,
+    47→  DialogContent,
+    48→  DialogDescription,
+    49→  DialogHeader,
+    50→  DialogTitle,
+    51→} from "@/components/ui/dialog";
+    52→import { Input } from "@/components/ui/input";
+    53→import { Label } from "@/components/ui/label";
+    54→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    55→import { useI18n } from "@/lib/i18n/provider";
+    56→import { usePortalStore } from "@/lib/portal-store";
+    57→import {
+    58→  PROGRAM_LABELS,
+    59→  STATUS_META,
+    60→  TIER_META,
+    61→  TYPE_META,
+    62→  portalChangePassword,
+    63→  portalMe,
+    64→  type PaymentT,
+    65→  type PortalApplicationT,
+    66→} from "@/lib/pusaka";
+    67→import { cn } from "@/lib/utils";
+    68→
+    69→// ---------- Pola anti-hydration (sama dengan theme-toggle) ----------
+    70→const emptySubscribe = () => () => {};
+    71→const getClientSnapshot = () => true;
+    72→const getServerSnapshot = () => false;
+    73→
+    74→// ---------- Akun demo portal ----------
+    75→const DEMO_EMAIL = "finance@zahratour.co.id";
+    76→const DEMO_PASSWORD = "pusaka123";
+    77→
+    78→// ---------- Pemetaan status → kunci i18n & warna ----------
+    79→const INSTITUTION_STATUS_I18N: Record<string, string> = {
+    80→  AKTIF: "common.status.active",
+    81→  DIPERBARUI: "common.status.updated",
+    82→  KADALUARSA: "common.status.expired",
+    83→};
+    84→
+    85→const COMMON_TIER_I18N: Record<string, string> = {
+    86→  PLATINUM: "common.tiers.PLATINUM",
+    87→  GOLD: "common.tiers.GOLD",
+    88→  SILVER: "common.tiers.SILVER",
+    89→};
+    90→
+    91→const APPLICATION_STATUS_I18N: Record<string, string> = {
+    92→  SUBMITTED: "portal.status.SUBMITTED",
+    93→  REVIEW: "portal.status.REVIEW",
+    94→  VERIFIKASI: "portal.status.VERIFIKASI",
+    95→  ASSESSMENT: "portal.status.ASSESSMENT",
+    96→  APPROVED: "portal.status.APPROVED",
+    97→};
+    98→
+    99→const APPLICATION_STATUS_BADGE: Record<string, string> = {
+   100→  SUBMITTED: "border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
+   101→  REVIEW: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+   102→  VERIFIKASI: "border-teal-600/30 bg-teal-500/10 text-teal-800 dark:text-teal-300",
+   103→  ASSESSMENT: "border-orange-500/40 bg-orange-500/10 text-orange-700 dark:text-orange-300",
+   104→  APPROVED: "border-emerald-600/40 bg-emerald-600/15 text-emerald-800 dark:text-emerald-300",
+   105→};
+   106→
+   107→const APPLICATION_PAYMENT_STATE_I18N: Record<string, string> = {
+   108→  BELUM_BAYAR: "common.status.unpaid",
+   109→  MENUNGGU: "common.status.waiting",
+   110→  LUNAS: "common.status.paid",
+   111→};
+   112→
+   113→const APPLICATION_PAYMENT_STATE_BADGE: Record<string, string> = {
+   114→  BELUM_BAYAR:
+   115→    "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+   116→  MENUNGGU:
+   117→    "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+   118→  LUNAS:
+   119→    "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+   120→};
+   121→
+   122→const PAYMENT_STATUS_I18N: Record<string, string> = {
+   123→  MENUNGGU: "portal.payStatus.MENUNGGU",
+   124→  BERHASIL: "portal.payStatus.BERHASIL",
+   125→  GAGAL: "portal.payStatus.GAGAL",
+   126→  KADALUARSA: "portal.payStatus.KADALUARSA",
+   127→};
+   128→
+   129→const PAYMENT_STATUS_BADGE: Record<string, string> = {
+   130→  MENUNGGU: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+   131→  BERHASIL: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+   132→  GAGAL: "border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300",
+   133→  KADALUARSA: "border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300",
+   134→};
+   135→
+   136→// Scrollbar halus untuk area scroll (dialog + daftar panjang)
+   137→const SCROLLBAR_CLASS =
+   138→  "[scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-emerald-600/25 [&::-webkit-scrollbar-thumb:hover]:bg-emerald-600/45 dark:[&::-webkit-scrollbar-thumb]:bg-emerald-400/20 dark:[&::-webkit-scrollbar-thumb:hover]:bg-emerald-400/40";
+   139→
+   140→/** Ambil label dari peta i18n; fallback ke nilai mentah (data, bukan UI copy). */
+   141→function labelFor(
+   142→  map: Record<string, string>,
+   143→  key: string,
+   144→  t: (path: string) => string
+   145→): string {
+   146→  const path = map[key];
+   147→  return path ? t(path) : key;
+   148→}
+   149→
+   150→// ---------- Komponen kecil presentasional ----------
+   151→function InfoRow({ label, children }: { label: string; children: ReactNode }) {
+   152→  return (
+   153→    <div className="min-w-0">
+   154→      <dt className="text-xs text-muted-foreground">{label}</dt>
+   155→      <dd className="mt-0.5 text-sm font-medium text-foreground">{children}</dd>
+   156→    </div>
+   157→  );
+   158→}
+   159→
+   160→function EmptyState({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
+   161→  return (
+   162→    <div className="flex flex-col items-center gap-2 py-10 text-center">
+   163→      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+   164→        <Icon className="h-6 w-6 text-muted-foreground" aria-hidden />
+   165→      </span>
+   166→      <p className="max-w-xs text-sm text-muted-foreground">{text}</p>
+   167→    </div>
+   168→  );
+   169→}
+   170→
+   171→// ============================================================
+   172→// Komponen utama — render <MemberPortal /> sekali di page.tsx
+   173→// ============================================================
+   174→export function MemberPortal() {
+   175→  const { t, formatCurrency, formatDate } = useI18n();
+   176→  const account = usePortalStore((s) => s.account);
+   177→  const institution = usePortalStore((s) => s.institution);
+   178→  const status = usePortalStore((s) => s.status);
+   179→  const init = usePortalStore((s) => s.init);
+   180→  const login = usePortalStore((s) => s.login);
+   181→  const logout = usePortalStore((s) => s.logout);
+   182→
+   183→  const [open, setOpen] = useState(false);
+   184→  const [applications, setApplications] = useState<PortalApplicationT[]>([]);
+   185→  const [payments, setPayments] = useState<PaymentT[]>([]);
+   186→  const [dataLoaded, setDataLoaded] = useState(false);
+   187→
+   188→  // Form login
+   189→  const [email, setEmail] = useState("");
+   190→  const [password, setPassword] = useState("");
+   191→  const [showPassword, setShowPassword] = useState(false);
+   192→  const [submitting, setSubmitting] = useState(false);
+   193→
+   194→  // Form ganti password
+   195→  const [currentPassword, setCurrentPassword] = useState("");
+   196→  const [newPassword, setNewPassword] = useState("");
+   197→  const [confirmPassword, setConfirmPassword] = useState("");
+   198→  const [pwError, setPwError] = useState<string | null>(null);
+   199→  const [savingPassword, setSavingPassword] = useState(false);
+   200→
+   201→  // Guard mount (pola useSyncExternalStore — bebas set-state-in-effect)
+   202→  const mounted = useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
+   203→
+   204→  // Reset error form ganti password saat dialog dibuka ulang
+   205→  // (pola "adjust state during render" dari admin-login-dialog)
+   206→  const [lastOpen, setLastOpen] = useState(open);
+   207→  if (open !== lastOpen) {
+   208→    setLastOpen(open);
+   209→    if (open) setPwError(null);
+   210→  }
+   211→
+   212→  const authed = mounted && status === "authed" && account !== null && institution !== null;
+   213→
+   214→  // MOUNT: init sesi + dengarkan event "pusaka:open-portal" dari navbar
+   215→  useEffect(() => {
+   216→    void init();
+   217→    const onOpenPortal = () => setOpen(true);
+   218→    window.addEventListener("pusaka:open-portal", onOpenPortal);
+   219→    return () => window.removeEventListener("pusaka:open-portal", onOpenPortal);
+   220→  }, [init]);
+   221→
+   222→  // DATA: refetch portalMe setiap dialog terbuka / status berubah authed
+   223→  // (setState hanya di dalam .then/.finally — pola sama dengan news.tsx)
+   224→  useEffect(() => {
+   225→    if (!open || status !== "authed") return;
+   226→    let alive = true;
+   227→    portalMe()
+   228→      .then((data) => {
+   229→        if (!alive) return;
+   230→        if (data) {
+   231→          setApplications(data.applications);
+   232→          setPayments(data.payments);
+   233→        }
+   234→      })
+   235→      .catch(() => {
+   236→        // diam — data lama / empty state tetap tampil
+   237→      })
+   238→      .finally(() => {
+   239→        if (alive) setDataLoaded(true);
+   240→      });
+   241→    return () => {
+   242→      alive = false;
+   243→    };
+   244→  }, [open, status]);
+   245→
+   246→  const handleLogin = useCallback(
+   247→    async (e: FormEvent<HTMLFormElement>) => {
+   248→      e.preventDefault();
+   249→      if (submitting) return;
+   250→      setSubmitting(true);
+   251→      const ok = await login(email, password);
+   252→      if (ok) {
+   253→        setPassword("");
+   254→        setShowPassword(false);
+   255→        toast.success(t("portal.login.success"));
+   256→      } else {
+   257→        toast.error(t("portal.login.error"));
+   258→      }
+   259→      setSubmitting(false);
+   260→    },
+   261→    [email, password, login, submitting, t]
+   262→  );
+   263→
+   264→  const fillDemo = useCallback(() => {
+   265→    setEmail(DEMO_EMAIL);
+   266→    setPassword(DEMO_PASSWORD);
+   267→  }, []);
+   268→
+   269→  const handleCopy = useCallback(
+   270→    (value: string) => {
+   271→      const fail = () => toast.error(t("portal.misc.copyError"));
+   272→      if (typeof navigator !== "undefined" && navigator.clipboard) {
+   273→        navigator.clipboard
+   274→          .writeText(value)
+   275→          .then(() => toast.success(t("common.actions.copied")))
+   276→          .catch(fail);
+   277→      } else {
+   278→        fail();
+   279→      }
+   280→    },
+   281→    [t]
+   282→  );
+   283→
+   284→  // "Verifikasi & Unduh": tutup dialog + arahkan ke anchor #verifikasi
+   285→  const handleVerifyClick = useCallback(() => {
+   286→    setOpen(false);
+   287→    window.setTimeout(() => {
+   288→      window.location.hash = "#verifikasi";
+   289→    }, 250);
+   290→  }, []);
+   291→
+   292→  // Invoice MENUNGGU → kirim kode ke halaman lacak (TrackSection autofill)
+   293→  const handlePayNow = useCallback((trackingCode: string) => {
+   294→    window.dispatchEvent(
+   295→      new CustomEvent("pusaka:autofill-track", { detail: trackingCode })
+   296→    );
+   297→    setOpen(false);
+   298→    toast.info(t("portal.pay.redirectTrack"));
+   299→  }, [t]);
+   300→
+   301→  const handleLogout = useCallback(async () => {
+   302→    await logout();
+   303→    setApplications([]);
+   304→    setPayments([]);
+   305→    setDataLoaded(false);
+   306→    setCurrentPassword("");
+   307→    setNewPassword("");
+   308→    setConfirmPassword("");
+   309→    setPwError(null);
+   310→    toast.success(t("portal.profile.logoutSuccess"));
+   311→  }, [logout, t]);
+   312→
+   313→  const handleChangePassword = useCallback(
+   314→    async (e: FormEvent<HTMLFormElement>) => {
+   315→      e.preventDefault();
+   316→      if (savingPassword) return;
+   317→      if (!currentPassword) {
+   318→        setPwError(t("portal.profile.emptyCurrent"));
+   319→        return;
+   320→      }
+   321→      if (newPassword.length < 8) {
+   322→        setPwError(t("portal.profile.minChars"));
+   323→        return;
+   324→      }
+   325→      if (newPassword !== confirmPassword) {
+   326→        setPwError(t("portal.profile.mismatch"));
+   327→        return;
+   328→      }
+   329→      setPwError(null);
+   330→      setSavingPassword(true);
+   331→      try {
+   332→        await portalChangePassword({ currentPassword, newPassword });
+   333→        setCurrentPassword("");
+   334→        setNewPassword("");
+   335→        setConfirmPassword("");
+   336→        toast.success(t("portal.profile.success"));
+   337→      } catch {
+   338→        toast.error(t("portal.profile.error"));
+   339→      } finally {
+   340→        setSavingPassword(false);
+   341→      }
+   342→    },
+   343→    [confirmPassword, currentPassword, newPassword, savingPassword, t]
+   344→  );
+   345→
+   346→  // ---------- Ringkasan pembayaran ----------
+   347→  const totalPaid = payments
+   348→    .filter((p) => p.status === "BERHASIL")
+   349→    .reduce((sum, p) => sum + p.total, 0);
+   350→  const activeDue = payments
+   351→    .filter((p) => p.status === "MENUNGGU")
+   352→    .reduce((sum, p) => sum + p.total, 0);
+   353→
+   354→  return (
+   355→    <Dialog open={open} onOpenChange={setOpen}>
+   356→      <DialogContent
+   357→        className={`w-[min(94vw,760px)] max-h-[85vh] gap-5 overflow-y-auto ${SCROLLBAR_CLASS}`}
+   358→      >
+   359→        {!authed || !account || !institution ? (
+   360→          // ================= VIEW GUEST / LOADING =================
+   361→          <>
+   362→            <DialogHeader className="items-center text-center">
+   363→              <div
+   364→                className="mx-auto mb-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-amber-500 text-white shadow-md shadow-emerald-900/20"
+   365→                aria-hidden
+   366→              >
+   367→                <UserRound className="h-7 w-7" />
+   368→              </div>
+   369→              <DialogTitle className="text-center font-display text-xl">
+   370→                {t("portal.login.title")}
+   371→              </DialogTitle>
+   372→              <DialogDescription className="text-center">
+   373→                {t("portal.login.subtitle")}
+   374→              </DialogDescription>
+   375→            </DialogHeader>
+   376→
+   377→            {mounted && status === "loading" ? (
+   378→              <div className="flex flex-col items-center gap-3 py-10" role="status" aria-live="polite">
+   379→                <Loader2
+   380→                  className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-400"
+   381→                  aria-hidden
+   382→                />
+   383→                <p className="text-sm text-muted-foreground">{t("common.actions.loading")}</p>
+   384→              </div>
+   385→            ) : (
+   386→              <>
+   387→                <form onSubmit={handleLogin} className="space-y-4" noValidate>
+   388→                  <div className="space-y-2">
+   389→                    <Label htmlFor="portal-email">{t("portal.login.emailLabel")}</Label>
+   390→                    <Input
+   391→                      id="portal-email"
+   392→                      name="email"
+   393→                      type="email"
+   394→                      autoComplete="email"
+   395→                      placeholder={t("portal.login.emailPlaceholder")}
+   396→                      value={email}
+   397→                      onChange={(e) => setEmail(e.target.value)}
+   398→                      disabled={submitting}
+   399→                      required
+   400→                    />
+   401→                  </div>
+   402→
+   403→                  <div className="space-y-2">
+   404→                    <Label htmlFor="portal-password">{t("portal.login.passwordLabel")}</Label>
+   405→                    <div className="relative">
+   406→                      <Input
+   407→                        id="portal-password"
+   408→                        name="password"
+   409→                        type={showPassword ? "text" : "password"}
+   410→                        autoComplete="current-password"
+   411→                        placeholder="••••••••"
+   412→                        value={password}
+   413→                        onChange={(e) => setPassword(e.target.value)}
+   414→                        className="pr-10"
+   415→                        disabled={submitting}
+   416→                        required
+   417→                      />
+   418→                      <button
+   419→                        type="button"
+   420→                        onClick={() => setShowPassword((v) => !v)}
+   421→                        className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:hover:text-emerald-300"
+   422→                        aria-label={
+   423→                          showPassword
+   424→                            ? t("portal.login.hidePassword")
+   425→                            : t("portal.login.showPassword")
+   426→                        }
+   427→                        aria-pressed={showPassword}
+   428→                      >
+   429→                        {showPassword ? (
+   430→                          <EyeOff className="h-4 w-4" aria-hidden />
+   431→                        ) : (
+   432→                          <Eye className="h-4 w-4" aria-hidden />
+   433→                        )}
+   434→                      </button>
+   435→                    </div>
+   436→                  </div>
+   437→
+   438→                  <Button
+   439→                    type="submit"
+   440→                    disabled={submitting}
+   441→                    className="h-11 w-full gap-2 bg-emerald-700 text-white hover:bg-emerald-800"
+   442→                  >
+   443→                    {submitting ? (
+   444→                      <>
+   445→                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+   446→                        {t("portal.login.submitting")}
+   447→                      </>
+   448→                    ) : (
+   449→                      <>
+   450→                        <LogIn className="h-4 w-4" aria-hidden />
+   451→                        {t("portal.login.submit")}
+   452→                      </>
+   453→                    )}
+   454→                  </Button>
+   455→                </form>
+   456→
+   457→                {/* Hint akun demo */}
+   458→                <div className="rounded-lg border border-dashed border-amber-500/40 bg-amber-500/10 p-3">
+   459→                  <div className="flex items-start gap-2">
+   460→                    <KeyRound
+   461→                      className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400"
+   462→                      aria-hidden
+   463→                    />
+   464→                    <div className="min-w-0 flex-1">
+   465→                      <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
+   466→                        {t("portal.login.demoHint")}
+   467→                      </p>
+   468→                      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+   469→                        <code className="min-w-0 break-all font-mono text-[11px] text-amber-900 dark:text-amber-100">
+   470→                          {DEMO_EMAIL} / {DEMO_PASSWORD}
+   471→                        </code>
+   472→                        <Button
+   473→                          type="button"
+   474→                          variant="ghost"
+   475→                          size="sm"
+   476→                          className="h-7 shrink-0 gap-1.5 px-2 text-xs text-amber-700 hover:bg-amber-500/20 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
+   477→                          onClick={fillDemo}
+   478→                          aria-label={`${t("portal.login.useAccount")} ${DEMO_EMAIL}`}
+   479→                        >
+   480→                          {t("portal.login.useAccount")}
+   481→                        </Button>
+   482→                      </div>
+   483→                    </div>
+   484→                  </div>
+   485→                </div>
+   486→              </>
+   487→            )}
+   488→          </>
+   489→        ) : (
+   490→          // ================= VIEW AUTHED =================
+   491→          <>
+   492→            {/* Header institusi */}
+   493→            <div className="rounded-xl border border-emerald-600/20 bg-gradient-to-br from-emerald-500/10 via-transparent to-amber-500/10 p-4 dark:border-emerald-500/30">
+   494→              <div className="flex flex-wrap items-start justify-between gap-3">
+   495→                <div className="flex min-w-0 items-start gap-3">
+   496→                  <span
+   497→                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-amber-500 font-display text-lg font-black text-white shadow-sm"
+   498→                    aria-hidden
+   499→                  >
+   500→                    {institution.name.charAt(0)}
+   501→                  </span>
+   502→                  <div className="min-w-0">
+   503→                    <DialogTitle className="font-display text-lg font-bold leading-tight text-foreground">
+   504→                      {institution.name}
+   505→                    </DialogTitle>
+   506→                    <DialogDescription className="sr-only">
+   507→                      {t("portal.login.title")}
+   508→                    </DialogDescription>
+   509→                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+   510→                      {institution.certNumber}
+   511→                    </p>
+   512→                  </div>
+   513→                </div>
+   514→                <div className="flex flex-wrap items-center gap-1.5">
+   515→                  <Badge
+   516→                    variant="outline"
+   517→                    className={cn(
+   518→                      TYPE_META[institution.type]?.badgeClass ??
+   519→                        "border-border bg-muted text-foreground"
+   520→                    )}
+   521→                  >
+   522→                    {institution.type}
+   523→                  </Badge>
+   524→                  <Badge variant="outline" className={TIER_META[institution.tier]?.badgeClass}>
+   525→                    <span
+   526→                      className={cn(
+   527→                        "h-1.5 w-1.5 rounded-full",
+   528→                        TIER_META[institution.tier]?.dotClass ?? "bg-muted-foreground"
+   529→                      )}
+   530→                      aria-hidden
+   531→                    />
+   532→                    {labelFor(COMMON_TIER_I18N, institution.tier, t)}
+   533→                  </Badge>
+   534→                  <Badge
+   535→                    variant="outline"
+   536→                    className={STATUS_META[institution.status]?.badgeClass}
+   537→                  >
+   538→                    {labelFor(INSTITUTION_STATUS_I18N, institution.status, t)}
+   539→                  </Badge>
+   540→                  <span
+   541→                    className="inline-flex items-center gap-1 rounded-md border border-emerald-600/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:border-emerald-500/40 dark:text-emerald-300"
+   542→                    aria-label={t("portal.cert.auditScore")}
+   543→                    title={t("portal.cert.auditScore")}
+   544→                  >
+   545→                    <Gauge className="h-3 w-3" aria-hidden />
+   546→                    {institution.score} / 100
+   547→                  </span>
+   548→                </div>
+   549→              </div>
+   550→            </div>
+   551→
+   552→            {!dataLoaded ? (
+   553→              <p className="flex items-center gap-2 text-xs text-muted-foreground" role="status">
+   554→                <Loader2
+   555→                  className="h-3.5 w-3.5 animate-spin text-emerald-600 dark:text-emerald-400"
+   556→                  aria-hidden
+   557→                />
+   558→                {t("common.actions.loading")}
+   559→              </p>
+   560→            ) : null}
+   561→
+   562→            {/* 4 Tab utama */}
+   563→            <Tabs defaultValue="certificate" className="w-full">
+   564→              <TabsList className="grid h-auto w-full grid-cols-4 p-1">
+   565→                <TabsTrigger
+   566→                  value="certificate"
+   567→                  className="gap-1.5 px-1 py-1.5 text-xs sm:text-sm"
+   568→                >
+   569→                  <Award className="h-4 w-4 shrink-0" aria-hidden />
+   570→                  <span className="truncate">{t("portal.tabs.certificate")}</span>
+   571→                </TabsTrigger>
+   572→                <TabsTrigger
+   573→                  value="applications"
+   574→                  className="gap-1.5 px-1 py-1.5 text-xs sm:text-sm"
+   575→                >
+   576→                  <FileStack className="h-4 w-4 shrink-0" aria-hidden />
+   577→                  <span className="truncate">{t("portal.tabs.applications")}</span>
+   578→                </TabsTrigger>
+   579→                <TabsTrigger value="payments" className="gap-1.5 px-1 py-1.5 text-xs sm:text-sm">
+   580→                  <CreditCard className="h-4 w-4 shrink-0" aria-hidden />
+   581→                  <span className="truncate">{t("portal.tabs.payments")}</span>
+   582→                </TabsTrigger>
+   583→                <TabsTrigger value="profile" className="gap-1.5 px-1 py-1.5 text-xs sm:text-sm">
+   584→                  <UserRound className="h-4 w-4 shrink-0" aria-hidden />
+   585→                  <span className="truncate">{t("portal.tabs.profile")}</span>
+   586→                </TabsTrigger>
+   587→              </TabsList>
+   588→
+   589→              {/* ---- Tab 1: SERTIFIKAT ---- */}
+   590→              <TabsContent value="certificate" className="mt-3">
+   591→                <Card className="border-border">
+   592→                  <CardHeader className="pb-3">
+   593→                    <CardTitle className="flex items-center gap-2 text-base">
+   594→                      <BadgeCheck
+   595→                        className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+   596→                        aria-hidden
+   597→                      />
+   598→                      {t("portal.cert.title")}
+   599→                    </CardTitle>
+   600→                  </CardHeader>
+   601→                  <CardContent className="space-y-4">
+   602→                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/50 p-3">
+   603→                      <div className="min-w-0">
+   604→                        <p className="text-xs text-muted-foreground">
+   605→                          {t("portal.cert.number")}
+   606→                        </p>
+   607→                        <p className="truncate font-mono text-base font-bold text-emerald-800 dark:text-emerald-300">
+   608→                          {institution.certNumber}
+   609→                        </p>
+   610→                      </div>
+   611→                      <Button
+   612→                        variant="ghost"
+   613→                        size="icon"
+   614→                        className="h-8 w-8 shrink-0"
+   615→                        onClick={() => handleCopy(institution.certNumber)}
+   616→                        aria-label={t("portal.cert.copyNumber")}
+   617→                      >
+   618→                        <Copy className="h-3.5 w-3.5" aria-hidden />
+   619→                      </Button>
+   620→                    </div>
+   621→
+   622→                    <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+   623→                      <InfoRow label={t("portal.cert.program")}>
+   624→                        {PROGRAM_LABELS[institution.programCode] ?? institution.programCode}
+   625→                      </InfoRow>
+   626→                      <InfoRow label={t("portal.cert.type")}>{institution.type}</InfoRow>
+   627→                      <InfoRow label={t("portal.cert.tier")}>
+   628→                        {labelFor(COMMON_TIER_I18N, institution.tier, t)}
+   629→                      </InfoRow>
+   630→                      <InfoRow label={t("portal.cert.issued")}>
+   631→                        {formatDate(institution.issuedAt)}
+   632→                      </InfoRow>
+   633→                      <InfoRow label={t("portal.cert.validUntil")}>
+   634→                        <span className="inline-flex flex-wrap items-center gap-2">
+   635→                          {formatDate(institution.expiresAt)}
+   636→                          <Badge
+   637→                            variant="outline"
+   638→                            className={STATUS_META[institution.status]?.badgeClass}
+   639→                          >
+   640→                            {labelFor(INSTITUTION_STATUS_I18N, institution.status, t)}
+   641→                          </Badge>
+   642→                        </span>
+   643→                      </InfoRow>
+   644→                      <InfoRow label={t("portal.cert.auditScore")}>
+   645→                        {institution.score} / 100
+   646→                      </InfoRow>
+   647→                    </dl>
+   648→
+   649→                    <div className="flex justify-end border-t pt-4">
+   650→                      <Button
+   651→                        asChild
+   652→                        className="h-11 w-full gap-2 bg-emerald-700 text-white hover:bg-emerald-800 sm:w-auto"
+   653→                      >
+   654→                        <a
+   655→                          href="#verifikasi"
+   656→                          onClick={handleVerifyClick}
+   657→                          aria-label={t("portal.cert.verifyDownload")}
+   658→                        >
+   659→                          <ShieldCheck className="h-4 w-4" aria-hidden />
+   660→                          {t("portal.cert.verifyDownload")}
+   661→                        </a>
+   662→                      </Button>
+   663→                    </div>
+   664→                  </CardContent>
+   665→                </Card>
+   666→              </TabsContent>
+   667→
+   668→              {/* ---- Tab 2: PENGAJUAN ---- */}
+   669→              <TabsContent value="applications" className="mt-3">
+   670→                <Card className="border-border">
+   671→                  <CardHeader className="pb-3">
+   672→                    <CardTitle className="flex items-center gap-2 text-base">
+   673→                      <FileStack
+   674→                        className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+   675→                        aria-hidden
+   676→                      />
+   677→                      {t("portal.apps.title")}
+   678→                    </CardTitle>
+   679→                  </CardHeader>
+   680→                  <CardContent>
+   681→                    {applications.length === 0 ? (
+   682→                      <EmptyState icon={Inbox} text={t("portal.apps.empty")} />
+   683→                    ) : (
+   684→                      <ul className={`max-h-72 space-y-2 overflow-y-auto pr-1 ${SCROLLBAR_CLASS}`}>
+   685→                        {applications.map((app) => (
+   686→                          <li
+   687→                            key={app.id}
+   688→                            className="rounded-lg border bg-muted/40 p-3 transition-colors hover:border-emerald-600/30 dark:hover:border-emerald-500/30"
+   689→                          >
+   690→                            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+   691→                              <div className="min-w-0">
+   692→                                <p className="truncate font-mono text-sm font-bold text-emerald-800 dark:text-emerald-300">
+   693→                                  {app.trackingCode}
+   694→                                </p>
+   695→                                <p className="mt-0.5 text-xs text-muted-foreground">
+   696→                                  {PROGRAM_LABELS[app.programCode] ?? app.programCode}
+   697→                                  {" · "}
+   698→                                  {t("portal.apps.registeredAt")} {formatDate(app.createdAt)}
+   699→                                </p>
+   700→                              </div>
+   701→                              <div className="flex flex-wrap items-center gap-1.5">
+   702→                                <Badge
+   703→                                  variant="outline"
+   704→                                  className={cn(
+   705→                                    APPLICATION_STATUS_BADGE[app.status] ??
+   706→                                      "border-border bg-muted text-foreground"
+   707→                                  )}
+   708→                                >
+   709→                                  {labelFor(APPLICATION_STATUS_I18N, app.status, t)}
+   710→                                </Badge>
+   711→                                <Badge
+   712→                                  variant="outline"
+   713→                                  className={cn(
+   714→                                    APPLICATION_PAYMENT_STATE_BADGE[app.paymentStatus] ??
+   715→                                      "border-border bg-muted text-foreground"
+   716→                                  )}
+   717→                                >
+   718→                                  {labelFor(
+   719→                                    APPLICATION_PAYMENT_STATE_I18N,
+   720→                                    app.paymentStatus,
+   721→                                    t
+   722→                                  )}
+   723→                                </Badge>
+   724→                                <Button
+   725→                                  variant="ghost"
+   726→                                  size="icon"
+   727→                                  className="h-7 w-7"
+   728→                                  onClick={() => handleCopy(app.trackingCode)}
+   729→                                  aria-label={`${t("portal.apps.copyTracking")} ${app.trackingCode}`}
+   730→                                >
+   731→                                  <Copy className="h-3 w-3" aria-hidden />
+   732→                                </Button>
+   733→                              </div>
+   734→                            </div>
+   735→                          </li>
+   736→                        ))}
+   737→                      </ul>
+   738→                    )}
+   739→                  </CardContent>
+   740→                </Card>
+   741→              </TabsContent>
+   742→
+   743→              {/* ---- Tab 3: PEMBAYARAN ---- */}
+   744→              <TabsContent value="payments" className="mt-3 space-y-3">
+   745→                <div className="grid grid-cols-2 gap-2">
+   746→                  <div className="rounded-lg border border-emerald-600/20 bg-emerald-500/10 p-3 dark:border-emerald-500/30">
+   747→                    <p className="text-xs text-muted-foreground">{t("portal.pay.summaryPaid")}</p>
+   748→                    <p className="mt-0.5 font-display text-base font-bold text-emerald-800 dark:text-emerald-300">
+   749→                      {formatCurrency(totalPaid)}
+   750→                    </p>
+   751→                  </div>
+   752→                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
+   753→                    <p className="text-xs text-muted-foreground">{t("portal.pay.summaryDue")}</p>
+   754→                    <p className="mt-0.5 font-display text-base font-bold text-amber-700 dark:text-amber-300">
+   755→                      {formatCurrency(activeDue)}
+   756→                    </p>
+   757→                  </div>
+   758→                </div>
+   759→
+   760→                <Card className="border-border">
+   761→                  <CardHeader className="pb-3">
+   762→                    <CardTitle className="flex items-center gap-2 text-base">
+   763→                      <ReceiptText
+   764→                        className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+   765→                        aria-hidden
+   766→                      />
+   767→                      {t("portal.pay.title")}
+   768→                    </CardTitle>
+   769→                  </CardHeader>
+   770→                  <CardContent>
+   771→                    {payments.length === 0 ? (
+   772→                      <EmptyState icon={ReceiptText} text={t("portal.pay.empty")} />
+   773→                    ) : (
+   774→                      <ul className={`max-h-72 space-y-2 overflow-y-auto pr-1 ${SCROLLBAR_CLASS}`}>
+   775→                        {payments.map((payment) => (
+   776→                          <li
+   777→                            key={payment.id}
+   778→                            className="rounded-lg border bg-muted/40 p-3 transition-colors hover:border-emerald-600/30 dark:hover:border-emerald-500/30"
+   779→                          >
+   780→                            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+   781→                              <div className="min-w-0 flex-1">
+   782→                                <div className="flex items-center gap-1">
+   783→                                  <p className="truncate font-mono text-sm font-bold text-foreground">
+   784→                                    {payment.invoiceNo}
+   785→                                  </p>
+   786→                                  <button
+   787→                                    type="button"
+   788→                                    onClick={() => handleCopy(payment.invoiceNo)}
+   789→                                    className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:hover:text-emerald-300"
+   790→                                    aria-label={`${t("portal.pay.copyInvoice")} ${payment.invoiceNo}`}
+   791→                                  >
+   792→                                    <Copy className="h-3.5 w-3.5" aria-hidden />
+   793→                                  </button>
+   794→                                </div>
+   795→                                <p className="mt-0.5 text-xs text-muted-foreground">
+   796→                                  {payment.provider}
+   797→                                  {" · "}
+   798→                                  {payment.methodId}
+   799→                                  {" · "}
+   800→                                  {formatDate(payment.createdAt)}
+   801→                                </p>
+   802→                                {payment.status === "MENUNGGU" ? (
+   803→                                  <Button
+   804→                                    variant="outline"
+   805→                                    size="sm"
+   806→                                    className="mt-2 h-8 gap-1.5 border-amber-500/50 text-amber-700 hover:bg-amber-500/15 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
+   807→                                    onClick={() => handlePayNow(payment.trackingCode)}
+   808→                                    aria-label={`${t("portal.pay.payNow")} ${payment.invoiceNo}`}
+   809→                                  >
+   810→                                    <CreditCard className="h-3.5 w-3.5" aria-hidden />
+   811→                                    {t("portal.pay.payNow")}
+   812→                                  </Button>
+   813→                                ) : null}
+   814→                              </div>
+   815→                              <div className="flex flex-col items-start gap-1 sm:items-end">
+   816→                                <span className="text-sm font-bold text-foreground">
+   817→                                  {formatCurrency(payment.total)}
+   818→                                </span>
+   819→                                <Badge
+   820→                                  variant="outline"
+   821→                                  className={cn(
+   822→                                    PAYMENT_STATUS_BADGE[payment.status] ??
+   823→                                      PAYMENT_STATUS_BADGE.KADALUARSA,
+   824→                                    payment.status === "MENUNGGU" && "animate-pulse-amber"
+   825→                                  )}
+   826→                                >
+   827→                                  {labelFor(PAYMENT_STATUS_I18N, payment.status, t)}
+   828→                                </Badge>
+   829→                              </div>
+   830→                            </div>
+   831→                          </li>
+   832→                        ))}
+   833→                      </ul>
+   834→                    )}
+   835→                  </CardContent>
+   836→                </Card>
+   837→              </TabsContent>
+   838→
+   839→              {/* ---- Tab 4: PROFIL ---- */}
+   840→              <TabsContent value="profile" className="mt-3">
+   841→                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+   842→                  <Card className="border-border">
+   843→                    <CardHeader className="pb-3">
+   844→                      <CardTitle className="flex items-center gap-2 text-base">
+   845→                        <UserRound
+   846→                          className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+   847→                          aria-hidden
+   848→                        />
+   849→                        {t("portal.profile.title")}
+   850→                      </CardTitle>
+   851→                    </CardHeader>
+   852→                    <CardContent>
+   853→                      <dl className="space-y-3">
+   854→                        <InfoRow label={t("portal.profile.name")}>{account.name}</InfoRow>
+   855→                        <InfoRow label={t("portal.profile.position")}>
+   856→                          {account.position ?? "-"}
+   857→                        </InfoRow>
+   858→                        <InfoRow label={t("portal.profile.email")}>{account.email}</InfoRow>
+   859→                        <InfoRow label={t("portal.profile.memberSince")}>
+   860→                          {formatDate(account.createdAt)}
+   861→                        </InfoRow>
+   862→                      </dl>
+   863→                    </CardContent>
+   864→                  </Card>
+   865→
+   866→                  <Card className="border-border">
+   867→                    <CardHeader className="pb-3">
+   868→                      <CardTitle className="flex items-center gap-2 text-base">
+   869→                        <KeyRound
+   870→                          className="h-5 w-5 text-amber-600 dark:text-amber-400"
+   871→                          aria-hidden
+   872→                        />
+   873→                        {t("portal.profile.changePassword")}
+   874→                      </CardTitle>
+   875→                    </CardHeader>
+   876→                    <CardContent>
+   877→                      <form onSubmit={handleChangePassword} className="space-y-3" noValidate>
+   878→                        <div className="space-y-1.5">
+   879→                          <Label htmlFor="portal-current-password">
+   880→                            {t("portal.profile.currentPassword")}
+   881→                          </Label>
+   882→                          <Input
+   883→                            id="portal-current-password"
+   884→                            name="currentPassword"
+   885→                            type="password"
+   886→                            autoComplete="current-password"
+   887→                            value={currentPassword}
+   888→                            onChange={(e) => setCurrentPassword(e.target.value)}
+   889→                            disabled={savingPassword}
+   890→                            required
+   891→                          />
+   892→                        </div>
+   893→                        <div className="space-y-1.5">
+   894→                          <Label htmlFor="portal-new-password">
+   895→                            {t("portal.profile.newPassword")}
+   896→                          </Label>
+   897→                          <Input
+   898→                            id="portal-new-password"
+   899→                            name="newPassword"
+   900→                            type="password"
+   901→                            autoComplete="new-password"
+   902→                            minLength={8}
+   903→                            value={newPassword}
+   904→                            onChange={(e) => setNewPassword(e.target.value)}
+   905→                            disabled={savingPassword}
+   906→                            required
+   907→                          />
+   908→                        </div>
+   909→                        <div className="space-y-1.5">
+   910→                          <Label htmlFor="portal-confirm-password">
+   911→                            {t("portal.profile.confirmPassword")}
+   912→                          </Label>
+   913→                          <Input
+   914→                            id="portal-confirm-password"
+   915→                            name="confirmPassword"
+   916→                            type="password"
+   917→                            autoComplete="new-password"
+   918→                            minLength={8}
+   919→                            value={confirmPassword}
+   920→                            onChange={(e) => setConfirmPassword(e.target.value)}
+   921→                            disabled={savingPassword}
+   922→                            required
+   923→                          />
+   924→                        </div>
+   925→
+   926→                        {pwError ? (
+   927→                          <p
+   928→                            role="alert"
+   929→                            className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-700 dark:text-red-300"
+   930→                          >
+   931→                            {pwError}
+   932→                          </p>
+   933→                        ) : null}
+   934→
+   935→                        <Button
+   936→                          type="submit"
+   937→                          disabled={savingPassword}
+   938→                          className="h-10 w-full gap-2 bg-emerald-700 text-white hover:bg-emerald-800"
+   939→                        >
+   940→                          {savingPassword ? (
+   941→                            <>
+   942→                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+   943→                              {t("portal.profile.submitting")}
+   944→                            </>
+   945→                          ) : (
+   946→                            <>
+   947→                              <KeyRound className="h-4 w-4" aria-hidden />
+   948→                              {t("portal.profile.submit")}
+   949→                            </>
+   950→                          )}
+   951→                        </Button>
+   952→                      </form>
+   953→                    </CardContent>
+   954→                  </Card>
+   955→                </div>
+   956→
+   957→                <div className="mt-4 flex justify-center border-t pt-4 sm:justify-end">
+   958→                  <Button
+   959→                    variant="outline"
+   960→                    className="h-10 gap-2 border-red-500/40 text-red-700 hover:bg-red-500/10 hover:text-red-800 dark:text-red-300 dark:hover:text-red-200"
+   961→                    onClick={() => void handleLogout()}
+   962→                    aria-label={t("portal.profile.logoutAria")}
+   963→                  >
+   964→                    <LogOut className="h-4 w-4" aria-hidden />
+   965→                    {t("portal.profile.logout")}
+   966→                  </Button>
+   967→                </div>
+   968→              </TabsContent>
+   969→            </Tabs>
+   970→          </>
+   971→        )}
+   972→      </DialogContent>
+   973→    </Dialog>
+   974→  );
+   975→}
+   976→

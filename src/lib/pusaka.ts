@@ -149,6 +149,19 @@ export interface ApplicationResp {
   status: string;
 }
 
+export interface TrackLatestPaymentT {
+  id: string;
+  invoiceNo: string;
+  method: string;
+  methodId: string;
+  provider: string;
+  total: number;
+  status: string;
+  reference: string | null;
+  paidAt: string | null;
+  expiredAt: string;
+}
+
 export interface TrackResp {
   trackingCode: string;
   programCode: string;
@@ -156,6 +169,12 @@ export interface TrackResp {
   fullName: string;
   createdAt: string;
   statusHistory: { label: string; at: string | null; done: boolean }[];
+  /** Status pembayaran: BELUM_BAYAR | MENUNGGU | LUNAS */
+  paymentStatus: string;
+  /** Nominal biaya program (IDR). */
+  amountDue: number;
+  /** Invoice terbaru untuk pengajuan ini (jika pernah dibuat). */
+  latestPayment: TrackLatestPaymentT | null;
 }
 
 export interface ApplicationBody {
@@ -526,4 +545,111 @@ export const subscribeNewsletter = (email: string) =>
   apiRequest<NewsletterResult>("/api/newsletter", {
     method: "POST",
     body: JSON.stringify({ email }),
+  });
+
+// ============================================================
+// 12. PAYMENT GATEWAY — /api/payments/*
+// ============================================================
+
+export type PaymentMethodTypeT = "QRIS" | "VIRTUAL_ACCOUNT" | "E_WALLET" | "CREDIT_CARD";
+
+export interface PaymentMethodT {
+  id: string;
+  label: string;
+  provider: string;
+  type: PaymentMethodTypeT;
+  fee: number;
+  note: string;
+}
+
+export type PaymentStatusT = "MENUNGGU" | "BERHASIL" | "GAGAL" | "KADALUARSA";
+
+export interface PaymentT {
+  id: string;
+  invoiceNo: string;
+  trackingCode: string;
+  programCode: string;
+  method: PaymentMethodTypeT;
+  methodId: string;
+  provider: string;
+  amount: number;
+  fee: number;
+  total: number;
+  status: PaymentStatusT;
+  vaNumber: string | null;
+  qrPayload: string | null;
+  reference: string | null;
+  paidAt: string | null;
+  expiredAt: string;
+  createdAt: string;
+}
+
+/** GET /api/payments/methods — daftar channel pembayaran. */
+export const getPaymentMethods = () =>
+  apiRequest<PaymentMethodT[]>("/api/payments/methods");
+
+/** POST /api/payments — buat invoice pembayaran untuk kode pelacakan. */
+export const createPayment = (body: { trackingCode: string; methodId: string }) =>
+  apiRequest<PaymentT>("/api/payments", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+/** POST /api/payments/:id/settle — simulasi pembayaran (mode demo). */
+export const settlePayment = (id: string) =>
+  apiRequest<PaymentT>(`/api/payments/${id}/settle`, { method: "POST" });
+
+/** GET /api/payments?trackingCode= — daftar invoice untuk satu pengajuan. */
+export const listPayments = (trackingCode: string) =>
+  apiRequest<PaymentT[]>(`/api/payments?trackingCode=${encodeURIComponent(trackingCode)}`);
+
+// ============================================================
+// 13. PORTAL ANGGOTA LEMBAGA — /api/portal/*
+// ============================================================
+
+export interface PortalApplicationT {
+  id: string;
+  trackingCode: string;
+  programCode: string;
+  fullName: string;
+  status: string;
+  paymentStatus: string;
+  createdAt: string;
+}
+
+export interface PortalMeData {
+  account: {
+    id: string;
+    email: string;
+    name: string;
+    position: string | null;
+    createdAt: string;
+  };
+  institution: InstitutionT;
+  applications: PortalApplicationT[];
+  payments: PaymentT[];
+}
+
+/** POST /api/portal/login — login pemegang sertifikat. */
+export const portalLogin = (body: { email: string; password: string }) =>
+  apiRequest<{ account: PortalMeData["account"]; institution: InstitutionT }>(
+    "/api/portal/login",
+    { method: "POST", body: JSON.stringify(body) }
+  );
+
+/** POST /api/portal/logout. */
+export const portalLogout = () =>
+  apiRequest<{ loggedOut: boolean }>("/api/portal/logout", { method: "POST" });
+
+/** GET /api/portal/me — data lengkap sesi anggota. */
+export const portalMe = () => apiRequest<PortalMeData | null>("/api/portal/me");
+
+/** POST /api/portal/change-password. */
+export const portalChangePassword = (body: {
+  currentPassword: string;
+  newPassword: string;
+}) =>
+  apiRequest<{ changed: boolean }>("/api/portal/change-password", {
+    method: "POST",
+    body: JSON.stringify(body),
   });

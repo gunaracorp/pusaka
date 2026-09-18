@@ -3,6 +3,7 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { I18nProvider } from "@/lib/i18n/provider";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -69,8 +70,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors position="top-center" />
+          <I18nProvider>
+            {children}
+            <Toaster richColors position="top-center" />
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

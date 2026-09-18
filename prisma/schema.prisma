@@ -23,6 +23,47 @@ model AdminUser {
   createdAt    DateTime @default(now())
 }
 
+// ============================================================
+// PORTAL ANGOTA LEMBAGA — akun login pemegang sertifikat
+// ============================================================
+model MemberAccount {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String // format: salt:hash (scrypt)
+  name            String
+  position        String? // jabatan pemegang akun
+  institutionId   String    @unique
+  institution     Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+// ============================================================
+// PAYMENT GATEWAY — invoice pembayaran biaya pendaftaran
+// ============================================================
+model Payment {
+  id            String      @id @default(cuid())
+  invoiceNo     String      @unique // INV-YYYYMMDD-XXXXXX
+  trackingCode  String // kode pelacakan pengajuan terkait
+  applicationId String? // relasi opsional ke Application
+  application   Application? @relation(fields: [applicationId], references: [id])
+  programCode   String
+  method        String // QRIS | VIRTUAL_ACCOUNT | E_WALLET | CREDIT_CARD
+  methodId      String // QRIS | VA-BCA | VA-MANDIRI | ... | CC
+  provider      String // QRIS / BCA / Mandiri / BNI / BRI / GoPay / OVO / DANA / Kartu Kredit
+  amount        Int // nominal program (IDR)
+  fee           Int // biaya layanan channel (IDR)
+  total         Int // amount + fee
+  status        String      @default("MENUNGGU") // MENUNGGU | BERHASIL | GAGAL | KADALUARSA
+  vaNumber      String? // nomor virtual account / nomor tujuan
+  qrPayload     String? // payload QRIS (di-render jadi QR di client)
+  reference     String? // nomor referensi pembayaran saat BERHASIL
+  paidAt        DateTime?
+  expiredAt     DateTime
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
 model Program {
   id            String   @id @default(cuid())
   code          String   @unique // PIHK, PPIU, BPW, IATA, IJIN-UMRAH, IJIN-HAJI, BPW-PRO
@@ -81,6 +122,7 @@ model Institution {
   contact     String?
   phone       String?
   createdAt   DateTime @default(now())
+  memberAccount MemberAccount?
 }
 
 model Expert {
@@ -110,8 +152,10 @@ model Application {
   city         String
   message      String?
   status       String   @default("SUBMITTED") // SUBMITTED | REVIEW | VERIFIKASI | ASSESSMENT | APPROVED
+  paymentStatus String  @default("BELUM_BAYAR") // BELUM_BAYAR | MENUNGGU | LUNAS
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  payments     Payment[]
 }
 
 model VerifyLog {

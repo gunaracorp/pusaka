@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
+import { useI18n } from "@/lib/i18n/provider";
 import {
   STATUS_META,
   TIER_META,
@@ -21,10 +22,22 @@ const TIER_OPTIONS = ["SEMUA", "PLATINUM", "GOLD", "SILVER"];
 const TYPE_OPTIONS = ["SEMUA", "PPIU", "BPW", "IATA", "PIHK"];
 
 function InstitutionRow({ inst }: { inst: InstitutionT }) {
+  const { t, formatDateShort } = useI18n();
   const typeMeta = TYPE_META[inst.type];
   const tierMeta = TIER_META[inst.tier] ?? TIER_META.SILVER;
   const statusMeta = STATUS_META[inst.status];
   const expired = inst.status === "KADALUARSA";
+
+  // Label tier & status via i18n (common.*) — warna tetap dari META
+  const tierKey = `common.tiers.${inst.tier}`;
+  const tierLabel = t(tierKey) === tierKey ? String(inst.tier) : t(tierKey);
+  const statusKey =
+    inst.status === "AKTIF"
+      ? "common.status.active"
+      : inst.status === "DIPERBARUI"
+        ? "common.status.updated"
+        : "common.status.expired";
+  const statusLabel = t(statusKey);
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-emerald-500/40 sm:flex-row sm:items-center sm:justify-between">
@@ -43,17 +56,20 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
             <MapPin className="h-3 w-3" aria-hidden />
             {inst.city}, {inst.province}
           </span>
+          <span className={expired ? "line-through opacity-60" : ""}>
+            {t("directory.validUntil")} {formatDateShort(inst.expiresAt)}
+          </span>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 sm:w-72 sm:justify-end">
         <Badge variant="outline" className={`text-[10px] font-bold tracking-wider ${tierMeta.badgeClass}`}>
-          <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${tierMeta.dotClass}`} aria-hidden />
-          {tierMeta.label}
+          <span className={`me-1.5 inline-block h-1.5 w-1.5 rounded-full ${tierMeta.dotClass}`} aria-hidden />
+          {tierLabel}
         </Badge>
         <div className="w-28">
           <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
-            <span>Skor Audit</span>
+            <span>{t("directory.scoreLabel")}</span>
             <span className="font-mono font-bold text-foreground">{inst.score}</span>
           </div>
           <Progress
@@ -66,7 +82,7 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
             variant="outline"
             className={`text-[10px] font-bold ${expired ? statusMeta.badgeClass : "border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-300"}`}
           >
-            {statusMeta.label}
+            {statusLabel}
           </Badge>
         ) : null}
       </div>
@@ -75,6 +91,7 @@ function InstitutionRow({ inst }: { inst: InstitutionT }) {
 }
 
 export function Directory() {
+  const { t, formatNumber } = useI18n();
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [type, setType] = useState("SEMUA");
@@ -100,7 +117,8 @@ export function Directory() {
       const data = await getDirectory({ q: debounced, type, tier });
       setItems(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal memuat direktori.");
+      // "" = gagal generik → diterjemahkan saat render; string lain = pesan API
+      setError(e instanceof Error ? e.message : "");
     } finally {
       setLoading(false);
     }
@@ -115,33 +133,46 @@ export function Directory() {
     [items]
   );
 
+  function resetFilters() {
+    setSearch("");
+    setType("SEMUA");
+    setTier("SEMUA");
+  }
+
+  /** Label jenis lembaga via dict, fallback ke kode mentah. */
+  function typeLabel(opt: string): string {
+    const key = `directory.types.${opt}`;
+    const translated = t(key);
+    return translated === key ? opt : translated;
+  }
+
   return (
     <section id="direktori" className="scroll-mt-20 bg-muted/40 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Direktori Nasional"
-          title="Direktori Lembaga Teruji"
-          subtitle="Seluruh pemegang sertifikat & akreditasi PUSAKA telah melalui audit independen. Gunakan pencarian untuk memverifikasi mitra bisnis Anda."
+          eyebrow={t("directory.eyebrow")}
+          title={t("directory.title")}
+          subtitle={t("directory.subtitle")}
         />
 
         {/* toolbar */}
         <FadeIn delay={0.1} className="mt-8">
           <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm md:flex-row md:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari nama lembaga atau nomor sertifikat…"
-                className="h-11 pl-9"
-                aria-label="Cari lembaga"
+                placeholder={t("directory.searchPlaceholder")}
+                className="h-11 ps-9"
+                aria-label={t("directory.searchAria")}
               />
               {search ? (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-                  aria-label="Bersihkan pencarian"
+                  className="absolute end-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+                  aria-label={t("directory.clearSearch")}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -149,25 +180,25 @@ export function Directory() {
             </div>
             <div className="flex gap-3">
               <Select value={type} onValueChange={setType}>
-                <SelectTrigger className="h-11 w-full min-w-36 md:w-40" aria-label="Filter jenis lembaga">
-                  <SelectValue placeholder="Jenis" />
+                <SelectTrigger className="h-11 w-full min-w-36 md:w-40" aria-label={t("directory.filterTypeAria")}>
+                  <SelectValue placeholder={t("directory.placeholderType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {TYPE_OPTIONS.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t === "SEMUA" ? "Semua Jenis" : TYPE_META[t]?.desc ?? t}
+                  {TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt === "SEMUA" ? t("directory.allTypes") : typeLabel(opt)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={tier} onValueChange={setTier}>
-                <SelectTrigger className="h-11 w-full min-w-32 md:w-36" aria-label="Filter tier">
-                  <SelectValue placeholder="Tier" />
+                <SelectTrigger className="h-11 w-full min-w-32 md:w-36" aria-label={t("directory.filterTierAria")}>
+                  <SelectValue placeholder={t("directory.placeholderTier")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIER_OPTIONS.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t === "SEMUA" ? "Semua Tier" : t}
+                  {TIER_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt === "SEMUA" ? t("directory.allTiers") : t(`common.tiers.${opt}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -177,12 +208,11 @@ export function Directory() {
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted-foreground">
             <span>
-              Menampilkan{" "}
-              <strong className="text-foreground">{summary.total}</strong> lembaga
-              {loading ? " — memuat…" : ""}
+              {t("directory.found", { count: formatNumber(summary.total) })}
+              {loading ? t("directory.loadingSuffix") : ""}
             </span>
             <span>
-              {summary.platinum} berstatus tier PLATINUM
+              {t("directory.platinumSummary", { count: formatNumber(summary.platinum) })}
             </span>
           </div>
         </FadeIn>
@@ -201,23 +231,26 @@ export function Directory() {
                   <Skeleton className="hidden h-6 w-20 rounded-full sm:block" />
                 </div>
               ))
-            ) : error ? (
+            ) : error !== null ? (
               <div className="flex flex-col items-center gap-3 py-14 text-center">
                 <Loader2 className="h-8 w-8 text-muted-foreground/50" aria-hidden />
-                <p className="text-sm text-muted-foreground">{error}</p>
+                <p className="text-sm text-muted-foreground">{error === "" ? t("directory.error") : error}</p>
                 <Button variant="outline" size="sm" onClick={() => void load()}>
-                  Muat ulang
+                  {t("directory.retry")}
                 </Button>
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-14 text-center">
                 <SearchX className="h-10 w-10 text-muted-foreground/50" aria-hidden />
                 <p className="font-display text-base font-bold text-foreground">
-                  Tidak ada lembaga yang cocok
+                  {t("directory.emptyTitle")}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Ubah kata kunci atau reset filter jenis &amp; tier.
+                  {t("directory.emptyDesc")}
                 </p>
+                <Button variant="outline" size="sm" className="mt-1" onClick={resetFilters}>
+                  {t("directory.reset")}
+                </Button>
               </div>
             ) : (
               items.map((inst) => <InstitutionRow key={inst.id} inst={inst} />)

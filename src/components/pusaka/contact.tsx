@@ -9,26 +9,41 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FadeIn } from "@/components/pusaka/fade-in";
 import { postContact } from "@/lib/pusaka";
+import { useI18n } from "@/lib/i18n/provider";
 import { toast } from "sonner";
 
-const CONTACT_INFO = [
-  {
-    icon: MapPin,
-    label: "Kantor Sekretariat",
-    value: "Gedung Pusdai Lt. 5, Jl. Lapangan Banteng Selatan No. 3, Jakarta Pusat 10710",
-  },
-  { icon: Mail, label: "Email Resmi", value: "sekretariat@pusaka.go.id" },
-  { icon: Phone, label: "Telepon / WhatsApp", value: "+62 21 350 5075 (hotline 24 jam)" },
-  {
-    icon: Clock,
-    label: "Jam Layanan",
-    value: "Senin – Jumat, 08.00 – 16.00 WIB (layanan verifikasi daring 24 jam)",
-  },
-];
-
 export function ContactCTA() {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);
+
+  // Info kontak kiri — label & nilai "hidup" diterjemahkan; alamat & email tetap literal.
+  const CONTACT_INFO = [
+    {
+      key: "address",
+      icon: MapPin,
+      label: t("contact.info.addressLabel"),
+      value: "Gedung Pusdai Lt. 5, Jl. Lapangan Banteng Selatan No. 3, Jakarta Pusat 10710",
+    },
+    {
+      key: "email",
+      icon: Mail,
+      label: t("contact.info.emailLabel"),
+      value: "sekretariat@pusaka.go.id",
+    },
+    {
+      key: "phone",
+      icon: Phone,
+      label: t("contact.info.phoneLabel"),
+      value: t("contact.info.phoneValue"),
+    },
+    {
+      key: "hours",
+      icon: Clock,
+      label: t("contact.info.hoursLabel"),
+      value: t("contact.info.hoursValue"),
+    },
+  ];
 
   function set(key: keyof typeof form, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -36,19 +51,19 @@ export function ContactCTA() {
 
   function validate(): boolean {
     if (form.name.trim().length < 3) {
-      toast.error("Nama minimal 3 karakter.");
+      toast.error(t("contact.valid.name"));
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      toast.error("Alamat email tidak valid.");
+      toast.error(t("contact.valid.email"));
       return false;
     }
     if (form.subject.trim().length < 3) {
-      toast.error("Subjek minimal 3 karakter.");
+      toast.error(t("contact.valid.subject"));
       return false;
     }
     if (form.message.trim().length < 10) {
-      toast.error("Pesan minimal 10 karakter.");
+      toast.error(t("contact.valid.message"));
       return false;
     }
     return true;
@@ -64,10 +79,10 @@ export function ContactCTA() {
         subject: form.subject.trim(),
         message: form.message.trim(),
       });
-      toast.success("Pesan terkirim! Tim kami membalas maksimal 1 × 24 jam kerja.");
+      toast.success(t("contact.success.sent"));
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Gagal mengirim pesan.");
+      toast.error(e instanceof Error ? e.message : t("contact.error.send"));
     } finally {
       setSending(false);
     }
@@ -86,22 +101,20 @@ export function ContactCTA() {
               />
               <div>
                 <h2 className="font-display text-3xl font-black leading-tight text-white sm:text-4xl">
-                  Siap Menjadi Lembaga{" "}
+                  {t("contact.cta.title1")}{" "}
                   <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
-                    Terakreditasi?
+                    {t("contact.cta.titleAccent")}
                   </span>
                 </h2>
                 <p className="mt-4 max-w-md text-sm leading-relaxed text-emerald-100/80 sm:text-base">
-                  Bergabunglah bersama ribuan lembaga & profesional yang telah memegang sertifikat
-                  PUSAKA. Tim konsultasi kami siap membantu memilih jalur sertifikasi yang tepat
-                  untuk profil Anda — gratis.
+                  {t("contact.cta.desc")}
                 </p>
 
                 <ul className="mt-8 space-y-4">
                   {CONTACT_INFO.map((info) => {
                     const Icon = info.icon;
                     return (
-                      <li key={info.label} className="flex items-start gap-3">
+                      <li key={info.key} className="flex items-start gap-3">
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-700/60 bg-emerald-800/40 text-amber-400">
                           <Icon className="h-4 w-4" aria-hidden />
                         </span>
@@ -120,8 +133,7 @@ export function ContactCTA() {
               </div>
 
               <p className="mt-10 border-t border-emerald-800/60 pt-5 text-xs text-emerald-300/60">
-                PUSAKA — Pusat Sertifikasi &amp; Akreditasi Kompetensi • Terakreditasi berlaku
-                nasional &amp; internasional
+                {t("contact.cta.footnote")}
               </p>
             </div>
           </FadeIn>
@@ -130,9 +142,11 @@ export function ContactCTA() {
           <FadeIn delay={0.12}>
             <Card className="h-full border-border shadow-sm">
               <CardContent className="p-6 sm:p-8">
-                <h3 className="font-display text-xl font-bold text-foreground">Kirim Pesan</h3>
+                <h3 className="font-display text-xl font-bold text-foreground">
+                  {t("contact.form.title")}
+                </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Pertanyaan seputar program, biaya, atau jadwal audit — kami siap membantu.
+                  {t("contact.form.desc")}
                 </p>
 
                 <form
@@ -144,44 +158,44 @@ export function ContactCTA() {
                 >
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="contact-name">Nama *</Label>
+                      <Label htmlFor="contact-name">{t("contact.form.name")}</Label>
                       <Input
                         id="contact-name"
                         value={form.name}
                         onChange={(e) => set("name", e.target.value)}
-                        placeholder="Nama Anda"
+                        placeholder={t("contact.form.namePlaceholder")}
                         className="h-11"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="contact-email">Email *</Label>
+                      <Label htmlFor="contact-email">{t("contact.form.email")}</Label>
                       <Input
                         id="contact-email"
                         type="email"
                         value={form.email}
                         onChange={(e) => set("email", e.target.value)}
-                        placeholder="nama@email.com"
+                        placeholder={t("contact.form.emailPlaceholder")}
                         className="h-11"
                       />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="contact-subject">Subjek *</Label>
+                    <Label htmlFor="contact-subject">{t("contact.form.subject")}</Label>
                     <Input
                       id="contact-subject"
                       value={form.subject}
                       onChange={(e) => set("subject", e.target.value)}
-                      placeholder="mis. Konsultasi akreditasi BPW"
+                      placeholder={t("contact.form.subjectPlaceholder")}
                       className="h-11"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="contact-message">Pesan *</Label>
+                    <Label htmlFor="contact-message">{t("contact.form.message")}</Label>
                     <Textarea
                       id="contact-message"
                       value={form.message}
                       onChange={(e) => set("message", e.target.value)}
-                      placeholder="Tulis pertanyaan Anda…"
+                      placeholder={t("contact.form.messagePlaceholder")}
                       rows={5}
                     />
                   </div>
@@ -191,7 +205,7 @@ export function ContactCTA() {
                     className="h-12 w-full bg-emerald-700 text-base font-bold hover:bg-emerald-800"
                   >
                     <Send className="h-4 w-4" aria-hidden />
-                    {sending ? "Mengirim…" : "Kirim Pesan"}
+                    {sending ? t("contact.form.sending") : t("contact.form.send")}
                   </Button>
                 </form>
               </CardContent>

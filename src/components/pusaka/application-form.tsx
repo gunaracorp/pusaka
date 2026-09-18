@@ -27,12 +27,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
-import {
-  formatIDR,
-  getPrograms,
-  postApplication,
-  type ProgramT,
-} from "@/lib/pusaka";
+import { PaymentPanel } from "@/components/pusaka/payment-panel";
+import { useI18n } from "@/lib/i18n/provider";
+import { getPrograms, postApplication, type ProgramT } from "@/lib/pusaka";
 import { toast } from "sonner";
 
 interface FormState {
@@ -59,9 +56,11 @@ const INITIAL: FormState = {
   agree: false,
 };
 
-const STEP_LABELS = ["Data Pemohon", "Pilih Program", "Ringkasan"];
+/** Kunci langkah stepper → t(`applicationForm.step.<key>`). */
+const STEP_KEYS = ["dataPemohon", "pilihProgram", "ringkasan"] as const;
 
 export function ApplicationForm() {
+  const { t, formatCurrency } = useI18n();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(INITIAL);
   const [programs, setPrograms] = useState<ProgramT[]>([]);
@@ -106,23 +105,23 @@ export function ApplicationForm() {
 
   function validateStep1(): boolean {
     if (form.fullName.trim().length < 3) {
-      toast.error("Nama lengkap minimal 3 karakter.");
+      toast.error(t("applicationForm.errName"));
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      toast.error("Alamat email tidak valid.");
+      toast.error(t("applicationForm.errEmail"));
       return false;
     }
     if (form.phone.replace(/\D/g, "").length < 9) {
-      toast.error("Nomor telepon minimal 9 digit.");
+      toast.error(t("applicationForm.errPhone"));
       return false;
     }
     if (form.applicantType === "PERUSAHAAN" && form.institution.trim().length < 3) {
-      toast.error("Nama institusi/perusahaan wajib diisi untuk pemohon perusahaan.");
+      toast.error(t("applicationForm.errInstitution"));
       return false;
     }
     if (form.city.trim().length < 2) {
-      toast.error("Kota/domisili wajib diisi.");
+      toast.error(t("applicationForm.errCity"));
       return false;
     }
     return true;
@@ -130,7 +129,7 @@ export function ApplicationForm() {
 
   function validateStep2(): boolean {
     if (!form.programCode) {
-      toast.error("Silakan pilih program sertifikasi terlebih dahulu.");
+      toast.error(t("applicationForm.errProgram"));
       return false;
     }
     return true;
@@ -138,7 +137,7 @@ export function ApplicationForm() {
 
   function validateStep3(): boolean {
     if (!form.agree) {
-      toast.error("Anda harus menyetujui syarat & ketentuan sertifikasi.");
+      toast.error(t("applicationForm.errAgree"));
       return false;
     }
     return true;
@@ -165,9 +164,9 @@ export function ApplicationForm() {
         message: form.message.trim() || undefined,
       });
       setSuccessCode(res.trackingCode);
-      toast.success("Pendaftaran berhasil dikirim!");
+      toast.success(t("applicationForm.successToast"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Gagal mengirim pendaftaran.");
+      toast.error(e instanceof Error ? e.message : t("applicationForm.failToast"));
     } finally {
       setSubmitting(false);
     }
@@ -194,17 +193,16 @@ export function ApplicationForm() {
                 </span>
                 <div>
                   <h2 className="font-display text-2xl font-black text-foreground sm:text-3xl">
-                    Pendaftaran Berhasil Dikirim
+                    {t("applicationForm.successTitle")}
                   </h2>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Tim admisi kami akan memverifikasi berkas dalam 1 × 24 jam. Simpan kode
-                    pelacakan berikut untuk memantau status pendaftaran Anda.
+                    {t("applicationForm.successDesc")}
                   </p>
                 </div>
 
                 <div className="w-full rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/10 p-6">
                   <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                    Kode Pelacakan Anda
+                    {t("applicationForm.trackingLabel")}
                   </p>
                   <p className="mt-2 font-mono text-3xl font-black tracking-wider text-emerald-800 sm:text-4xl dark:text-emerald-300">
                     {successCode}
@@ -215,12 +213,12 @@ export function ApplicationForm() {
                     onClick={() => {
                       void navigator.clipboard
                         .writeText(successCode)
-                        .then(() => toast.success("Kode pelacakan disalin ke papan klip."))
-                        .catch(() => toast.error("Gagal menyalin — salin manual."));
+                        .then(() => toast.success(t("applicationForm.copiedToast")))
+                        .catch(() => toast.error(t("applicationForm.copyErrorToast")));
                     }}
                   >
                     <ClipboardCopy className="h-4 w-4" aria-hidden />
-                    Salin Kode
+                    {t("applicationForm.copyCode")}
                   </Button>
                 </div>
 
@@ -229,7 +227,7 @@ export function ApplicationForm() {
                     asChild
                     className="h-11 bg-emerald-700 hover:bg-emerald-800"
                   >
-                    <a href="#lacak">Lacak Status Sekarang</a>
+                    <a href="#lacak">{t("applicationForm.trackNow")}</a>
                   </Button>
                   <Button
                     variant="outline"
@@ -237,11 +235,35 @@ export function ApplicationForm() {
                     onClick={resetForm}
                   >
                     <RotateCcw className="h-4 w-4" aria-hidden />
-                    Daftar Lagi
+                    {t("applicationForm.registerAgain")}
                   </Button>
                 </div>
               </CardContent>
             </Card>
+          </FadeIn>
+
+          {/* Pembayaran biaya sertifikasi — panel mandiri di bawah kartu kode pelacakan */}
+          <FadeIn delay={0.1} className="mt-6">
+            <section
+              aria-labelledby="payment-heading"
+              className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
+            >
+              <h3
+                id="payment-heading"
+                className="font-display text-lg font-bold text-foreground"
+              >
+                {t("applicationForm.paymentTitle")}
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("applicationForm.paymentSubtitle")}
+              </p>
+              <PaymentPanel
+                className="mt-5"
+                trackingCode={successCode}
+                amountDue={selectedProgram?.price}
+                onPaid={() => toast.success(t("applicationForm.paymentDoneToast"))}
+              />
+            </section>
           </FadeIn>
         </div>
       </section>
@@ -253,20 +275,21 @@ export function ApplicationForm() {
     <section id="pendaftaran" className="scroll-mt-20 bg-card py-16 sm:py-20">
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Pendaftaran"
-          title="Formulir Pendaftaran Sertifikasi"
-          subtitle="Tiga langkah singkat menuju sertifikat digital PUSAKA. Data Anda dijaga kerahasiaannya sesuai regulasi perlindungan data."
+          eyebrow={t("applicationForm.eyebrow")}
+          title={t("applicationForm.title")}
+          subtitle={t("applicationForm.subtitle")}
         />
 
         {/* stepper */}
         <FadeIn delay={0.1} className="mt-10">
           <div className="flex items-center justify-between">
-            {STEP_LABELS.map((label, i) => {
+            {STEP_KEYS.map((key, i) => {
               const n = i + 1;
               const done = step > n;
               const active = step === n;
+              const label = t(`applicationForm.step.${key}`);
               return (
-                <div key={label} className="flex flex-1 items-center">
+                <div key={key} className="flex flex-1 items-center">
                   <div className="flex flex-col items-center gap-1.5">
                     <span
                       className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-display text-sm font-bold transition-colors ${
@@ -309,7 +332,9 @@ export function ApplicationForm() {
               {step === 1 ? (
                 <div className="space-y-5">
                   <div>
-                    <Label className="text-sm font-semibold">Tipe Pemohon</Label>
+                    <Label className="text-sm font-semibold">
+                      {t("applicationForm.typeLabel")}
+                    </Label>
                     <RadioGroup
                       value={form.applicantType}
                       onValueChange={(v) => set("applicantType", v as FormState["applicantType"])}
@@ -317,8 +342,18 @@ export function ApplicationForm() {
                     >
                       {(
                         [
-                          { value: "PERUSAHAAN", label: "Perusahaan / Lembaga", desc: "PPIU, BPW, PIHK, IATA", icon: Building2 },
-                          { value: "INDIVIDU", label: "Individu / Profesi", desc: "Profesional & komisaris", icon: User },
+                          {
+                            value: "PERUSAHAAN",
+                            label: t("applicationForm.typeCompany"),
+                            desc: t("applicationForm.typeCompanyDesc"),
+                            icon: Building2,
+                          },
+                          {
+                            value: "INDIVIDU",
+                            label: t("applicationForm.typeIndividual"),
+                            desc: t("applicationForm.typeIndividualDesc"),
+                            icon: User,
+                          },
                         ] as const
                       ).map((opt) => {
                         const Icon = opt.icon;
@@ -348,44 +383,44 @@ export function ApplicationForm() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="fullName">Nama Lengkap *</Label>
+                      <Label htmlFor="fullName">{t("applicationForm.fullName")}</Label>
                       <Input
                         id="fullName"
                         value={form.fullName}
                         onChange={(e) => set("fullName", e.target.value)}
-                        placeholder="Nama sesuai dokumen resmi"
+                        placeholder={t("applicationForm.fullNamePlaceholder")}
                         className="h-11"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email">{t("applicationForm.email")}</Label>
                       <Input
                         id="email"
                         type="email"
                         value={form.email}
                         onChange={(e) => set("email", e.target.value)}
-                        placeholder="nama@email.com"
+                        placeholder={t("applicationForm.emailPlaceholder")}
                         className="h-11"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="phone">Nomor Telepon / WhatsApp *</Label>
+                      <Label htmlFor="phone">{t("applicationForm.phone")}</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={form.phone}
                         onChange={(e) => set("phone", e.target.value)}
-                        placeholder="08xxxxxxxxxx"
+                        placeholder={t("applicationForm.phonePlaceholder")}
                         className="h-11"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="city">Kota / Domisili *</Label>
+                      <Label htmlFor="city">{t("applicationForm.city")}</Label>
                       <Input
                         id="city"
                         value={form.city}
                         onChange={(e) => set("city", e.target.value)}
-                        placeholder="mis. Jakarta Selatan"
+                        placeholder={t("applicationForm.cityPlaceholder")}
                         className="h-11"
                       />
                     </div>
@@ -393,12 +428,12 @@ export function ApplicationForm() {
 
                   {form.applicantType === "PERUSAHAAN" ? (
                     <div className="space-y-1.5">
-                      <Label htmlFor="institution">Nama Institusi / Perusahaan *</Label>
+                      <Label htmlFor="institution">{t("applicationForm.institution")}</Label>
                       <Input
                         id="institution"
                         value={form.institution}
                         onChange={(e) => set("institution", e.target.value)}
-                        placeholder="mis. PT Cahaya Thaif Travel Indonesia"
+                        placeholder={t("applicationForm.institutionPlaceholder")}
                         className="h-11"
                       />
                     </div>
@@ -410,13 +445,13 @@ export function ApplicationForm() {
               {step === 2 ? (
                 <div className="space-y-5">
                   <div className="space-y-1.5">
-                    <Label htmlFor="program">Program Sertifikasi *</Label>
+                    <Label htmlFor="program">{t("applicationForm.programLabel")}</Label>
                     <Select
                       value={form.programCode}
                       onValueChange={(v) => set("programCode", v)}
                     >
                       <SelectTrigger id="program" className="h-12 w-full">
-                        <SelectValue placeholder="Pilih program sertifikasi…" />
+                        <SelectValue placeholder={t("applicationForm.programPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {programs.map((p) => (
@@ -428,7 +463,7 @@ export function ApplicationForm() {
                     </Select>
                     {programs.length === 0 ? (
                       <p className="text-xs text-red-500">
-                        Daftar program gagal dimuat — muat ulang halaman.
+                        {t("applicationForm.programLoadError")}
                       </p>
                     ) : null}
                   </div>
@@ -437,23 +472,23 @@ export function ApplicationForm() {
                     <div className="grid grid-cols-1 gap-3 rounded-xl border border-emerald-600/30 bg-emerald-500/10 p-4 sm:grid-cols-3">
                       <div>
                         <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                          <FileText className="h-3 w-3" aria-hidden /> Investasi
+                          <FileText className="h-3 w-3" aria-hidden /> {t("applicationForm.investLabel")}
                         </p>
                         <p className="mt-1 font-display text-lg font-black text-emerald-700 dark:text-emerald-300">
-                          {formatIDR(selectedProgram.price)}
+                          {formatCurrency(selectedProgram.price)}
                         </p>
                       </div>
                       <div>
                         <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                          <CalendarDays className="h-3 w-3" aria-hidden /> Durasi
+                          <CalendarDays className="h-3 w-3" aria-hidden /> {t("applicationForm.durationLabel")}
                         </p>
                         <p className="mt-1 font-display text-lg font-black text-foreground">
-                          {selectedProgram.durationDays} Hari
+                          {selectedProgram.durationDays} {t("applicationForm.dayUnit")}
                         </p>
                       </div>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                          Tingkat Kelulusan
+                          {t("applicationForm.passRateLabel")}
                         </p>
                         <p className="mt-1 font-display text-lg font-black text-amber-600 dark:text-amber-400">
                           {selectedProgram.passRate}%
@@ -472,20 +507,28 @@ export function ApplicationForm() {
                 <div className="space-y-5">
                   <div className="rounded-xl border bg-muted/50 p-4">
                     <h4 className="font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                      Ringkasan Pendaftaran
+                      {t("applicationForm.summaryTitle")}
                     </h4>
                     <dl className="mt-3 space-y-2 text-sm">
                       {[
-                        ["Tipe Pemohon", form.applicantType === "PERUSAHAAN" ? "Perusahaan / Lembaga" : "Individu / Profesi"],
-                        ["Nama Lengkap", form.fullName],
-                        ["Email", form.email],
-                        ["Telepon", form.phone],
-                        ["Kota", form.city],
-                        ["Institusi", form.applicantType === "PERUSAHAAN" ? form.institution : "—"],
                         [
-                          "Program",
+                          t("applicationForm.rowType"),
+                          form.applicantType === "PERUSAHAAN"
+                            ? t("applicationForm.typeCompany")
+                            : t("applicationForm.typeIndividual"),
+                        ],
+                        [t("applicationForm.rowName"), form.fullName],
+                        [t("applicationForm.rowEmail"), form.email],
+                        [t("applicationForm.rowPhone"), form.phone],
+                        [t("applicationForm.rowCity"), form.city],
+                        [
+                          t("applicationForm.rowInstitution"),
+                          form.applicantType === "PERUSAHAAN" ? form.institution : "—",
+                        ],
+                        [
+                          t("applicationForm.rowProgram"),
                           selectedProgram
-                            ? `${selectedProgram.shortName} (${formatIDR(selectedProgram.price)} • ${selectedProgram.durationDays} hari)`
+                            ? `${selectedProgram.shortName} (${formatCurrency(selectedProgram.price)} • ${selectedProgram.durationDays} ${t("applicationForm.dayUnit")})`
                             : form.programCode,
                         ],
                       ].map(([k, v]) => (
@@ -498,12 +541,12 @@ export function ApplicationForm() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="message">Catatan Tambahan (opsional)</Label>
+                    <Label htmlFor="message">{t("applicationForm.messageLabel")}</Label>
                     <Textarea
                       id="message"
                       value={form.message}
                       onChange={(e) => set("message", e.target.value)}
-                      placeholder="Informasi tambahan untuk tim admisi…"
+                      placeholder={t("applicationForm.messagePlaceholder")}
                       rows={3}
                     />
                   </div>
@@ -516,9 +559,7 @@ export function ApplicationForm() {
                       className="mt-0.5"
                     />
                     <Label htmlFor="agree" className="cursor-pointer text-xs leading-relaxed text-muted-foreground">
-                      Saya menyatakan data yang diisi benar & menyetujui syarat dan ketentuan
-                      sertifikasi PUSAKA, termasuk kebijakan biaya, jadwal audit, dan kode etik
-                      lembaga terakreditasi.
+                      {t("applicationForm.agreeLabel")}
                     </Label>
                   </div>
                 </div>
@@ -532,14 +573,16 @@ export function ApplicationForm() {
                   disabled={step === 1 || submitting}
                   onClick={() => setStep((s) => Math.max(1, s - 1))}
                 >
-                  Kembali
+                  {t("applicationForm.back")}
                 </Button>
                 {step < 3 ? (
                   <Button
                     className="h-11 min-w-32 bg-emerald-700 hover:bg-emerald-800"
                     onClick={next}
                   >
-                    Lanjut ke {STEP_LABELS[step]}
+                    {t("applicationForm.nextTo", {
+                      step: t(`applicationForm.step.${STEP_KEYS[step]}`),
+                    })}
                   </Button>
                 ) : (
                   <Button
@@ -547,7 +590,7 @@ export function ApplicationForm() {
                     disabled={submitting}
                     onClick={() => void submit()}
                   >
-                    {submitting ? "Mengirim…" : "Kirim Pendaftaran"}
+                    {submitting ? t("applicationForm.sending") : t("applicationForm.submit")}
                   </Button>
                 )}
               </div>

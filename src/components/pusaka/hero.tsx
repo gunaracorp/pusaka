@@ -7,13 +7,7 @@ import { Award, BadgeCheck, Landmark, ScrollText, ShieldCheck } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { AnimatedCounter } from "@/components/pusaka/animated-counter";
 import { FALLBACK_STATS, getStats, qrPattern, type StatsT } from "@/lib/pusaka";
-
-const HERO_STATS_FALLBACK = [
-  { value: 14840, suffix: "+", label: "Sertifikat Terbit" },
-  { value: 46, suffix: "", label: "Dewan Pakar" },
-  { value: 7, suffix: "", label: "Program Sertifikasi" },
-  { value: 9, suffix: "", label: "Bidang Keilmuan" },
-];
+import { useI18n } from "@/lib/i18n/provider";
 
 const QR_BITS = qrPattern("PPU-2025-0001-PLATINUM");
 
@@ -34,6 +28,10 @@ function MiniQr() {
 }
 
 function CertificateMockup() {
+  const { t, formatDateShort } = useI18n();
+  // Tanggal contoh pada mockup — diformat sesuai bahasa aktif.
+  const validUntil = formatDateShort(new Date("2028-12-31"));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 32, rotate: 0 }}
@@ -56,7 +54,7 @@ function CertificateMockup() {
           <div>
             <p className="font-display text-sm font-extrabold tracking-wide text-white">PUSAKA</p>
             <p className="text-[10px] uppercase tracking-widest text-emerald-300/80">
-              Sertifikat Digital
+              {t("hero.cert.digital")}
             </p>
           </div>
         </div>
@@ -66,27 +64,25 @@ function CertificateMockup() {
       </div>
 
       <div className="mt-6 rounded-lg border border-emerald-700/50 bg-emerald-950/60 p-4">
-        <p className="font-mono text-xs tracking-widest text-emerald-400">NO. SERTIFIKAT</p>
+        <p className="font-mono text-xs tracking-widest text-emerald-400">{t("hero.cert.no")}</p>
         <p className="mt-1 font-mono text-lg font-bold tracking-wider text-white">
           PPU-2025-0001
         </p>
         <p className="mt-3 text-xs uppercase tracking-widest text-emerald-300/70">
-          Diterbitkan kepada
+          {t("hero.cert.issuedTo")}
         </p>
         <p className="font-display text-base font-bold text-white">
           PT Cahaya Thaif Travel Indonesia
         </p>
-        <p className="mt-1 text-xs text-emerald-200/70">
-          Program PPIU — Penyelenggara Perjalanan Umrah
-        </p>
+        <p className="mt-1 text-xs text-emerald-200/70">{t("hero.cert.program")}</p>
       </div>
 
       <div className="mt-5 flex items-end justify-between">
         <div className="flex items-center gap-2 text-emerald-300">
           <BadgeCheck className="h-5 w-5" aria-hidden />
           <div className="text-[10px] leading-tight text-emerald-200/80">
-            <p className="font-semibold text-emerald-100">QR-Verified</p>
-            <p>Berlaku s.d. 31 Des 2028</p>
+            <p className="font-semibold text-emerald-100">{t("hero.cert.qrVerified")}</p>
+            <p>{t("hero.cert.validUntil", { date: validUntil })}</p>
           </div>
         </div>
         <MiniQr />
@@ -96,6 +92,7 @@ function CertificateMockup() {
 }
 
 export function Hero() {
+  const { t } = useI18n();
   const [stats, setStats] = useState<StatsT>(FALLBACK_STATS);
 
   useEffect(() => {
@@ -113,10 +110,10 @@ export function Hero() {
   }, []);
 
   const heroStats = [
-    { value: stats.totals.certificateHolders, suffix: "+", label: "Sertifikat Terbit" },
-    { value: stats.totals.experts, suffix: "", label: "Dewan Pakar" },
-    { value: stats.totals.programs, suffix: "", label: "Program Sertifikasi" },
-    { value: 9, suffix: "", label: "Bidang Keilmuan" },
+    { value: stats.totals.certificateHolders, suffix: "+", label: t("hero.stats.certificates") },
+    { value: stats.totals.experts, suffix: "", label: t("hero.stats.experts") },
+    { value: stats.totals.programs, suffix: "", label: t("hero.stats.programs") },
+    { value: 9, suffix: "", label: t("hero.stats.fields") },
   ];
 
   return (
@@ -124,7 +121,7 @@ export function Hero() {
       {/* tekstur latar */}
       <Image
         src="/images/hero-bg.png"
-        alt="Tekstur latar ornamen islami PUSAKA"
+        alt={t("hero.bgAlt")}
         fill
         priority
         sizes="100vw"
@@ -135,7 +132,7 @@ export function Hero() {
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-32 top-10 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl"
+        className="pointer-events-none absolute -end-32 top-10 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl"
         aria-hidden
       />
 
@@ -150,7 +147,7 @@ export function Hero() {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-amber-300">
                 <Landmark className="h-3.5 w-3.5" aria-hidden />
-                Terakreditasi • Berlaku Nasional &amp; Internasional
+                {t("hero.badge")}
               </span>
             </motion.div>
 
@@ -160,9 +157,9 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-display mt-6 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-[3.4rem]"
             >
-              Pusat Sertifikasi &amp; Akreditasi{" "}
+              {t("hero.judul")}{" "}
               <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
-                Industri Perjalanan Wisata, Umrah &amp; Haji
+                {t("hero.judulSorot")}
               </span>
             </motion.h1>
 
@@ -172,12 +169,13 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="mt-5 max-w-xl text-base leading-relaxed text-emerald-100/80 sm:text-lg"
             >
-              Lembaga sertifikasi profesi &amp; akreditasi resmi bagi penyelenggara{" "}
+              {t("hero.deskripsiA")}{" "}
               <strong className="font-semibold text-emerald-50">PIHK</strong>,{" "}
               <strong className="font-semibold text-emerald-50">PPIU</strong>,{" "}
-              <strong className="font-semibold text-emerald-50">BPW</strong>, dan{" "}
-              <strong className="font-semibold text-emerald-50">IATA</strong> — dengan Dewan Pakar
-              46 lintas bidang serta sertifikat digital QR-verified yang diakui lintas negara.
+              <strong className="font-semibold text-emerald-50">BPW</strong>,{" "}
+              {t("hero.deskripsiDan")}{" "}
+              <strong className="font-semibold text-emerald-50">IATA</strong>{" "}
+              {t("hero.deskripsiB", { count: 46 })}
             </motion.p>
 
             <motion.div
@@ -192,7 +190,7 @@ export function Hero() {
               >
                 <a href="#pendaftaran" className="gap-2 text-sm font-bold">
                   <Award className="h-4 w-4" aria-hidden />
-                  Mulai Sertifikasi
+                  {t("hero.ctaUtama")}
                 </a>
               </Button>
               <Button
@@ -202,7 +200,7 @@ export function Hero() {
               >
                 <a href="#verifikasi" className="gap-2 text-sm font-semibold">
                   <ShieldCheck className="h-4 w-4" aria-hidden />
-                  Verifikasi Sertifikat
+                  {t("hero.ctaVerifikasi")}
                 </a>
               </Button>
             </motion.div>

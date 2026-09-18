@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   EXAMPLE_CERT_NUMBERS,
   TIER_META,
-  formatDateShort,
   postVerify,
   type VerifyData,
 } from "@/lib/pusaka";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function QuickVerify() {
+  const { t, formatDateShort } = useI18n();
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyData | null>(null);
@@ -30,7 +31,7 @@ export function QuickVerify() {
       setResult(data);
     } catch (e) {
       setResult(null);
-      setError(e instanceof Error ? e.message : "Gagal memverifikasi sertifikat.");
+      setError(e instanceof Error ? e.message : t("quickVerify.errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -39,7 +40,10 @@ export function QuickVerify() {
   const tierMeta = result?.valid ? TIER_META[result.institution.tier] : undefined;
 
   return (
-    <section aria-label="Verifikasi cepat sertifikat" className="relative z-10 mx-auto -mt-0 w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <section
+      aria-label={t("quickVerify.ariaLabel")}
+      className="relative z-10 mx-auto -mt-0 w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8"
+    >
       <div className="rounded-2xl border border-emerald-600/20 bg-card p-5 shadow-xl shadow-emerald-900/5 dark:border-emerald-500/20 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="flex items-center gap-3 lg:min-w-56">
@@ -48,9 +52,9 @@ export function QuickVerify() {
             </span>
             <div>
               <p className="font-display text-base font-bold text-foreground">
-                Verifikasi Cepat
+                {t("quickVerify.title")}
               </p>
-              <p className="text-xs text-muted-foreground">Cek keaslian sertifikat digital</p>
+              <p className="text-xs text-muted-foreground">{t("quickVerify.subtitle")}</p>
             </div>
           </div>
 
@@ -62,13 +66,13 @@ export function QuickVerify() {
             }}
           >
             <label htmlFor="quick-verify-input" className="sr-only">
-              Nomor sertifikat
+              {t("quickVerify.inputLabel")}
             </label>
             <Input
               id="quick-verify-input"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Masukkan nomor sertifikat, mis. PPU-2025-0001"
+              placeholder={t("quickVerify.placeholder")}
               className="h-11 flex-1 font-mono uppercase"
               autoComplete="off"
             />
@@ -80,12 +84,12 @@ export function QuickVerify() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  Memeriksa…
+                  {t("quickVerify.checking")}
                 </>
               ) : (
                 <>
                   <Search className="h-4 w-4" aria-hidden />
-                  Verifikasi
+                  {t("quickVerify.button")}
                 </>
               )}
             </Button>
@@ -94,7 +98,7 @@ export function QuickVerify() {
 
         {/* hint */}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span>Coba contoh:</span>
+          <span>{t("quickVerify.tryExample")}</span>
           {EXAMPLE_CERT_NUMBERS.map((num) => (
             <button
               key={num}
@@ -119,7 +123,7 @@ export function QuickVerify() {
           result.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-emerald-600/30 bg-emerald-500/10 px-4 py-3 dark:border-emerald-500/30">
               <Badge className="border-emerald-600 bg-emerald-700 px-2.5 py-1 text-xs font-bold text-white">
-                ✓ VALID
+                {t("quickVerify.badgeValid")}
               </Badge>
               <span className="text-sm font-semibold text-foreground">
                 {result.institution.name}
@@ -129,21 +133,22 @@ export function QuickVerify() {
               </span>
               {tierMeta ? (
                 <Badge variant="outline" className={`text-[10px] ${tierMeta.badgeClass}`}>
-                  {tierMeta.label}
+                  {t(`common.tiers.${result.institution.tier}`)}
                 </Badge>
               ) : null}
               <span className="text-xs text-muted-foreground">
-                Berlaku s.d. {formatDateShort(result.institution.expiresAt)}
+                {t("quickVerify.validUntil", {
+                  date: formatDateShort(result.institution.expiresAt),
+                })}
               </span>
             </div>
           ) : (
             <div className="mt-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-500/30 dark:bg-red-950/40">
               <Badge className="border-red-600 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
-                TIDAK VALID
+                {t("quickVerify.badgeInvalid")}
               </Badge>
               <span className="text-sm text-red-700 dark:text-red-300">
-                Nomor sertifikat tidak ditemukan dalam basis data PUSAKA. Hubungi sekretariat
-                bila merasa ada kekeliruan.
+                {t("quickVerify.notFound")}
               </span>
             </div>
           )

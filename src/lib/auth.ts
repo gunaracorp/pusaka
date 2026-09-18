@@ -105,8 +105,113 @@ export function verifySessionToken(token: string): SessionPayload | null {
   }
 }
 
+// ============================================================
+// SESI PORTAL ANGOTA LEMBAGA (MemberAccount)
+// Pola sama dengan sesi admin, cookie terpisah: pusaka_member_session
+// ============================================================
+
+export const MEMBER_COOKIE = "pusaka_member_session";
+export const MEMBER_MAX_AGE = 60 * 60 * 12; // 12 jam (detik)
+
+/** Payload sesi anggota yang disimpan di dalam token. */
+export interface MemberSessionPayload {
+  accountId: string;
+  email: string;
+  name: string;
+  institutionId: string;
+  institutionName: string;
+  exp: number;
+}
+
+/** Buat token sesi anggota (payload berbeda dari admin). */
+export function createMemberToken(
+  payload: Omit<MemberSessionPayload, "exp"> & { exp?: number }
+): string {
+  const full: MemberSessionPayload = {
+    ...payload,
+    exp: payload.exp ?? Date.now() + MEMBER_MAX_AGE * 1000,
+  };
+  const body = Buffer.from(JSON.stringify(full), "utf8").toString("base64url");
+  const sig = crypto
+    .createHmac("sha256", SESSION_SECRET)
+    .update(body)
+    .digest("base64url");
+  return `${body}.${sig}`;
+}
+
+/** Verifikasi token sesi anggota: signature + kedaluwarsa. */
+export function verifyMemberToken(token: string): MemberSessionPayload | null {
+  try {
+    if (!token || typeof token !== "string") return null;
+    const dot = token.indexOf(".");
+    if (dot <= 0) return null;
+    const body = token.slice(0, dot);
+    const sig = token.slice(dot + 1);
+    if (!body || !sig) return null;
+
+    const expected = crypto
+      .createHmac("sha256", SESSION_SECRET)
+      .update(body)
+      .digest("base64url");
+    const a = Buffer.from(sig, "utf8");
+    const b = Buffer.from(expected, "utf8");
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+
+    const decoded = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8")
+    ) as Record<string, unknown>;
+    if (!decoded || typeof decoded !== "object") return null;
+
+    const { accountId, email, name, institutionId, institutionName, exp } =
+      decoded;
+    if (
+      typeof accountId !== "string" ||
+      typeof email !== "string" ||
+      typeof name !== "string" ||
+      typeof institutionId !== "string" ||
+      typeof institutionName !== "string"
+    ) {
+      return null;
+    }
+    let expMs: number;
+    if (typeof exp === "number") {
+      expMs = exp;
+    } else if (typeof exp === "string") {
+      expMs = new Date(exp).getTime();
+    } else {
+      return null;
+    }
+    if (!Number.isFinite(expMs) || expMs <= Date.now()) return null;
+
+    return {
+      accountId,
+      email,
+      name,
+      institutionId,
+      institutionName,
+      exp: expMs,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Ambil sesi anggota dari header Cookie request (parse manual, tanpa next/headers). */
+export function getMemberSession(request: Request): MemberSessionPayload | null {
+  return readSessionCookie(request, MEMBER_COOKIE, verifyMemberToken);
+}
+
 /** Ambil sesi admin dari header Cookie request (parse manual, tanpa next/headers). */
 export function getAdminSession(request: Request): SessionPayload | null {
+  return readSessionCookie(request, SESSION_COOKIE, verifySessionToken);
+}
+
+/** Helper bersama: baca cookie tertentu dari header Cookie lalu verifikasi. */
+function readSessionCookie<T>(
+  request: Request,
+  cookieName: string,
+  verify: (token: string) => T | null
+): T | null {
   try {
     const cookieHeader = request.headers.get("cookie");
     if (!cookieHeader) return null;
@@ -114,7 +219,7 @@ export function getAdminSession(request: Request): SessionPayload | null {
       const eq = part.indexOf("=");
       if (eq === -1) continue;
       const key = part.slice(0, eq).trim();
-      if (key !== SESSION_COOKIE) continue;
+      if (key !== cookieName) continue;
       const raw = part.slice(eq + 1).trim();
       if (!raw) return null;
       let token = raw;
@@ -123,7 +228,7 @@ export function getAdminSession(request: Request): SessionPayload | null {
       } catch {
         // nilai mentah dipakai jika bukan URL-encoded
       }
-      return verifySessionToken(token);
+      return verify(token);
     }
     return null;
   } catch {
