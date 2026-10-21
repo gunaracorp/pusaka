@@ -108,12 +108,18 @@ function relativeTime(value: string | Date, lang: Lang): string {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("id");
 
-  // Muat bahasa tersimpan SEKALI setelah mount (hindari hydration mismatch).
-  // v6.0.1: efek [lang] TIDAK lagi menulis ke storage saat mount — preferensi
-  // tersimpan tidak lagi tertimpa default "id"; penulisan hanya di setLang().
+  // Muat bahasa SEKALI setelah mount (hindari hydration mismatch).
+  // v6.1.0: dukungan ?lang= (hreflang/crawler) — prioritas URL di atas
+  // localStorage, HANYA mengubah tampilan (tidak menulis storage).
+  // v6.0.1: efek [lang] TIDAK menulis ke storage saat mount.
   useEffect(() => {
     const id = window.setTimeout(() => {
       try {
+        const urlLang = new URLSearchParams(window.location.search).get("lang");
+        if (urlLang === "id" || urlLang === "en" || urlLang === "ar") {
+          setLangState(urlLang);
+          return;
+        }
         const saved = window.localStorage.getItem(STORAGE_KEY);
         if (saved === "id" || saved === "en" || saved === "ar") {
           setLangState(saved);

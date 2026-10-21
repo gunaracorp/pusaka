@@ -27,7 +27,8 @@ export const footerDict: NamespaceDict = {
       bpw: "Akreditasi BPW",
       pihk: "Sertifikasi PIHK",
       iata: "Sertifikasi IATA",
-      umrahHaji: "Izin Umrah & Haji",
+      umrahHaji: "Izin Umrah",
+      haji: "Izin Haji",
       verify: "Verifikasi Sertifikat",
       directory: "Direktori Lembaga",
       layanan: "Katalog Layanan",
@@ -35,6 +36,10 @@ export const footerDict: NamespaceDict = {
       track: "Lacak Pendaftaran",
       experts: "Dewan Pakar",
       faq: "Tanya Jawab",
+    },
+    legal: {
+      privacy: "Kebijakan Privasi",
+      terms: "Syarat & Ketentuan",
     },
     socials: {
       facebook: "Facebook PUSAKA",
@@ -97,7 +102,8 @@ export const footerDict: NamespaceDict = {
       bpw: "BPW Accreditation",
       pihk: "PIHK Certification",
       iata: "IATA Certification",
-      umrahHaji: "Umrah & Hajj License",
+      umrahHaji: "Umrah License",
+      haji: "Hajj License",
       verify: "Verify Certificate",
       directory: "Institution Directory",
       layanan: "Services Catalog",
@@ -105,6 +111,10 @@ export const footerDict: NamespaceDict = {
       track: "Track Application",
       experts: "Expert Council",
       faq: "FAQ",
+    },
+    legal: {
+      privacy: "Privacy Policy",
+      terms: "Terms & Conditions",
     },
     socials: {
       facebook: "PUSAKA on Facebook",
@@ -167,7 +177,8 @@ export const footerDict: NamespaceDict = {
       bpw: "اعتماد BPW",
       pihk: "شهادة PIHK",
       iata: "شهادة IATA",
-      umrahHaji: "ترخيص العمرة والحج",
+      umrahHaji: "ترخيص العمرة",
+      haji: "ترخيص الحج",
       verify: "التحقق من الشهادات",
       directory: "دليل المؤسسات",
       layanan: "كتالوج الخدمات",
@@ -175,6 +186,10 @@ export const footerDict: NamespaceDict = {
       track: "تتبع طلب التسجيل",
       experts: "مجلس الخبراء",
       faq: "الأسئلة الشائعة",
+    },
+    legal: {
+      privacy: "سياسة الخصوصية",
+      terms: "الشروط والأحكام",
     },
     socials: {
       facebook: "فيسبوك بوساكا",

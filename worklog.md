@@ -693,3 +693,35 @@ Stage Summary:
 - v6.0.0 "Sentinel" + v6.0.1 "Lingua" LIVE — release train pertama yang diatur oleh sistem versinya sendiri (bukti sistem bekerja: bug E2E → patch → changelog → worklog).
 - Kontrak baru: GET /api/version (lihat VERSIONING.md §8) — tambahkan ke dokumentasi kontrak API.
 - Berikutnya (usul): otomatisasi bump via skrip, badge versi di panel CMS, release notes dalam 3 bahasa penuh bila dibutuhkan.
+
+---
+Task ID: 13
+Agent: Main Orchestrator (Z.ai)
+Rilis: PUSAKA v6.1.0 (MINOR — codename "Lighthouse")
+Task: Membuat halaman-halaman tersendiri (dedicated pages) dengan SEO penuh — metadata dinamis, structured data, sitemap/robots/manifest, OG image — dalam batasan rute tunggal "/" (pratinjau sandbox).
+
+Work Log:
+- [+] `src/lib/site.ts` — konstanta situs terpusat (SITE_URL placeholder produksi, deskripsi, kontak, situs ekosistem) untuk metadata/sitemap/JSON-LD.
+- [+] `src/lib/pages/registry.ts` — registri 11 halaman: 6 slug layanan (pihk, ppiu, bpw, iata, izin-umrah, izin-haji) + 5 informasi (tentang, kontak, faq, kebijakan-privasi, syarat-ketentuan); `parseHash()` memetakan deep-link `#/p/...`; peta RELATED_SERVICES untuk internal linking; `pageSeoKeyPath()`.
+- [+] `src/lib/use-hash-route.ts` — hook rute hash (state awal "home" agar hydration aman; sinkron mount + hashchange; scroll-top saat masuk halaman).
+- [+] `src/lib/use-page-seo.ts` — SEO dinamis: document.title, meta description, canonical, og:*, twitter:*; MutationObserver pengaman (runtime head Next.js/HMR dapat membuat ulang <title> SSR setelah efek — bug ditemukan saat E2E load-langsung, fix terverifikasi pada 3 skenario).
+- [+] Kamus i18n `dict/pages/` (9 file): common (breadcrumb/CTA), servicesA (pihk/ppiu/bpw), servicesB (iata/izin-umrah/izin-haji), services (merge), about, contact, faqPage, legal (privasi+terms 7 bagian), index (namespace `pages`) — konten penuh 3 bahasa × 11 halaman; didaftarkan di dict/index.ts.
+- [+] `components/pusaka/json-ld.tsx` — `<JsonLd>` + builder: buildRootJsonLd (@graph Organization+WebSite+ProfessionalService, server-rendered di RootLayout), buildServiceJsonLd, buildFaqJsonLd, buildBreadcrumbJsonLd.
+- [+] `components/pusaka/page-shell.tsx` — PageShell: breadcrumb aria (chevron rtl:rotate-180), hero emerald-gold, konten max-w-6xl.
+- [+] `components/pusaka/pages/` — service-page (hero, intro, manfaat 4, lingkup 6, syarat 5, proses 5, FAQ 4+JSON-LD, 3 layanan terkait, CTA band), about-page (profil, visi-misi, 4 nilai, identitas di angka, kepemimpinan), contact-page (4 kartu info + 6 kartu bantuan cepat), faq-page (8 butir beranda + 4 ekstra + JSON-LD FAQPage 12), legal-page (7 bagian, tanggal perbarui = OS_RELEASE_DATE), index.tsx (PageView dispatcher).
+- [+] Infrastruktur SEO file-based: `app/sitemap.xml` via sitemap.ts (11 entri deep-link + prioritas), `app/robots.ts` (+Sitemap URL), `app/manifest.ts`, `public/icon.svg`, `public/og-image.png` 1200×630 (screenshot agent-browser dari kartu branding HTML presisi piksel).
+- [~] `app/layout.tsx` — metadata lengkap: metadataBase, canonical + hreflang id/en/ar/x-default, robots+googleBot (max-image-preview large), keywords diperluas, OG+Twitter dengan og-image, icons, appleWebApp, formatDetection, category; `<JsonLd>` root terpasang.
+- [~] `app/page.tsx` — integrasi router: rute halaman tersendiri merender PageView (TopTicker+Navbar+main+Footer+SakaChat+MemberPortal tetap), anchor-scroll kembali ke beranda (#program dsb.), usePageSeo TERPUSAT di Home (slug turunan rute — PageView tidak lagi memanggilnya sendiri, mencegah konflik penulis).
+- [~] `navbar.tsx` + dict — DropdownMenu "Halaman" (5 tautan) desktop + grup tautan di Sheet mobile.
+- [~] `footer.tsx` + dict — kolom Program kini 6 tautan halaman resmi (umrahHaji dipecah: Izin Umrah + Izin Haji — kunci baru `haji`), FAQ → #/p/faq, tautan Kebijakan Privasi & Syarat Ketentuan di bar bawah (keys footer.legal.*).
+- [~] `programs.tsx` — dialog detail program: tautan "Buka halaman resmi program" via peta PROGRAM_PAGE_SLUG (PIHK→pihk, BPW-PRO→bpw, dst.).
+- [~] `provider.tsx` — dukungan `?lang=` (prioritas di atas localStorage, read-only — hreflang/crawler; tidak menimpa preferensi tersimpan, melanjutkan fix v6.0.1).
+- [!] Konflik `public/robots.txt` (warisan scaffold) vs `app/robots.ts` → HTTP 500; file statis dihapus, robots dinamis (dengan Sitemap URL) menang — 200 terverifikasi.
+- [~] Bump MINOR sesuai VERSIONING.md §6: VERSION 6.1.0, OS_VERSION/OS_CODENAME "Lighthouse", entri registri teratas (20 rilis), CHANGELOG.md, roster codename += Lingua, Lighthouse.
+
+Stage Summary:
+- 11 halaman resmi tersendiri LIVE dengan SEO penuh: title/meta/canonical dinamis per halaman (3 bahasa), JSON-LD Service+FAQ+Breadcrumb per halaman + @graph root server-rendered, sitemap/robots/manifest/icon/OG image.
+- Internal linking lengkap: navbar dropdown, Sheet mobile, footer (program+legal), dialog program, kartu terkait antar halaman layanan, FAQ → program.
+- E2E Agent Browser lulus: deep-link langsung 11 halaman (judul dinamis benar pada load penuh & SPA), dropdown→Tentang, Sheet mobile→Privasi, dialog program→PIHK, CTA layanan→#pendaftaran (form ditemukan), RTL Arab penuh (dir=rtl, judul Arab, breadcrumb rtl), EN via ?lang= (tanpa menulis storage), mode gelap, footer sticky (2800px viewport), mobile 390px, regresi Quick Verify PPU-2025-0001 → PT Zahra Tour PLATINUM, dialog versi "20 rilis — Rilis Berjalan Lighthouse".
+- SEO files 200: /sitemap.xml, /robots.txt, /manifest.webmanifest, /icon.svg, /og-image.png; /api/version → 6.1.0 "Lighthouse", registryHealthy+semverValid true.
+- Kontrak baru di atas: rute SEO file-based + deep-link #/p/... (lihat CHANGELOG 6.1.0) — tambahkan ke dokumentasi kontrak.

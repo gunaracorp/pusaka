@@ -30,6 +30,15 @@ export const navbarDict: NamespaceDict = {
     register: "Daftar Sertifikasi",
     theme: "Tampilan",
     language: "Bahasa",
+    pagesMenu: "Halaman",
+    pagesMenuAria: "Buka menu halaman tersendiri",
+    pages: {
+      tentang: "Tentang PUSAKA",
+      kontak: "Kontak",
+      faq: "Pusat Bantuan",
+      privasi: "Kebijakan Privasi",
+      terms: "Syarat & Ketentuan",
+    },
   },
   en: {
     brandAria: "PUSAKA - Home",
@@ -56,6 +65,15 @@ export const navbarDict: NamespaceDict = {
     register: "Register for Certification",
     theme: "Appearance",
     language: "Language",
+    pagesMenu: "Pages",
+    pagesMenuAria: "Open dedicated pages menu",
+    pages: {
+      tentang: "About PUSAKA",
+      kontak: "Contact",
+      faq: "Help Center",
+      privasi: "Privacy Policy",
+      terms: "Terms & Conditions",
+    },
   },
   ar: {
     brandAria: "بوساكا - الرئيسية",
@@ -82,5 +100,14 @@ export const navbarDict: NamespaceDict = {
     register: "التسجيل للشهادات",
     theme: "المظهر",
     language: "اللغة",
+    pagesMenu: "الصفحات",
+    pagesMenuAria: "افتح قائمة الصفحات المخصصة",
+    pages: {
+      tentang: "عن PUSAKA",
+      kontak: "اتصل بنا",
+      faq: "مركز المساعدة",
+      privasi: "سياسة الخصوصية",
+      terms: "الشروط والأحكام",
+    },
   },
 };

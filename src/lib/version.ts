@@ -77,10 +77,10 @@ function isoDaysAgo(days: number): string {
 export const OS_NAME = "PUSAKA";
 
 /** Versi berjalan — sinkron dengan file VERSION dan entri teratas CHANGELOG. */
-export const OS_VERSION = "6.0.1";
+export const OS_VERSION = "6.1.0";
 
 /** Nama kode rilis berjalan. */
-export const OS_CODENAME = "Lingua";
+export const OS_CODENAME = "Lighthouse";
 
 /** Saluran rilis: stable | beta | alpha. */
 export const OS_CHANNEL = "stable" as const;
@@ -94,6 +94,32 @@ export const OS_RELEASE_DATE = isoDaysAgo(0);
 // ---------- Riwayat rilis (terbaru di atas — append-only) ----------
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "6.1.0",
+    date: isoDaysAgo(0),
+    type: "minor",
+    codename: "Lighthouse",
+    title: "Halaman Tersendiri & Infrastruktur SEO Penuh",
+    summary:
+      "11 halaman resmi tersendiri (6 program + 5 informasi) dengan metadata dinamis, JSON-LD terstruktur, sitemap/robots/manifest, dan gambar Open Graph — terbaca penuh oleh mesin pencari.",
+    tasks: ["13"],
+    added: [
+      "Router halaman dalam (deep-link #/p/...) + 6 halaman layanan resmi: PIHK, PPIU, BPW, IATA, Izin Umrah, Izin Haji — hero, manfaat, lingkup, persyaratan, alur proses, FAQ, layanan terkait, CTA",
+      "5 halaman informasi: Tentang PUSAKA, Kontak, Pusat Bantuan (FAQ 12 butir), Kebijakan Privasi, Syarat & Ketentuan (7 bagian per dokumen)",
+      "Infrastruktur SEO: metadata layout lengkap (metadataBase, canonical, hreflang id/en/ar/x-default, robots + googleBot, OG image, Twitter card, PWA manifest)",
+      "File-based SEO routes: sitemap.xml (11 entri deep-link), robots.txt (dengan referensi sitemap), manifest.webmanifest, icon.svg, og-image.png 1200x630",
+      "JSON-LD: @graph Organization + WebSite + ProfessionalService (server-rendered), plus Service + FAQPage + BreadcrumbList per halaman",
+      "Konten i18n penuh 3 bahasa (ID/EN/AR) untuk seluruh halaman baru + dukungan parameter ?lang= (hreflang/crawler, tanpa menimpa preferensi tersimpan)",
+      "Navigasi: dropdown “Halaman” di navbar (desktop + Sheet mobile), kolom Program footer mengarah ke halaman resmi tiap program, tautan legal di bar bawah, tautan “Buka halaman resmi program” pada dialog Program",
+    ],
+    changed: [
+      "SEO title/meta/canonical kini dikelola satu sumber (usePageSeo di Home) dengan MutationObserver pengaman agar tidak tertimpa runtime head Next.js",
+      "Butir footer “Izin Umrah & Haji” dipecah menjadi dua tautan halaman: Izin Umrah & Izin Haji",
+    ],
+    fixed: [
+      "Konflik public/robots.txt vs app/robots.ts (HTTP 500) — file statis dihapus, robots dinamis dengan sitemap yang menang",
+    ],
+  },
   {
     version: "6.0.1",
     date: isoDaysAgo(0),

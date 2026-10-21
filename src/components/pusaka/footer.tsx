@@ -23,13 +23,14 @@ import { useAdminStore } from "@/lib/admin-store";
 import { useI18n } from "@/lib/i18n/provider";
 import { VersionBadge } from "@/components/pusaka/version-badge";
 
-/** Tautan kolom Program — label diterjemahkan via footer.links.*. */
+/** Tautan kolom Program → halaman tersendiri (Task 13) — label via footer.links.*. */
 const PROGRAM_LINKS = [
-  { href: "#program", key: "ppiu" },
-  { href: "#program", key: "bpw" },
-  { href: "#program", key: "pihk" },
-  { href: "#program", key: "iata" },
-  { href: "#program", key: "umrahHaji" },
+  { href: "#/p/layanan/ppiu", key: "ppiu" },
+  { href: "#/p/layanan/bpw", key: "bpw" },
+  { href: "#/p/layanan/pihk", key: "pihk" },
+  { href: "#/p/layanan/iata", key: "iata" },
+  { href: "#/p/layanan/izin-umrah", key: "umrahHaji" },
+  { href: "#/p/layanan/izin-haji", key: "haji" },
 ] as const;
 
 /** Tautan kolom Layanan — label diterjemahkan via footer.links.*. */
@@ -40,7 +41,7 @@ const SERVICE_LINKS = [
   { href: "#tutorial", key: "tutorial" },
   { href: "#lacak", key: "track" },
   { href: "#dewan-pakar", key: "experts" },
-  { href: "#faq", key: "faq" },
+  { href: "#/p/faq", key: "faq" },
 ] as const;
 
 /** Jaringan situs ekosistem (Task 11-b) — brand & domain literal,
@@ -286,6 +287,19 @@ export function Footer() {
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-emerald-300/60 sm:flex-row sm:px-6 lg:px-8">
           <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
+            <a
+              href="#/p/kebijakan-privasi"
+              className="rounded-md px-2 py-1 underline-offset-2 transition-colors hover:text-emerald-100 hover:underline"
+            >
+              {t("footer.legal.privacy")}
+            </a>
+            <span aria-hidden className="text-emerald-800">·</span>
+            <a
+              href="#/p/syarat-ketentuan"
+              className="rounded-md px-2 py-1 underline-offset-2 transition-colors hover:text-emerald-100 hover:underline"
+            >
+              {t("footer.legal.terms")}
+            </a>
             <VersionBadge />
             <span className="flex items-center gap-1.5 rounded-md border border-emerald-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider">
               <ShieldCheck className="h-3 w-3 text-amber-400" aria-hidden />

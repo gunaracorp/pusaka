@@ -43,6 +43,7 @@ export const programsDict: NamespaceDict = {
       accreditation: "Diakui & Diakreditasi oleh",
       internationalScope: "Cakupan Internasional",
       apply: "Daftar Program Ini",
+      fullPage: "Buka halaman resmi program",
     },
   },
   en: {
@@ -79,6 +80,7 @@ export const programsDict: NamespaceDict = {
       accreditation: "Recognized & Accredited by",
       internationalScope: "International Coverage",
       apply: "Register for This Program",
+      fullPage: "Open the program's official page",
     },
   },
   ar: {
@@ -115,6 +117,7 @@ export const programsDict: NamespaceDict = {
       accreditation: "معترَف به ومعتمد من",
       internationalScope: "الانتشار الدولي",
       apply: "سجّل في هذا البرنامج",
+      fullPage: "افتح الصفحة الرسمية للبرنامج",
     },
   },
 };

@@ -8,6 +8,21 @@ Format mengikuti **Keep a Changelog 1.1.0** + **SemVer 2.0.0** (standar lengkap:
 
 ---
 
+## [6.1.0] — MINOR — "Lighthouse"
+
+**Halaman Tersendiri & Infrastruktur SEO Penuh.** *Task: 13*
+
+- [+] 6 halaman layanan resmi (deep-link `#/p/layanan/...`): PIHK, PPIU, BPW, IATA, Izin Umrah, Izin Haji — hero, manfaat, lingkup layanan, persyaratan, alur proses 5 langkah, FAQ, layanan terkait, CTA
+- [+] 5 halaman informasi: Tentang PUSAKA (profil, visi-misi, nilai), Kontak (info kantor + bantuan cepat), Pusat Bantuan (FAQ 12 butir), Kebijakan Privasi & Syarat Ketentuan (7 bagian per dokumen)
+- [+] Metadata layout lengkap: metadataBase, canonical, hreflang `id/en/ar/x-default`, robots + googleBot directive, Open Graph + Twitter card dengan gambar, PWA manifest, icons
+- [+] Rute SEO file-based: `sitemap.xml` (11 entri deep-link), `robots.txt` (+referensi sitemap), `manifest.webmanifest`, `icon.svg`, `og-image.png` 1200×630 (screenshot presisi dari kartu branding)
+- [+] JSON-LD terstruktur: `@graph` Organization + WebSite + ProfessionalService (server-rendered di RootLayout); Service + FAQPage + BreadcrumbList per halaman
+- [+] Konten i18n penuh 3 bahasa (ID/EN/AR) untuk 11 halaman baru + dukungan parameter `?lang=` (hreflang/crawler — tidak menimpa preferensi tersimpan)
+- [+] Navigasi: dropdown “Halaman” di navbar (desktop + Sheet mobile), kolom Program footer → halaman resmi tiap program, tautan legal di bar bawah, tautan “Buka halaman resmi program” pada dialog Program
+- [~] SEO title/meta/canonical dikelola satu sumber (`usePageSeo` di Home) dengan MutationObserver pengaman agar tidak tertimpa runtime head Next.js
+- [~] Butir footer “Izin Umrah & Haji” dipecah menjadi dua tautan halaman: Izin Umrah & Izin Haji
+- [!] Konflik `public/robots.txt` vs `app/robots.ts` (HTTP 500) — file statis dihapus, robots dinamis dengan sitemap yang menang
+
 ## [6.0.1] — PATCH — "Lingua"
 
 **Perbaikan Persistensi Bahasa.** *Task: 12-b*

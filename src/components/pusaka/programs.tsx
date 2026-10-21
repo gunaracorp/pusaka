@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FadeIn, SectionHeading } from "@/components/pusaka/fade-in";
 import { useI18n } from "@/lib/i18n/provider";
+import { pageHref, type ServiceSlug } from "@/lib/pages/registry";
 import {
   CATEGORY_LABEL,
   getPrograms,
@@ -39,6 +40,17 @@ const PROGRAM_ICON: Record<string, React.ComponentType<{ className?: string }>> 
   "IJIN-UMRAH": FileCheck,
   "IJIN-HAJI": Stamp,
   "BPW-PRO": UserCheck,
+};
+
+/** Task 13: peta kode program → slug halaman resmi (deep-link #/p/layanan/...). */
+const PROGRAM_PAGE_SLUG: Record<string, ServiceSlug> = {
+  PIHK: "pihk",
+  PPIU: "ppiu",
+  BPW: "bpw",
+  IATA: "iata",
+  "IJIN-UMRAH": "izin-umrah",
+  "IJIN-HAJI": "izin-haji",
+  "BPW-PRO": "bpw",
 };
 
 const CATEGORY_TABS: { value: string; key: string }[] = [
@@ -208,6 +220,18 @@ function ProgramDetailDialog({
               >
                 {t("programs.dialog.apply")}
               </Button>
+
+              {PROGRAM_PAGE_SLUG[program.code] ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-11 w-full border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 dark:border-emerald-500/40 dark:text-emerald-300"
+                >
+                  <a href={pageHref(PROGRAM_PAGE_SLUG[program.code])}>
+                    {t("programs.dialog.fullPage")}
+                  </a>
+                </Button>
+              ) : null}
             </div>
           </>
         ) : null}

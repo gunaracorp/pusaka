@@ -116,7 +116,7 @@ menurut §2.
 - **Pemilik produk:** Gugun Gunara — menyetujui arah MAJOR (generasi) dan nama kode rilis.
 - **Nama kode (codename):** satu kata, tema identitas generasi (Genesis, Meridian, Panorama,
   Kronos, Citadel, Atlas, Prism, Oracle, Spectra, Beacon, Polyglot, Keyholder, Vault, Anchor,
-  Pustaka, Polymath, Concord, Sentinel, …).
+  Pustaka, Polymath, Concord, Sentinel, Lingua, Lighthouse, …).
 - **Bahasa kanonik catatan rilis:** Bahasa Indonesia; label antarmuka diterjemahkan (ID/EN/AR)
   via namespace i18n `versionControl`.
 - **Dilarang:** menghapus/menulis ulang entri changelog; melompati nomor versi; dua MAJOR dalam
