@@ -14,6 +14,8 @@ export const navbarDict: NamespaceDict = {
     links: {
       beranda: "Beranda",
       program: "Program",
+      layanan: "Layanan",
+      tutorial: "Tutorial",
       jaringan: "Jaringan",
       verifikasi: "Verifikasi",
       direktori: "Direktori",
@@ -38,6 +40,8 @@ export const navbarDict: NamespaceDict = {
     links: {
       beranda: "Home",
       program: "Programs",
+      layanan: "Services",
+      tutorial: "Guides",
       jaringan: "Network",
       verifikasi: "Verification",
       direktori: "Directory",
@@ -62,6 +66,8 @@ export const navbarDict: NamespaceDict = {
     links: {
       beranda: "الرئيسية",
       program: "البرامج",
+      layanan: "الخدمات",
+      tutorial: "الأدلة",
       jaringan: "الشبكة",
       verifikasi: "التحقق",
       direktori: "الدليل",

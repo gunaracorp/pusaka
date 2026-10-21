@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { randomBytes, scryptSync } from 'crypto'
 import { globalNodes, programCountries } from './data/globalNodes'
+import { buildServiceCatalog } from './data/services'
 
 const prisma = new PrismaClient()
 
@@ -368,6 +369,7 @@ async function main() {
   console.log('🌱 Seeding PUSAKA database...')
 
   await prisma.verifyLog.deleteMany()
+  await prisma.payment.deleteMany()
   await prisma.contactMessage.deleteMany()
   await prisma.application.deleteMany()
   await prisma.newsArticle.deleteMany()
@@ -375,6 +377,7 @@ async function main() {
   await prisma.institution.deleteMany()
   await prisma.program.deleteMany()
   await prisma.globalNode.deleteMany()
+  await prisma.service.deleteMany()
 
   // ===== Akun CMS Admin =====
   await prisma.adminUser.deleteMany()
@@ -405,6 +408,13 @@ async function main() {
     })
   }
   console.log(`  ✓ ${programs.length} programs (+ cakupan internasional)`)
+
+  // ===== Katalog 500 Layanan Sertifikasi & Akreditasi Global =====
+  const serviceCatalog = buildServiceCatalog()
+  for (let i = 0; i < serviceCatalog.length; i += 100) {
+    await prisma.service.createMany({ data: serviceCatalog.slice(i, i + 100) })
+  }
+  console.log(`  ✓ ${serviceCatalog.length} layanan sertifikasi & akreditasi (${new Set(serviceCatalog.map(s => s.categorySlug)).size} bidang)`)
 
   // ===== Jaringan Global (kantor perwakilan & mitra internasional) =====
   for (const node of globalNodes) {

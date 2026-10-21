@@ -13,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Award, FileSearch, Globe2, Handshake, Layers, Users } from "lucide-react";
+import { Award, BadgeCheck, FileSearch, Globe2, Handshake, Layers, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedCounter } from "@/components/pusaka/animated-counter";
@@ -64,6 +64,7 @@ export function StatsSection() {
 
   const counters = [
     { icon: Award, label: t("stats.counters.certificates"), value: s.totals.certificateHolders, suffix: "+" },
+    { icon: BadgeCheck, label: t("stats.counters.services"), value: s.totals.services, suffix: "+" },
     { icon: Layers, label: t("stats.counters.institutions"), value: s.totals.institutions, suffix: "" },
     { icon: Users, label: t("stats.counters.experts"), value: s.totals.experts, suffix: "" },
     { icon: FileSearch, label: t("stats.counters.verifications"), value: s.totals.verificationsToday, suffix: "" },
@@ -80,8 +81,8 @@ export function StatsSection() {
           subtitle={t("stats.subtitle")}
         />
 
-        {/* 6 counter besar */}
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {/* 7 counter besar */}
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
           {counters.map((c, idx) => {
             const Icon = c.icon;
             return (

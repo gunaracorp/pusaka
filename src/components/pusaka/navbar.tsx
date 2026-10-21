@@ -28,6 +28,23 @@ const LINK_KEYS: Record<(typeof NAV_LINKS)[number]["href"], string> = {
   "#berita": "berita",
 };
 
+/** Link tambahan section baru (Task 11-b) — desktop tampil mulai xl,
+ *  mobile Sheet selalu tampil. Nav lg+ tidak berubah (8 link lama). */
+const EXTRA_LINKS = [
+  { href: "#layanan", key: "layanan", extra: true },
+  { href: "#tutorial", key: "tutorial", extra: true },
+] as const;
+
+/** Gabungan link nav: NAV_LINKS + 2 link baru disisipkan setelah "#program". */
+const ALL_LINKS: { href: string; key: string; extra?: boolean }[] = [
+  ...NAV_LINKS.slice(0, 2).map((l) => ({ href: l.href, key: LINK_KEYS[l.href] })),
+  ...EXTRA_LINKS.map((l) => ({ href: l.href, key: l.key, extra: l.extra })),
+  ...NAV_LINKS.slice(2).map((l) => ({ href: l.href, key: LINK_KEYS[l.href] })),
+];
+
+const NAV_LINK_CLASS =
+  "rounded-md px-1.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300";
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -75,19 +92,19 @@ export function Navbar() {
         </a>
 
         {/* Menu desktop */}
-        <nav aria-label={t("navbar.navAria")} className="hidden items-center gap-1 lg:flex">
-          {NAV_LINKS.map((link) => (
+        <nav aria-label={t("navbar.navAria")} className="hidden items-center gap-0 lg:flex">
+          {ALL_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
+              className={link.extra ? `hidden xl:inline-flex ${NAV_LINK_CLASS}` : NAV_LINK_CLASS}
             >
-              {t(`navbar.links.${LINK_KEYS[link.href]}`)}
+              {t(`navbar.links.${link.key}`)}
             </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           <LanguageSwitcher />
           <ThemeToggle />
           <Button
@@ -108,7 +125,7 @@ export function Navbar() {
           >
             <UserRound className="h-4 w-4" aria-hidden />
           </Button>
-          <Button asChild className="h-10 min-w-44 bg-emerald-700 hover:bg-emerald-800">
+          <Button asChild className="h-10 min-w-40 bg-emerald-700 px-3 hover:bg-emerald-800">
             <a href="#pendaftaran" className="gap-2">
               <BadgeCheck className="h-4 w-4" aria-hidden />
               {t("navbar.register")}
@@ -138,14 +155,14 @@ export function Navbar() {
               </SheetTitle>
             </SheetHeader>
             <nav aria-label={t("navbar.navMobileAria")} className="flex flex-col gap-1 p-4">
-              {NAV_LINKS.map((link) => (
+              {ALL_LINKS.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300"
                 >
-                  {t(`navbar.links.${LINK_KEYS[link.href]}`)}
+                  {t(`navbar.links.${link.key}`)}
                 </a>
               ))}
               <div className="mt-4 border-t pt-4">

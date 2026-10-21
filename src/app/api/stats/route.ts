@@ -12,6 +12,8 @@ export interface StatsData {
     programs: number;
     verificationsToday: number;
     applicationsThisMonth: number;
+    /** Katalog layanan global: jumlah layanan aktif (model Service). */
+    services: number;
   };
   programDistribution: { code: string; holders: number }[];
   tierDistribution: { tier: string; count: number }[];
@@ -42,6 +44,7 @@ export async function GET() {
       tierGroups,
       provinceGroups,
       recentLogs,
+      servicesCount,
     ] = await Promise.all([
       db.program.aggregate({ _sum: { holderCount: true } }),
       db.institution.count(),
@@ -57,6 +60,7 @@ export async function GET() {
         take: 8,
         select: { certNumber: true, result: true, createdAt: true },
       }),
+      db.service.count({ where: { active: true } }),
     ]);
 
     // Statistik jaringan global — try/catch terpisah agar tetap aman (default 0)
@@ -83,6 +87,7 @@ export async function GET() {
         programs: programCount,
         verificationsToday,
         applicationsThisMonth,
+        services: servicesCount,
       },
       programDistribution: programs
         .map((p) => ({ code: p.code, holders: p.holderCount }))

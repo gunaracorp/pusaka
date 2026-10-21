@@ -64,6 +64,30 @@ model Payment {
   updatedAt     DateTime    @updatedAt
 }
 
+// ============================================================
+// KATALOG LAYANAN GLOBAL — 500 layanan sertifikasi & akreditasi
+// lintas bidang profesional berstandar internasional
+// ============================================================
+model Service {
+  id            String   @id @default(cuid())
+  code          String   @unique // SVC-0001 .. SVC-0500
+  name          String // nama layanan (konten DB — tidak diterjemahkan)
+  category      String // nama bidang (Indonesia)
+  categorySlug  String // slug bidang utk filter & dict i18n, mis. "manajemen-mutu"
+  standard      String // referensi standar internasional (ISO/IEC, Codex, dll)
+  description   String
+  price         Int // biaya skema (IDR)
+  durationWeeks Int // estimasi proses (minggu)
+  scheme        String // BADAN_USAHA | PROFESIONAL
+  scope         String // NASIONAL | INTERNASIONAL
+  issuer        String // mis. "PUSAKA × JAS-ANZ (IAF MLA)"
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([categorySlug])
+  @@index([scheme])
+}
+
 model Program {
   id            String   @id @default(cuid())
   code          String   @unique // PIHK, PPIU, BPW, IATA, IJIN-UMRAH, IJIN-HAJI, BPW-PRO

@@ -46,7 +46,11 @@ export function TopTicker() {
 
   // Pengumuman statis dari kamus + judul berita dari DB (tidak diterjemahkan).
   const items = useMemo(() => {
-    const merged = [t("topTicker.items.batch2026"), t("topTicker.items.verify247")];
+    const merged = [
+      t("topTicker.items.batch2026"),
+      t("topTicker.items.services"),
+      t("topTicker.items.verify247"),
+    ];
     for (const title of newsTitles) {
       if (!merged.includes(title)) merged.push(title);
     }

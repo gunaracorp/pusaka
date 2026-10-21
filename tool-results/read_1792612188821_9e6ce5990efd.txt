@@ -1,0 +1,649 @@
+     1→"use client";
+     2→
+     3→// ============================================================
+     4→// PUSAKA — Section Jaringan Global (layanan di 32 negara)
+     5→// Section gelap premium: emerald-950 + ornamen radial + aksen amber.
+     6→// Data: GET /api/global (fetch sekali, filter di client-side).
+     7→// ============================================================
+     8→
+     9→import { useEffect, useMemo, useRef, useState } from "react";
+    10→import {
+    11→  Building2,
+    12→  Globe2,
+    13→  Handshake,
+    14→  Landmark,
+    15→  Loader2,
+    16→  MapPin,
+    17→  Network,
+    18→  Search,
+    19→  X,
+    20→  type LucideIcon,
+    21→} from "lucide-react";
+    22→import { Badge } from "@/components/ui/badge";
+    23→import { Button } from "@/components/ui/button";
+    24→import {
+    25→  Dialog,
+    26→  DialogContent,
+    27→  DialogDescription,
+    28→  DialogHeader,
+    29→  DialogTitle,
+    30→} from "@/components/ui/dialog";
+    31→import { Input } from "@/components/ui/input";
+    32→import {
+    33→  Select,
+    34→  SelectContent,
+    35→  SelectItem,
+    36→  SelectTrigger,
+    37→  SelectValue,
+    38→} from "@/components/ui/select";
+    39→import { Skeleton } from "@/components/ui/skeleton";
+    40→import { FadeIn } from "@/components/pusaka/fade-in";
+    41→import { AnimatedCounter } from "@/components/pusaka/animated-counter";
+    42→import { useI18n } from "@/lib/i18n/provider";
+    43→import {
+    44→  GLOBAL_KIND_LABEL,
+    45→  GLOBAL_REGION_LABEL,
+    46→  GLOBAL_REGION_ORDER,
+    47→  GLOBAL_STATUS_META,
+    48→  PROGRAM_LABELS,
+    49→  getGlobal,
+    50→  safeParseJsonArray,
+    51→  type GlobalNodeT,
+    52→  type GlobalResp,
+    53→} from "@/lib/pusaka";
+    54→
+    55→// ---------- meta stat pill ----------
+    56→
+    57→const STAT_META: {
+    58→  key: "totalCountries" | "totalNodes" | "offices" | "partners";
+    59→  icon: LucideIcon;
+    60→}[] = [
+    61→  { key: "totalCountries", icon: Globe2 },
+    62→  { key: "totalNodes", icon: Network },
+    63→  { key: "offices", icon: Landmark },
+    64→  { key: "partners", icon: Handshake },
+    65→];
+    66→
+    67→/** Terjemahan kunci dinamis; label meta jadi fallback bila kunci kamus tidak ada. */
+    68→function metaT(
+    69→  t: (path: string, vars?: Record<string, string | number>) => string,
+    70→  key: string,
+    71→  fallback: string
+    72→): string {
+    73→  const value = t(key);
+    74→  return value === key ? fallback : value;
+    75→}
+    76→
+    77→/** Summary cadangan bila backend belum mengirim objek summary. */
+    78→function computeSummary(nodes: GlobalNodeT[]): GlobalResp["summary"] {
+    79→  const regionCounts = new Map<string, number>();
+    80→  const countries = new Set<string>();
+    81→  let offices = 0;
+    82→  let partners = 0;
+    83→  for (const n of nodes) {
+    84→    countries.add(n.countryCode);
+    85→    regionCounts.set(n.region, (regionCounts.get(n.region) ?? 0) + 1);
+    86→    if (n.kind === "KANTOR_PERWAKILAN") offices += 1;
+    87→    if (n.kind === "MITRA_INTERNASIONAL") partners += 1;
+    88→  }
+    89→  return {
+    90→    totalCountries: countries.size,
+    91→    totalNodes: nodes.length,
+    92→    offices,
+    93→    partners,
+    94→    regionCounts: [...regionCounts.entries()].map(([region, count]) => ({ region, count })),
+    95→  };
+    96→}
+    97→
+    98→// ---------- dialog detail node ----------
+    99→
+   100→function NodeDetailDialog({
+   101→  node,
+   102→  onClose,
+   103→}: {
+   104→  node: GlobalNodeT | null;
+   105→  onClose: () => void;
+   106→}) {
+   107→  const { t } = useI18n();
+   108→  const scope = safeParseJsonArray(node?.scope);
+   109→  const statusMeta = node ? GLOBAL_STATUS_META[node.status] : undefined;
+   110→
+   111→  function handleApply() {
+   112→    const code = scope[0];
+   113→    if (code) {
+   114→      window.dispatchEvent(new CustomEvent("pusaka:select-program", { detail: code }));
+   115→    }
+   116→    onClose();
+   117→    document.getElementById("pendaftaran")?.scrollIntoView({ behavior: "smooth" });
+   118→  }
+   119→
+   120→  return (
+   121→    <Dialog open={!!node} onOpenChange={(open) => (open ? undefined : onClose())}>
+   122→      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+   123→        {node ? (
+   124→          <>
+   125→            <DialogHeader>
+   126→              <div className="flex items-start gap-3 pr-8">
+   127→                <span
+   128→                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-4xl leading-none"
+   129→                  aria-hidden
+   130→                >
+   131→                  {node.flag}
+   132→                </span>
+   133→                <div className="min-w-0">
+   134→                  <DialogTitle className="font-display text-start text-xl font-bold">
+   135→                    {node.country}
+   136→                    <span className="ms-2 text-sm font-semibold text-muted-foreground">{node.city}</span>
+   137→                  </DialogTitle>
+   138→                  {statusMeta ? (
+   139→                    <Badge variant="outline" className={`mt-1.5 ${statusMeta.badgeClass}`}>
+   140→                      {metaT(t, `globalNetwork.status.${node.status}`, statusMeta.label)}
+   141→                    </Badge>
+   142→                  ) : null}
+   143→                </div>
+   144→              </div>
+   145→            </DialogHeader>
+   146→            <DialogDescription className="sr-only">
+   147→              {t("globalNetwork.dialog.srDescription", { country: node.country, city: node.city })}
+   148→            </DialogDescription>
+   149→
+   150→            <div className="space-y-5">
+   151→              <p className="font-display text-base font-bold text-emerald-800 dark:text-emerald-300">{node.title}</p>
+   152→              <p className="-mt-3 text-sm font-medium text-muted-foreground">{node.orgName}</p>
+   153→              <p className="text-sm leading-relaxed text-muted-foreground">{node.description}</p>
+   154→
+   155→              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+   156→                <div className="rounded-lg border bg-muted/50 p-3">
+   157→                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+   158→                    {t("globalNetwork.dialog.region")}
+   159→                  </p>
+   160→                  <p className="mt-0.5 text-sm font-bold text-foreground">
+   161→                    {metaT(t, `globalNetwork.region.${node.region}`, GLOBAL_REGION_LABEL[node.region] ?? node.region)}
+   162→                  </p>
+   163→                </div>
+   164→                <div className="rounded-lg border bg-muted/50 p-3">
+   165→                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+   166→                    {t("globalNetwork.dialog.city")}
+   167→                  </p>
+   168→                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.city}</p>
+   169→                </div>
+   170→                <div className="rounded-lg border bg-muted/50 p-3">
+   171→                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+   172→                    {t("globalNetwork.dialog.kind")}
+   173→                  </p>
+   174→                  <p className="mt-0.5 text-sm font-bold text-foreground">
+   175→                    {metaT(t, `globalNetwork.kind.${node.kind}`, GLOBAL_KIND_LABEL[node.kind] ?? node.kind)}
+   176→                  </p>
+   177→                </div>
+   178→                <div className="rounded-lg border bg-muted/50 p-3">
+   179→                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+   180→                    {t("globalNetwork.dialog.sinceLabel")}
+   181→                  </p>
+   182→                  <p className="mt-0.5 text-sm font-bold text-foreground">{node.since}</p>
+   183→                </div>
+   184→                <div className="col-span-2 rounded-lg border bg-muted/50 p-3 sm:col-span-1">
+   185→                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+   186→                    {t("globalNetwork.dialog.contact")}
+   187→                  </p>
+   188→                  {node.contact ? (
+   189→                    <a
+   190→                      href={`mailto:${node.contact}`}
+   191→                      className="mt-0.5 block break-all text-sm font-bold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
+   192→                    >
+   193→                      {node.contact}
+   194→                    </a>
+   195→                  ) : (
+   196→                    <p className="mt-0.5 text-sm font-bold text-muted-foreground">—</p>
+   197→                  )}
+   198→                </div>
+   199→              </div>
+   200→
+   201→              {scope.length > 0 ? (
+   202→                <div>
+   203→                  <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+   204→                    {t("globalNetwork.dialog.scopeTitle")}
+   205→                  </h4>
+   206→                  <div className="flex flex-wrap gap-2">
+   207→                    {scope.map((code) => (
+   208→                      <Badge
+   209→                        key={code}
+   210→                        variant="outline"
+   211→                        className="border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
+   212→                      >
+   213→                        {PROGRAM_LABELS[code] ?? code}
+   214→                      </Badge>
+   215→                    ))}
+   216→                  </div>
+   217→                </div>
+   218→              ) : null}
+   219→
+   220→              <div className="flex flex-col gap-2 sm:flex-row">
+   221→                <Button
+   222→                  onClick={handleApply}
+   223→                  className="h-12 flex-1 bg-emerald-700 text-base font-bold hover:bg-emerald-800"
+   224→                >
+   225→                  {t("globalNetwork.dialog.applyRegion")}
+   226→                </Button>
+   227→                {node.contact ? (
+   228→                  <Button
+   229→                    asChild
+   230→                    variant="outline"
+   231→                    className="h-12 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/10 hover:text-emerald-900 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:text-emerald-200"
+   232→                  >
+   233→                    <a
+   234→                      href={`mailto:${node.contact}`}
+   235→                      aria-label={t("globalNetwork.dialog.emailOfficeAria", { country: node.country })}
+   236→                    >
+   237→                      {t("globalNetwork.dialog.contactOffice")}
+   238→                    </a>
+   239→                  </Button>
+   240→                ) : null}
+   241→              </div>
+   242→            </div>
+   243→          </>
+   244→        ) : null}
+   245→      </DialogContent>
+   246→    </Dialog>
+   247→  );
+   248→}
+   249→
+   250→// ---------- section utama ----------
+   251→
+   252→export function GlobalNetwork() {
+   253→  const { t, formatNumber } = useI18n();
+   254→  const [resp, setResp] = useState<GlobalResp | null>(null);
+   255→  const [loading, setLoading] = useState(true);
+   256→  const [error, setError] = useState<string | null>(null);
+   257→
+   258→  const [query, setQuery] = useState("");
+   259→  const [kind, setKind] = useState("SEMUA");
+   260→  const [region, setRegion] = useState("SEMUA");
+   261→  const [selected, setSelected] = useState<GlobalNodeT | null>(null);
+   262→  const [reloadKey, setReloadKey] = useState(0);
+   263→
+   264→  // Ref agar fetch awal tidak perlu t sebagai dependency (identitas t berubah saat ganti bahasa).
+   265→  const tRef = useRef(t);
+   266→  useEffect(() => {
+   267→    tRef.current = t;
+   268→  }, [t]);
+   269→
+   270→  useEffect(() => {
+   271→    let alive = true;
+   272→    getGlobal()
+   273→      .then((data) => {
+   274→        if (alive) setResp(data);
+   275→      })
+   276→      .catch((e) => {
+   277→        if (alive) setError(e instanceof Error ? e.message : tRef.current("globalNetwork.loadError"));
+   278→      })
+   279→      .finally(() => {
+   280→        if (alive) setLoading(false);
+   281→      });
+   282→    return () => {
+   283→      alive = false;
+   284→    };
+   285→  }, [reloadKey]);
+   286→
+   287→  const retry = () => {
+   288→    setLoading(true);
+   289→    setError(null);
+   290→    setReloadKey((k) => k + 1);
+   291→  };
+   292→
+   293→  const nodes = resp?.nodes ?? [];
+   294→  const summary = resp?.summary ?? computeSummary(nodes);
+   295→
+   296→  const regionCountMap = useMemo(() => {
+   297→    const map: Record<string, number> = {};
+   298→    for (const rc of summary.regionCounts) map[rc.region] = rc.count;
+   299→    return map;
+   300→  }, [summary]);
+   301→
+   302→  // daftar bendera unik (32 negara) untuk marquee
+   303→  const flags = useMemo(() => {
+   304→    const seen = new Set<string>();
+   305→    const out: { code: string; flag: string; country: string }[] = [];
+   306→    for (const n of nodes) {
+   307→      if (seen.has(n.countryCode)) continue;
+   308→      seen.add(n.countryCode);
+   309→      out.push({ code: n.countryCode, flag: n.flag, country: n.country });
+   310→    }
+   311→    return out;
+   312→  }, [nodes]);
+   313→
+   314→  const filtered = useMemo(() => {
+   315→    const q = query.trim().toLowerCase();
+   316→    return nodes.filter((n) => {
+   317→      if (kind !== "SEMUA" && n.kind !== kind) return false;
+   318→      if (region !== "SEMUA" && n.region !== region) return false;
+   319→      if (q) {
+   320→        const hay = `${n.country} ${n.city} ${n.orgName} ${n.title}`.toLowerCase();
+   321→        if (!hay.includes(q)) return false;
+   322→      }
+   323→      return true;
+   324→    });
+   325→  }, [nodes, kind, region, query]);
+   326→
+   327→  return (
+   328→    <section
+   329→      id="jaringan-global"
+   330→      className="relative scroll-mt-20 overflow-hidden bg-emerald-950 py-16 sm:py-20"
+   331→    >
+   332→      {/* ornamen latar gelap — selaras hero */}
+   333→      <div className="pointer-events-none absolute inset-0" aria-hidden>
+   334→        <div className="absolute -top-24 left-1/2 h-[420px] w-[860px] max-w-[140vw] -translate-x-1/2 rounded-full bg-emerald-900/50 blur-3xl" />
+   335→        <div className="absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
+   336→        <div className="absolute -left-32 top-1/3 h-80 w-80 rounded-full bg-emerald-800/40 blur-3xl" />
+   337→      </div>
+   338→
+   339→      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+   340→        {/* Heading (varian dark dari SectionHeading — warna disesuaikan bg emerald-950) */}
+   341→        <FadeIn className="mx-auto max-w-3xl text-center">
+   342→          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-300">
+   343→            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
+   344→            {t("globalNetwork.eyebrow")}
+   345→          </p>
+   346→          <h2 className="font-display text-3xl font-extrabold text-white sm:text-4xl">
+   347→            {t("globalNetwork.titleBefore")}{" "}
+   348→            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+   349→              {t("globalNetwork.titleHighlight")}
+   350→            </span>
+   351→          </h2>
+   352→          <p className="mt-3 text-base leading-relaxed text-emerald-100/80">
+   353→            {t("globalNetwork.subtitle")}
+   354→          </p>
+   355→        </FadeIn>
+   356→
+   357→        {/* 4 stat pill */}
+   358→        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+   359→          {STAT_META.map((s, idx) => {
+   360→            const Icon = s.icon;
+   361→            return (
+   362→              <FadeIn key={s.key} delay={idx * 0.06}>
+   363→                <div className="flex h-full items-center gap-3 rounded-2xl border border-emerald-800/60 bg-emerald-900/40 px-4 py-4 backdrop-blur">
+   364→                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-800/70 text-amber-300">
+   365→                    <Icon className="h-5 w-5" aria-hidden />
+   366→                  </span>
+   367→                  <div className="min-w-0">
+   368→                    {loading ? (
+   369→                      <Skeleton className="h-8 w-14 rounded-md bg-emerald-800/80" />
+   370→                    ) : (
+   371→                      <p className="font-display text-2xl font-black text-white sm:text-3xl">
+   372→                        <AnimatedCounter value={summary[s.key]} />
+   373→                      </p>
+   374→                    )}
+   375→                    <p className="truncate text-[11px] font-semibold uppercase tracking-widest text-emerald-200/70">
+   376→                      {t(`globalNetwork.stats.${s.key}`)}
+   377→                    </p>
+   378→                  </div>
+   379→                </div>
+   380→              </FadeIn>
+   381→            );
+   382→          })}
+   383→        </div>
+   384→
+   385→        {/* marquee bendera */}
+   386→        {flags.length > 0 ? (
+   387→          <FadeIn delay={0.15}>
+   388→            <div
+   389→              className="marquee-hover-pause relative mt-8 overflow-hidden rounded-2xl border border-emerald-800/60 bg-emerald-900/30 py-4"
+   390→              aria-label={t("globalNetwork.marqueeAria")}
+   391→            >
+   392→              <div className="animate-marquee flex w-max items-center gap-8 px-2">
+   393→                {[...flags, ...flags].map((f, i) => (
+   394→                  <span
+   395→                    key={`${f.code}-${i}`}
+   396→                    className="flex items-center gap-2 whitespace-nowrap"
+   397→                    aria-hidden={i >= flags.length}
+   398→                  >
+   399→                    <span className="text-2xl" aria-hidden>
+   400→                      {f.flag}
+   401→                    </span>
+   402→                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-200/80">
+   403→                      {f.country}
+   404→                    </span>
+   405→                  </span>
+   406→                ))}
+   407→              </div>
+   408→              <div
+   409→                className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-emerald-950 to-transparent"
+   410→                aria-hidden
+   411→              />
+   412→              <div
+   413→                className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-emerald-950 to-transparent"
+   414→                aria-hidden
+   415→              />
+   416→            </div>
+   417→          </FadeIn>
+   418→        ) : null}
+   419→
+   420→        {/* kontrol filter */}
+   421→        <FadeIn delay={0.2} className="mt-8 space-y-4">
+   422→          <div className="flex flex-col gap-3 sm:flex-row">
+   423→            <div className="relative flex-1">
+   424→              <Search
+   425→                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-300/60"
+   426→                aria-hidden
+   427→              />
+   428→              <Input
+   429→                type="search"
+   430→                value={query}
+   431→                onChange={(e) => setQuery(e.target.value)}
+   432→                placeholder={t("globalNetwork.searchPlaceholder")}
+   433→                aria-label={t("globalNetwork.searchPlaceholder")}
+   434→                className="h-11 border-emerald-700/70 bg-emerald-900/40 ps-9 text-emerald-50 placeholder:text-emerald-300/50 focus-visible:ring-amber-400/60"
+   435→              />
+   436→            </div>
+   437→            <Select value={kind} onValueChange={setKind}>
+   438→              <SelectTrigger
+   439→                aria-label={t("globalNetwork.filterKindAria")}
+   440→                className="h-11 w-full border-emerald-700/70 bg-emerald-900/40 text-emerald-50 data-[placeholder]:text-emerald-300/50 sm:w-64"
+   441→              >
+   442→                <SelectValue placeholder={t("globalNetwork.kindAll")} />
+   443→              </SelectTrigger>
+   444→              <SelectContent>
+   445→                <SelectItem value="SEMUA">{t("globalNetwork.kindAll")}</SelectItem>
+   446→                <SelectItem value="KANTOR_PERWAKILAN">
+   447→                  {t("globalNetwork.kind.KANTOR_PERWAKILAN")}
+   448→                </SelectItem>
+   449→                <SelectItem value="MITRA_INTERNASIONAL">
+   450→                  {t("globalNetwork.kind.MITRA_INTERNASIONAL")}
+   451→                </SelectItem>
+   452→              </SelectContent>
+   453→            </Select>
+   454→          </div>
+   455→
+   456→          {/* chip kawasan — horizontal scroll di mobile */}
+   457→          <div
+   458→            className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+   459→            role="group"
+   460→            aria-label={t("globalNetwork.regionFilterAria")}
+   461→          >
+   462→            <div className="flex w-max items-center gap-2 sm:w-auto sm:flex-wrap">
+   463→              <button
+   464→                type="button"
+   465→                onClick={() => setRegion("SEMUA")}
+   466→                aria-pressed={region === "SEMUA"}
+   467→                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+   468→                  region === "SEMUA"
+   469→                    ? "bg-amber-400 text-emerald-950"
+   470→                    : "border border-emerald-700 text-emerald-100 hover:border-amber-400/60 hover:text-white"
+   471→                }`}
+   472→              >
+   473→                {t("globalNetwork.regionAll", { count: formatNumber(summary.totalNodes) })}
+   474→              </button>
+   475→              {GLOBAL_REGION_ORDER.map((r) => {
+   476→                const count = regionCountMap[r] ?? nodes.filter((n) => n.region === r).length;
+   477→                const isActive = region === r;
+   478→                return (
+   479→                  <button
+   480→                    key={r}
+   481→                    type="button"
+   482→                    onClick={() => setRegion(r)}
+   483→                    aria-pressed={isActive}
+   484→                    className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+   485→                      isActive
+   486→                        ? "bg-amber-400 text-emerald-950"
+   487→                        : "border border-emerald-700 text-emerald-100 hover:border-amber-400/60 hover:text-white"
+   488→                    }`}
+   489→                  >
+   490→                    {metaT(t, `globalNetwork.region.${r}`, GLOBAL_REGION_LABEL[r] ?? r)} (
+   491→                    {formatNumber(count)})
+   492→                  </button>
+   493→                );
+   494→              })}
+   495→            </div>
+   496→          </div>
+   497→        </FadeIn>
+   498→
+   499→        {/* konten: skeleton / error / grid / empty */}
+   500→        {loading ? (
+   501→          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+   502→            {Array.from({ length: 8 }).map((_, i) => (
+   503→              <div
+   504→                key={i}
+   505→                className="rounded-2xl border border-emerald-800/60 bg-emerald-900/40 p-5"
+   506→              >
+   507→                <div className="flex items-center justify-between">
+   508→                  <Skeleton className="h-10 w-10 rounded-xl bg-emerald-800/80" />
+   509→                  <Skeleton className="h-5 w-24 rounded-full bg-emerald-800/80" />
+   510→                </div>
+   511→                <Skeleton className="mt-4 h-5 w-2/3 bg-emerald-800/80" />
+   512→                <Skeleton className="mt-2 h-3 w-1/2 bg-emerald-800/80" />
+   513→                <Skeleton className="mt-3 h-3 w-3/4 bg-emerald-800/80" />
+   514→                <div className="mt-4 flex gap-2">
+   515→                  <Skeleton className="h-6 w-16 rounded-full bg-emerald-800/80" />
+   516→                  <Skeleton className="h-6 w-20 rounded-full bg-emerald-800/80" />
+   517→                </div>
+   518→                <Skeleton className="mt-5 h-5 w-1/2 rounded-full bg-emerald-800/80" />
+   519→              </div>
+   520→            ))}
+   521→          </div>
+   522→        ) : error ? (
+   523→          <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-emerald-800 bg-emerald-900/30 py-14 text-center">
+   524→            <X className="h-8 w-8 text-red-400" aria-hidden />
+   525→            <p className="max-w-md text-sm text-emerald-100/80">{error}</p>
+   526→            <Button
+   527→              variant="outline"
+   528→              size="sm"
+   529→              className="border-emerald-700 text-emerald-100 hover:bg-emerald-900 hover:text-white"
+   530→              onClick={retry}
+   531→            >
+   532→              {t("globalNetwork.retry")}
+   533→            </Button>
+   534→          </div>
+   535→        ) : filtered.length === 0 ? (
+   536→          <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-emerald-800 bg-emerald-900/30 py-14 text-center">
+   537→            <Globe2 className="h-8 w-8 text-emerald-500" aria-hidden />
+   538→            <p className="max-w-md text-sm text-emerald-100/80">
+   539→              {t("globalNetwork.emptyFiltered")}
+   540→            </p>
+   541→            <Button
+   542→              variant="outline"
+   543→              size="sm"
+   544→              className="border-emerald-700 text-emerald-100 hover:bg-emerald-900 hover:text-white"
+   545→              onClick={() => {
+   546→                setQuery("");
+   547→                setKind("SEMUA");
+   548→                setRegion("SEMUA");
+   549→              }}
+   550→            >
+   551→              {t("globalNetwork.resetFilter")}
+   552→            </Button>
+   553→          </div>
+   554→        ) : (
+   555→          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+   556→            {filtered.map((n, idx) => {
+   557→              const scope = safeParseJsonArray(n.scope);
+   558→              const statusMeta = GLOBAL_STATUS_META[n.status];
+   559→              return (
+   560→                <FadeIn key={n.id} delay={Math.min(idx * 0.04, 0.28)} className="h-full">
+   561→                  <button
+   562→                    type="button"
+   563→                    onClick={() => setSelected(n)}
+   564→                    aria-label={t("globalNetwork.cardAria", { org: n.orgName, country: n.country })}
+   565→                    className="flex h-full w-full flex-col rounded-2xl border border-emerald-800/60 bg-emerald-900/40 p-5 text-start transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-xl hover:shadow-emerald-950/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+   566→                  >
+   567→                    <div className="flex items-start justify-between gap-2">
+   568→                      <span className="text-4xl leading-none" aria-hidden>
+   569→                        {n.flag}
+   570→                      </span>
+   571→                      <Badge
+   572→                        variant="outline"
+   573→                        className="shrink-0 border-amber-400/60 bg-amber-400/10 text-[10px] font-bold uppercase tracking-wider text-amber-300"
+   574→                      >
+   575→                        {metaT(t, `globalNetwork.kind.${n.kind}`, GLOBAL_KIND_LABEL[n.kind] ?? n.kind)}
+   576→                      </Badge>
+   577→                    </div>
+   578→
+   579→                    <h3 className="mt-4 flex items-center gap-1.5 font-display text-lg font-bold text-white">
+   580→                      {n.country}
+   581→                    </h3>
+   582→                    <p className="mt-0.5 flex items-center gap-1 text-xs text-emerald-200/70">
+   583→                      <MapPin className="h-3 w-3 shrink-0" aria-hidden />
+   584→                      {n.city}
+   585→                    </p>
+   586→
+   587→                    <p className="mt-2 line-clamp-2 text-sm font-semibold text-emerald-50">
+   588→                      {n.title}
+   589→                    </p>
+   590→                    <p className="mt-1 line-clamp-1 text-xs text-emerald-300/70">{n.orgName}</p>
+   591→
+   592→                    {scope.length > 0 ? (
+   593→                      <div className="mt-3 flex flex-wrap gap-1.5">
+   594→                        {scope.slice(0, 4).map((code) => (
+   595→                          <span
+   596→                            key={code}
+   597→                            className="rounded-full bg-emerald-800/60 px-2 py-0.5 text-[10px] font-medium text-emerald-100"
+   598→                          >
+   599→                            {PROGRAM_LABELS[code] ?? code}
+   600→                          </span>
+   601→                        ))}
+   602→                        {scope.length > 4 ? (
+   603→                          <span className="rounded-full bg-emerald-800/60 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+   604→                            +{scope.length - 4}
+   605→                          </span>
+   606→                        ) : null}
+   607→                      </div>
+   608→                    ) : null}
+   609→
+   610→                    <div className="mt-auto flex items-center justify-between gap-2 pt-4">
+   611→                      {statusMeta ? (
+   612→                        <Badge variant="outline" className={`${statusMeta.badgeClass} text-[10px]`}>
+   613→                          {metaT(t, `globalNetwork.status.${n.status}`, statusMeta.label)}
+   614→                        </Badge>
+   615→                      ) : (
+   616→                        <span />
+   617→                      )}
+   618→                      <span className="text-[10px] uppercase tracking-wider text-emerald-300/60">
+   619→                        {t("globalNetwork.since", { year: n.since })}
+   620→                      </span>
+   621→                    </div>
+   622→                  </button>
+   623→                </FadeIn>
+   624→              );
+   625→            })}
+   626→          </div>
+   627→        )}
+   628→
+   629→        {!loading && !error && filtered.length > 0 ? (
+   630→          <p className="mt-6 text-center text-xs text-emerald-300/60">
+   631→            {t("globalNetwork.showing", {
+   632→              shown: formatNumber(filtered.length),
+   633→              total: formatNumber(nodes.length),
+   634→            })}
+   635→          </p>
+   636→        ) : null}
+   637→
+   638→        {loading ? (
+   639→          <span className="sr-only" aria-live="polite">
+   640→            <Loader2 className="animate-spin" /> {t("globalNetwork.loadingAria")}
+   641→          </span>
+   642→        ) : null}
+   643→      </div>
+   644→
+   645→      <NodeDetailDialog node={selected} onClose={() => setSelected(null)} />
+   646→    </section>
+   647→  );
+   648→}
+   649→

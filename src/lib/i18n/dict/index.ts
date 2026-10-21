@@ -29,6 +29,10 @@ import { applicationFormDict } from "@/lib/i18n/dict/applicationForm";
 import { trackDict } from "@/lib/i18n/dict/track";
 import { paymentDict } from "@/lib/i18n/dict/payment";
 import { portalDict } from "@/lib/i18n/dict/portal";
+import { servicesDict } from "@/lib/i18n/dict/services";
+import { tutorialDict } from "@/lib/i18n/dict/tutorial";
+import { founderDict } from "@/lib/i18n/dict/founder";
+import { partnerSitesDict } from "@/lib/i18n/dict/partnerSites";
 
 const NAMESPACES: Record<string, { id: DictTree; en: DictTree; ar: DictTree }> = {
   common: commonDict,
@@ -54,6 +58,10 @@ const NAMESPACES: Record<string, { id: DictTree; en: DictTree; ar: DictTree }> =
   track: trackDict,
   payment: paymentDict,
   portal: portalDict,
+  services: servicesDict,
+  tutorial: tutorialDict,
+  founder: founderDict,
+  partnerSites: partnerSitesDict,
 };
 
 function buildLang(lang: Lang): DictTree {

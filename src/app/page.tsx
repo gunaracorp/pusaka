@@ -8,17 +8,21 @@ import { Hero } from "@/components/pusaka/hero";
 import { TrustMarquee } from "@/components/pusaka/trust-marquee";
 import { QuickVerify } from "@/components/pusaka/quick-verify";
 import { Programs } from "@/components/pusaka/programs";
+import { ServicesCatalog } from "@/components/pusaka/services-catalog";
 import { GlobalNetwork } from "@/components/pusaka/global-network";
 import { VerifySection } from "@/components/pusaka/verify-section";
 import { Process } from "@/components/pusaka/process";
+import { TutorialHub } from "@/components/pusaka/tutorial-hub";
 import { Directory } from "@/components/pusaka/directory";
 import { Experts } from "@/components/pusaka/experts";
+import { FounderSection } from "@/components/pusaka/founder-section";
 import { StatsSection } from "@/components/pusaka/stats-section";
 import { ApplicationForm } from "@/components/pusaka/application-form";
 import { TrackSection } from "@/components/pusaka/track";
 import { News } from "@/components/pusaka/news";
 import { FAQ } from "@/components/pusaka/faq";
 import { Testimonials } from "@/components/pusaka/testimonials";
+import { PartnerSites } from "@/components/pusaka/partner-sites";
 import { ContactCTA } from "@/components/pusaka/contact";
 import { Footer } from "@/components/pusaka/footer";
 import { MemberPortal } from "@/components/pusaka/member-portal";
@@ -55,17 +59,21 @@ export default function Home() {
         <TrustMarquee />
         <QuickVerify />
         <Programs />
+        <ServicesCatalog />
         <GlobalNetwork />
         <VerifySection />
         <Process />
+        <TutorialHub />
         <Directory />
         <Experts />
+        <FounderSection />
         <StatsSection />
         <ApplicationForm />
         <TrackSection />
         <News />
         <FAQ />
         <Testimonials />
+        <PartnerSites />
         <ContactCTA />
       </main>
       <Footer />

@@ -17,11 +17,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title:
-    "PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi | PIHK, PPIU, BPW, IATA",
+    "PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi | 500+ Layanan Global oleh Gugun Gunara",
   description:
-    "Lembaga sertifikasi profesi & akreditasi resmi industri perjalanan wisata, umrah & haji Indonesia. Program PIHK, PPIU, BPW, IATA, Izin Umrah & Izin Haji dengan Dewan Pakar 46 lintas bidang. Verifikasi sertifikat digital QR-verified secara online.",
+    "Lembaga sertifikasi profesi & akreditasi resmi — 500+ layanan sertifikasi dan akreditasi internasional di 25 bidang profesional (PIHK, PPIU, BPW, IATA, Izin Umrah/Haji, ISO, dst). Didirikan & dipimpin Gugun Gunara — Master Polymath, Sage Universal, The Ultimate Problem Solver — didukung 46 Dewan Pakar Lintas Bidang di 32 negara.",
   keywords: [
     "PUSAKA",
+    "Gugun Gunara",
+    "500 layanan sertifikasi",
     "sertifikasi PIHK",
     "PPIU",
     "BPW",
@@ -29,24 +31,25 @@ export const metadata: Metadata = {
     "izin umrah",
     "izin haji",
     "akreditasi biro perjalanan wisata",
+    "sertifikasi ISO",
     "sertifikasi kompetensi",
-    "dewan pakar",
+    "master polymath",
   ],
-  authors: [{ name: "PUSAKA" }],
+  authors: [{ name: "Gugun Gunara — PUSAKA" }],
   openGraph: {
     title:
-      "PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi | PIHK, PPIU, BPW, IATA",
+      "PUSAKA — 500+ Layanan Sertifikasi & Akreditasi Internasional | Gugun Gunara",
     description:
-      "Lembaga sertifikasi profesi & akreditasi industri perjalanan wisata, umrah & haji Indonesia. Sertifikat digital QR-verified dengan Dewan Pakar 46 lintas bidang.",
+      "Ekosistem sertifikasi paling lengkap: 500+ layanan di 25 bidang profesional berstandar internasional, didukung 46 Dewan Pakar Lintas Bidang. Verifikasi digital QR-verified.",
     siteName: "PUSAKA",
     type: "website",
     locale: "id_ID",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PUSAKA — Pusat Sertifikasi & Akreditasi Kompetensi",
+    title: "PUSAKA — 500+ Layanan Sertifikasi Global",
     description:
-      "Sertifikasi PIHK, PPIU, BPW, IATA, Izin Umrah & Haji. Verifikasi digital QR-verified.",
+      "500+ layanan sertifikasi & akreditasi internasional di 25 bidang oleh Gugun Gunara. Verifikasi digital QR-verified.",
   },
 };
 

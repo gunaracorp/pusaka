@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import {
   CheckCircle2,
+  ExternalLink,
   Facebook,
   Instagram,
   Loader2,
@@ -34,9 +35,24 @@ const PROGRAM_LINKS = [
 const SERVICE_LINKS = [
   { href: "#verifikasi", key: "verify" },
   { href: "#direktori", key: "directory" },
+  { href: "#layanan", key: "layanan" },
+  { href: "#tutorial", key: "tutorial" },
   { href: "#lacak", key: "track" },
   { href: "#dewan-pakar", key: "experts" },
   { href: "#faq", key: "faq" },
+] as const;
+
+/** Jaringan situs ekosistem (Task 11-b) — brand & domain literal,
+ *  aria-label via footer.network.items.<key>.aria. */
+const NETWORK_SITES = [
+  { key: "gunara", brand: "Gunara", domain: "gunara.web.id", href: "https://gunara.web.id" },
+  {
+    key: "perizinan",
+    brand: "Pusat Perizinan",
+    domain: "pusatperizinan.com",
+    href: "https://pusatperizinan.com",
+  },
+  { key: "gohajj", brand: "GoHajj", domain: "gohajj.web.id", href: "https://gohajj.web.id" },
 ] as const;
 
 const SOCIALS = [
@@ -103,6 +119,9 @@ export function Footer() {
             </div>
             <p className="mt-4 text-sm leading-relaxed text-emerald-200/70">
               {t("footer.brand.description")}
+            </p>
+            <p className="mt-3 border-s-2 border-amber-500/40 ps-3 text-xs leading-relaxed text-emerald-300/70">
+              {t("footer.brand.founderCredit")}
             </p>
             <div className="mt-5 flex gap-2">
               {SOCIALS.map((s) => {
@@ -227,6 +246,37 @@ export function Footer() {
               {t("footer.newsletter.privacy")}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* jaringan situs ekosistem (Task 11-b) */}
+      <div className="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 border-t border-emerald-900 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-display text-sm font-bold uppercase tracking-widest text-amber-400">
+              {t("footer.network.title")}
+            </h3>
+            <p className="mt-1 text-xs text-emerald-300/50">{t("footer.network.desc")}</p>
+          </div>
+          <ul className="flex flex-wrap gap-2">
+            {NETWORK_SITES.map((site) => (
+              <li key={site.key}>
+                <a
+                  href={site.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t(`footer.network.items.${site.key}.aria`)}
+                  className="flex h-11 items-center gap-2 rounded-lg border border-emerald-800 bg-emerald-900/40 px-3 transition-colors hover:border-amber-500/60"
+                >
+                  <span className="text-sm font-semibold text-emerald-100">{site.brand}</span>
+                  <span className="font-mono text-xs text-emerald-400" dir="ltr">
+                    {site.domain}
+                  </span>
+                  <ExternalLink className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 

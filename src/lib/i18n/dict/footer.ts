@@ -12,6 +12,8 @@ export const footerDict: NamespaceDict = {
       tagline: "Sertifikasi & Akreditasi",
       description:
         "Pusat Sertifikasi & Akreditasi Kompetensi untuk industri perjalanan wisata, umrah & haji Indonesia — dengan Dewan Pakar 46 lintas bidang dan sertifikat digital QR-verified.",
+      founderCredit:
+        "Didirikan & dipimpin oleh Gugun Gunara — Master Polymath, Sage Universal, The Ultimate Problem Solver",
     },
     nav: {
       program: "Program",
@@ -28,6 +30,8 @@ export const footerDict: NamespaceDict = {
       umrahHaji: "Izin Umrah & Haji",
       verify: "Verifikasi Sertifikat",
       directory: "Direktori Lembaga",
+      layanan: "Katalog Layanan",
+      tutorial: "Tutorial & Panduan",
       track: "Lacak Pendaftaran",
       experts: "Dewan Pakar",
       faq: "Tanya Jawab",
@@ -53,6 +57,21 @@ export const footerDict: NamespaceDict = {
       privacy: "Kami menghormati privasi Anda. Berhenti kapan saja.",
     },
     copyright: "© {year} PUSAKA • Terdaftar & Diawasi oleh Dewan Pakar Nasional",
+    network: {
+      title: "Jaringan Situs",
+      desc: "Ekosistem digital terpadu di bawah satu jaringan.",
+      items: {
+        gunara: {
+          aria: "Kunjungi gunara.web.id — Gunara",
+        },
+        perizinan: {
+          aria: "Kunjungi pusatperizinan.com — Pusat Perizinan",
+        },
+        gohajj: {
+          aria: "Kunjungi gohajj.web.id — GoHajj",
+        },
+      },
+    },
     admin: {
       panel: "Panel Admin",
       aria: "Buka Panel Admin PUSAKA",
@@ -63,6 +82,8 @@ export const footerDict: NamespaceDict = {
       tagline: "Certification & Accreditation",
       description:
         "Center for Competency Certification & Accreditation for Indonesia's travel, umrah & hajj industry — backed by a 46-member cross-disciplinary Expert Council and QR-verified digital certificates.",
+      founderCredit:
+        "Founded & led by Gugun Gunara — Master Polymath, Sage Universal, The Ultimate Problem Solver",
     },
     nav: {
       program: "Programs",
@@ -79,6 +100,8 @@ export const footerDict: NamespaceDict = {
       umrahHaji: "Umrah & Hajj License",
       verify: "Verify Certificate",
       directory: "Institution Directory",
+      layanan: "Services Catalog",
+      tutorial: "Guides & Tutorials",
       track: "Track Application",
       experts: "Expert Council",
       faq: "FAQ",
@@ -104,6 +127,21 @@ export const footerDict: NamespaceDict = {
       privacy: "We respect your privacy. Unsubscribe anytime.",
     },
     copyright: "© {year} PUSAKA • Registered & Supervised by the National Expert Council",
+    network: {
+      title: "Site Network",
+      desc: "An integrated digital ecosystem under one network.",
+      items: {
+        gunara: {
+          aria: "Visit gunara.web.id — Gunara",
+        },
+        perizinan: {
+          aria: "Visit pusatperizinan.com — Pusat Perizinan",
+        },
+        gohajj: {
+          aria: "Visit gohajj.web.id — GoHajj",
+        },
+      },
+    },
     admin: {
       panel: "Admin Panel",
       aria: "Open the PUSAKA Admin Panel",
@@ -114,6 +152,8 @@ export const footerDict: NamespaceDict = {
       tagline: "الاعتماد والتصديق",
       description:
         "المركز الوطني لاعتماد الكفاءات لصناعة السفر والعمرة والحج الإندونيسي — بدعم من مجلس خبراء يضم 46 عضوًا من مختلف التخصصات وشهادات رقمية موثقة برمز QR.",
+      founderCredit:
+        "تأسس ويقوده Gugun Gunara — Master Polymath, Sage Universal, The Ultimate Problem Solver",
     },
     nav: {
       program: "البرامج",
@@ -130,6 +170,8 @@ export const footerDict: NamespaceDict = {
       umrahHaji: "ترخيص العمرة والحج",
       verify: "التحقق من الشهادات",
       directory: "دليل المؤسسات",
+      layanan: "كتالوج الخدمات",
+      tutorial: "الدروس والأدلة",
       track: "تتبع طلب التسجيل",
       experts: "مجلس الخبراء",
       faq: "الأسئلة الشائعة",
@@ -155,6 +197,21 @@ export const footerDict: NamespaceDict = {
       privacy: "نحترم خصوصيتكم. يمكنكم إلغاء الاشتراك في أي وقت.",
     },
     copyright: "© {year} بوساكا • مسجل وخاضع لإشراف مجلس الخبراء الوطني",
+    network: {
+      title: "شبكة المواقع",
+      desc: "منظومة رقمية متكاملة ضمن شبكة واحدة.",
+      items: {
+        gunara: {
+          aria: "زيارة gunara.web.id — Gunara",
+        },
+        perizinan: {
+          aria: "زيارة pusatperizinan.com — Pusat Perizinan",
+        },
+        gohajj: {
+          aria: "زيارة gohajj.web.id — GoHajj",
+        },
+      },
+    },
     admin: {
       panel: "لوحة الإدارة",
       aria: "افتح لوحة إدارة بوساكا",

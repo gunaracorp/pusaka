@@ -85,6 +85,7 @@ export interface StatsT {
     programs: number;
     verificationsToday: number;
     applicationsThisMonth: number;
+    services: number;
   };
   programDistribution: { code: string; holders: number }[];
   tierDistribution: { tier: string; count: number }[];
@@ -327,6 +328,7 @@ export const FALLBACK_STATS: StatsT = {
     programs: 7,
     verificationsToday: 0,
     applicationsThisMonth: 0,
+    services: 500,
   },
   programDistribution: [
     { code: "PPIU", holders: 6841 },
@@ -486,6 +488,55 @@ export const getStats = () => apiRequest<StatsT>("/api/stats");
 
 // 2. GET /api/programs
 export const getPrograms = () => apiRequest<ProgramT[]>("/api/programs");
+
+// 2-b. GET /api/services — Katalog 500 layanan sertifikasi & akreditasi
+export interface ServiceT {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  categorySlug: string;
+  standard: string;
+  description: string;
+  price: number;
+  durationWeeks: number;
+  scheme: "BADAN_USAHA" | "PROFESIONAL";
+  scope: "NASIONAL" | "INTERNASIONAL";
+  issuer: string;
+}
+
+export interface ServicesRespT {
+  items: ServiceT[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  totalAll: number;
+  facets: {
+    categories: { slug: string; name: string; count: number }[];
+    schemes: { scheme: string; count: number }[];
+    scopes: { scope: string; count: number }[];
+  };
+}
+
+export function getServices(params: {
+  q?: string;
+  category?: string;
+  scheme?: string;
+  scope?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<ServicesRespT> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  if (params.category) qs.set("category", params.category);
+  if (params.scheme) qs.set("scheme", params.scheme);
+  if (params.scope) qs.set("scope", params.scope);
+  if (params.page && params.page > 1) qs.set("page", String(params.page));
+  if (params.pageSize && params.pageSize !== 12) qs.set("pageSize", String(params.pageSize));
+  const query = qs.toString();
+  return apiRequest<ServicesRespT>(`/api/services${query ? `?${query}` : ""}`);
+}
 
 // 3. POST /api/verify
 export const postVerify = (certNumber: string) =>

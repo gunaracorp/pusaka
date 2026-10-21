@@ -13,6 +13,7 @@ export const statsDict: NamespaceDict = {
       "Kinerja sertifikasi & akreditasi PUSAKA diperbarui langsung dari basis data operasional — terbuka untuk publik.",
     counters: {
       certificates: "Sertifikat Terbit",
+      services: "Layanan Sertifikasi",
       institutions: "Lembaga Terakreditasi",
       experts: "Dewan Pakar",
       verifications: "Verifikasi Hari Ini",
@@ -37,6 +38,7 @@ export const statsDict: NamespaceDict = {
       "PUSAKA certification & accreditation performance is updated directly from the operational database — open to the public.",
     counters: {
       certificates: "Certificates Issued",
+      services: "Certification Services",
       institutions: "Accredited Institutions",
       experts: "Expert Council",
       verifications: "Verifications Today",
@@ -61,6 +63,7 @@ export const statsDict: NamespaceDict = {
       "تُحدَّث بيانات أداء الاعتماد والتوثيق في بوساكا مباشرةً من قاعدة البيانات التشغيلية — ومتاحة للجمهور.",
     counters: {
       certificates: "الشهادات الصادرة",
+      services: "خدمات الاعتماد",
       institutions: "المؤسسات المعتمدة",
       experts: "مجلس الخبراء",
       verifications: "عمليات التحقق اليوم",
