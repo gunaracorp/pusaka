@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { subscribeNewsletter } from "@/lib/pusaka";
 import { useAdminStore } from "@/lib/admin-store";
 import { useI18n } from "@/lib/i18n/provider";
+import { VersionBadge } from "@/components/pusaka/version-badge";
 
 /** Tautan kolom Program — label diterjemahkan via footer.links.*. */
 const PROGRAM_LINKS = [
@@ -284,7 +285,8 @@ export function Footer() {
       <div className="border-t border-emerald-900">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-emerald-300/60 sm:flex-row sm:px-6 lg:px-8">
           <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <VersionBadge />
             <span className="flex items-center gap-1.5 rounded-md border border-emerald-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider">
               <ShieldCheck className="h-3 w-3 text-amber-400" aria-hidden />
               ISO 9001:2015

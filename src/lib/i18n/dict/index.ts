@@ -33,6 +33,7 @@ import { servicesDict } from "@/lib/i18n/dict/services";
 import { tutorialDict } from "@/lib/i18n/dict/tutorial";
 import { founderDict } from "@/lib/i18n/dict/founder";
 import { partnerSitesDict } from "@/lib/i18n/dict/partnerSites";
+import { versionControlDict } from "@/lib/i18n/dict/versionControl";
 
 const NAMESPACES: Record<string, { id: DictTree; en: DictTree; ar: DictTree }> = {
   common: commonDict,
@@ -62,6 +63,7 @@ const NAMESPACES: Record<string, { id: DictTree; en: DictTree; ar: DictTree }> =
   tutorial: tutorialDict,
   founder: founderDict,
   partnerSites: partnerSitesDict,
+  versionControl: versionControlDict,
 };
 
 function buildLang(lang: Lang): DictTree {
