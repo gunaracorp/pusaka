@@ -1,10 +1,10 @@
-# GUNARA OS — Versioning Standard (Standar Kontrol Versi)
+# PUSAKA — Versioning Standard (Standar Kontrol Versi)
 
-> **Versi dokumen:** 1.0.0 · **Berlaku sejak:** Gunara OS v6.0.0 "Sentinel" · **Status:** NORMATIVE (mengikat)
+> **Versi dokumen:** 1.0.0 · **Berlaku sejak:** PUSAKA v6.0.0 "Sentinel" · **Status:** NORMATIVE (mengikat)
 >
 > Sistem ini memenuhi **Semantic Versioning 2.0.0** (<https://semver.org>) dan mengadopsi prinsip
 > **Keep a Changelog 1.1.0** (<https://keepachangelog.com>), diperluas dengan protokol worklog
-> Gunara OS. Ini adalah standar resmi untuk **seluruh proyek PUSAKA** dan seluruh ekosistem situs
+> PUSAKA. Ini adalah standar resmi untuk **seluruh proyek PUSAKA** dan seluruh ekosistem situs
 > (gunara.web.id · pusatperizinan.com · gohajj.web.id).
 
 ---
@@ -36,7 +36,7 @@ Dekode contoh **v9.1.2**:
 
 **Kaidah kenaikan (bump rules):**
 
-| Jenis | Kapan | Contoh Gunara OS |
+| Jenis | Kapan | Contoh PUSAKA |
 | --- | --- | --- |
 | **MAJOR** (X.0.0) | Subsistem/arsitektur baru yang mengubah kapabilitas platform; perubahan kontrak API yang memecah konsumen lama; penggantian skema data non-kompatibel | v2.0.0 CMS, v3.0.0 SAKA AI + Dark Mode, v4.0.0 i18n, v5.0.0 Katalog 500 Layanan |
 | **MINOR** (x.Y.0) | Fitur baru yang kompatibel; penambahan endpoint; penambahan kolom opsional | v4.1.0 Portal Anggota, v4.2.0 Payment Gateway, v5.1.0 Branding |
@@ -78,7 +78,7 @@ Setiap entri baru di `worklog.md` (selalu **ditambahkan di akhir file**) wajib m
 ---
 Task ID: <id>              # urut global, mis. 12, 13-a, 13-b
 Agent: <nama agent>
-Rilis: Gunara OS v<X.Y.Z>  # versi yang disasar task ini (WAJIB)
+Rilis: PUSAKA v<X.Y.Z>  # versi yang disasar task ini (WAJIB)
 Task: <deskripsi tugas>
 
 Work Log:
@@ -135,6 +135,6 @@ Respons selalu mematuhi kontrak umum platform: `{ "ok": true, "data": … }` / `
 
 ---
 
-*Dokumen ini bagian dari Gunara OS — dikelola oleh Gugun Gunara (Master Polymath · Sage Universal ·
+*Dokumen ini bagian dari PUSAKA — dikelola oleh Gugun Gunara (Master Polymath · Sage Universal ·
 The Ultimate Problem Solver). Sejak v6.0.0, setiap perubahan pada proyek ini tercatat, terlacak,
 dan dapat diaudit.*

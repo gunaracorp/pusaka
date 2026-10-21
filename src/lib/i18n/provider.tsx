@@ -108,7 +108,9 @@ function relativeTime(value: string | Date, lang: Lang): string {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("id");
 
-  // Muat bahasa tersimpan SEKALI setelah mount (hindari hydration mismatch)
+  // Muat bahasa tersimpan SEKALI setelah mount (hindari hydration mismatch).
+  // v6.0.1: efek [lang] TIDAK lagi menulis ke storage saat mount — preferensi
+  // tersimpan tidak lagi tertimpa default "id"; penulisan hanya di setLang().
   useEffect(() => {
     const id = window.setTimeout(() => {
       try {
@@ -123,18 +125,21 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(id);
   }, []);
 
-  // Sinkronkan atribut dokumen + localStorage setiap kali bahasa berubah
+  // Sinkronkan atribut dokumen setiap kali bahasa berubah
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  // v6.0.1: tulis ke localStorage HANYA saat pengguna benar-benar mengganti bahasa
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
     try {
-      window.localStorage.setItem(STORAGE_KEY, lang);
+      window.localStorage.setItem(STORAGE_KEY, next);
     } catch {
       /* abaikan */
     }
-  }, [lang]);
-
-  const setLang = useCallback((next: Lang) => setLangState(next), []);
+  }, []);
 
   const t = useCallback(
     (path: string, vars?: Record<string, string | number>) => resolve(path, lang, vars),

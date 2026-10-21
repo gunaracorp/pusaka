@@ -655,3 +655,41 @@ Stage Summary:
 - Tutorial aktif: 4 jalur panduan interaktif + kode demo copy-to-clipboard.
 - E2E Agent Browser: katalog (cari "27001"→2 hasil, chip kategori, pagination hal-2 TL 9000/ISO 17100, Reset Filter), tutorial 4 tab + salin kredensial demo, founder, partner 3 link href benar, footer Jaringan Situs, stats 7 kartu, RTL Arab penuh (dir=rtl, الخدمات/الأدلة navbar, katalog Arab), mobile 390px (Sheet 10 link), regresi Quick Verify PPU-2025-0001 → PT Zahra Tour Indonesia PLATINUM. Lint 0 error; dev.log tanpa 500/404.
 - Kontrak baru di atas: tambahkan ke dokumentasi kontrak API — GET /api/services & totals.services.
+
+---
+Task ID: 12
+Agent: Main Orchestrator (Z.ai)
+Rilis: PUSAKA v6.0.0 (MAJOR — codename "Sentinel")
+Task: Merancang & menerapkan Sistem Kontrol Versi berstandar internasional (SemVer 2.0.0 + Keep a Changelog 1.1.0) — setiap perubahan terstruktur, sistematis, dan terlacak.
+
+Work Log:
+- [+] `VERSIONING.md` — standar normatif: format SemVer (dekode contoh v9.1.2), kaidah bump MAJOR/MINOR/PATCH, pre-release, kategori Keep a Changelog, alur rilis 8 langkah, tata kelola, konsumsi API.
+- [+] `VERSION` (akar repo) + `CHANGELOG.md` — mirror terformat dengan marker [+]/[~]/[-]/[!]/[$].
+- [+] `src/lib/version.ts` — SUMBER KEBENARAN: 18 rilis retroaktif terpetakan dari worklog Task 1–11 (v1.0.0 Genesis → v6.0.0 Sentinel) lengkap codename, tanggal relatif, ketertelusuran Task ID; util `parseSemVer/compareSemVer/bumpSemVer/nextVersionProjections`.
+- [+] `GET /api/version` — API mesin (?type=&limit=&q=) kontrak {ok,data}+meta self-audit (registryHealthy, semverValid); 400 untuk type invalid; curl tervalidasi.
+- [+] `version-badge.tsx` — lencana PUSAKA v6.0.0 di bar bawah footer (dot pulsing, dir=ltr) + dialog Riwayat Versi: legenda cara membaca versi, kartu 18 rilis (badge MAJOR/MINOR/PATCH, codename, tanggal terlokalisasi, chips Task, butir per kategori berikon+berwarna), highlight RILIS BERJALAN ring emas, catatan sumber kebenaran; i18n penuh (namespace `versionControl` id/en/ar) + dict/index.ts terdaftar.
+- [+] Footer: `<VersionBadge />` terpasang berdampingan chip ISO/BNSP.
+- [~] Protokol worklog v2 berlaku mulai entri ini — setiap task wajib memuat tag `Rilis:` dan marker kategori.
+
+Stage Summary:
+- Website kini punya version control permanen: VERSION → version.ts → CHANGELOG.md → /api/version → lencana UI, semuanya sinkron.
+- Regresi aman: tidak menyentuh skema DB, kontrak API lama, maupun section publik lain.
+- E2E: dialog 18 rilis + rilis berjalan tampil; footer badge "PUSAKA v6.0.0" ada.
+
+---
+Task ID: 12-b
+Agent: Main Orchestrator (Z.ai)
+Rilis: PUSAKA v6.0.1 (PATCH — codename "Lingua")
+Task: Rebrand sistem versi atas revisi pemilik produk ("Gunara OS" hanyalah contoh → "PUSAKA") + perbaikan bug persistensi bahasa yang ditemukan saat E2E.
+
+Work Log:
+- [~] Rebrand "Gunara OS" → "PUSAKA" di seluruh artefak versi: version.ts (OS_NAME), VERSIONING.md, CHANGELOG.md, kamus i18n versionControl (3 bahasa), komentar komponen — kredit pendiri "Gugun Gunara" TETAP (tokoh, bukan nama sistem). Verifikasi rg: 0 sisa.
+- [!] I18nProvider menimpa localStorage bahasa tersimpan saat mount (effect [lang] menulis default "id" sebelum pembacaan tersimpan selesai) — penulisan kini HANYA terjadi di setLang() saat pengguna mengganti bahasa; pembacaan tersimpan tetap via setTimeout (patuh react-hooks/set-state-in-effect).
+- [!] Verifikasi E2E persistensi: set "en" → reload → localStorage tetap "en" + document.lang="en" (sebelumnya selalu kembali "id").
+- [~] Bump PATCH sesuai VERSIONING.md §6: VERSION 6.0.1, OS_VERSION/OS_CODENAME ("Lingua"), entri CHANGELOG teratas (registry 19 rilis), CHANGELOG.md; API /api/version → 6.0.1 "Lingua", proyeksi {7.0.0, 6.1.0, 6.0.2}.
+- E2E penuh: dialog ID/EN/AR (RTL dir=rtl, سجل إصدارات PUSAKA, الإصدار الحالي), mobile 390px (dialog responsif), konsol bersih, lint 0 error, dev.log tanpa 500/404 baru.
+
+Stage Summary:
+- v6.0.0 "Sentinel" + v6.0.1 "Lingua" LIVE — release train pertama yang diatur oleh sistem versinya sendiri (bukti sistem bekerja: bug E2E → patch → changelog → worklog).
+- Kontrak baru: GET /api/version (lihat VERSIONING.md §8) — tambahkan ke dokumentasi kontrak API.
+- Berikutnya (usul): otomatisasi bump via skrip, badge versi di panel CMS, release notes dalam 3 bahasa penuh bila dibutuhkan.

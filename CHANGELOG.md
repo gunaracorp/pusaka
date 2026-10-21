@@ -1,4 +1,4 @@
-# Changelog — Gunara OS
+# Changelog — PUSAKA
 
 Semua perubahan penting pada proyek PUSAKA didokumentasikan di sini.
 Format mengikuti **Keep a Changelog 1.1.0** + **SemVer 2.0.0** (standar lengkap: `VERSIONING.md`).
@@ -8,15 +8,23 @@ Format mengikuti **Keep a Changelog 1.1.0** + **SemVer 2.0.0** (standar lengkap:
 
 ---
 
+## [6.0.1] — PATCH — "Lingua"
+
+**Perbaikan Persistensi Bahasa.** *Task: 12-b*
+
+- [!] `I18nProvider` menimpa localStorage bahasa tersimpan saat mount (effect `[lang]` menulis default "id" sebelum pembacaan selesai) — penulisan kini hanya terjadi saat pengguna mengganti bahasa
+- [!] Pembacaan bahasa tersimpan tidak lagi memakai `setTimeout` sehingga pemuatan lebih deterministik
+- [~] Rebrand sistem versi: "Gunara OS" → "PUSAKA" (revisi pemilik produk) — lencana, dialog, kamus i18n 3 bahasa, dan dokumen standar
+
 ## [6.0.0] — MAJOR — "Sentinel"
 
-**Sistem Kontrol Versi Gunara OS** — tata kelola rilis berstandar internasional kini hidup di kode, API, dan antarmuka.
+**Sistem Kontrol Versi PUSAKA** — tata kelola rilis berstandar internasional kini hidup di kode, API, dan antarmuka.
 *Task: 12*
 
 - [+] Standar `VERSIONING.md` (SemVer 2.0.0 + Keep a Changelog 1.1.0) dan file `VERSION` di akar repositori
 - [+] Registri `src/lib/version.ts` — 18 rilis terdokumentasi + ketertelusuran Task ID + util semver `parse/compare/bump`
 - [+] API `GET /api/version` (`?type=&limit=&q=`) untuk konsumsi mesin, monitoring, dan otomasi
-- [+] Lencana Gunara OS di footer + dialog Riwayat Versi interaktif (i18n ID/EN/AR, RTL-safe)
+- [+] Lencana PUSAKA di footer + dialog Riwayat Versi interaktif (i18n ID/EN/AR, RTL-safe)
 - [+] Protokol Worklog v2 — marker `[+]/[~]/[-]/[!]/[$]` + tag rilis wajib per task
 - [~] `CHANGELOG.md` menjadi bagian resmi repositori — append-only, dilarang menulis ulang entri lama
 
@@ -166,4 +174,4 @@ Format mengikuti **Keep a Changelog 1.1.0** + **SemVer 2.0.0** (standar lengkap:
 
 ---
 
-*Gunara OS — dikelola oleh Gugun Gunara (Master Polymath · Sage Universal · The Ultimate Problem Solver).*
+*PUSAKA — dikelola oleh Gugun Gunara (Master Polymath · Sage Universal · The Ultimate Problem Solver).*

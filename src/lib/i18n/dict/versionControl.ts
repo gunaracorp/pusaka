@@ -1,19 +1,19 @@
 import type { NamespaceDict } from "@/lib/i18n/types";
 
 // ============================================================
-// PUSAKA — Kamus namespace "versionControl" (Gunara OS)
+// PUSAKA — Kamus namespace "versionControl" (PUSAKA)
 // Lencana versi + dialog Riwayat Versi (Task 12).
-// Konvensi: "Gunara OS" & nomor versi adalah proper noun — TIDAK
+// Konvensi: "PUSAKA" & nomor versi adalah proper noun — TIDAK
 // diterjemahkan; konten entri changelog kanonik Bahasa Indonesia.
 // ============================================================
 
 export const versionControlDict: NamespaceDict = {
   id: {
     badge: {
-      aria: "Lihat riwayat versi Gunara OS",
+      aria: "Lihat riwayat versi PUSAKA",
     },
     dialog: {
-      title: "Riwayat Versi Gunara OS",
+      title: "Riwayat Versi PUSAKA",
       subtitle:
         "Setiap perubahan tercatat sistematis — fitur yang ditambahkan, disempurnakan, maupun dihapus — mengikuti standar internasional.",
       channelLabel: "Stabil",
@@ -40,10 +40,10 @@ export const versionControlDict: NamespaceDict = {
   },
   en: {
     badge: {
-      aria: "View Gunara OS version history",
+      aria: "View PUSAKA version history",
     },
     dialog: {
-      title: "Gunara OS Version History",
+      title: "PUSAKA Version History",
       subtitle:
         "Every change is systematically recorded — features added, refined, or removed — following international standards.",
       channelLabel: "Stable",
@@ -70,10 +70,10 @@ export const versionControlDict: NamespaceDict = {
   },
   ar: {
     badge: {
-      aria: "عرض سجل إصدارات Gunara OS",
+      aria: "عرض سجل إصدارات PUSAKA",
     },
     dialog: {
-      title: "سجل إصدارات Gunara OS",
+      title: "سجل إصدارات PUSAKA",
       subtitle:
         "كل تغيير موثّق بشكل منهجي — الميزات المضافة والمحسّنة والمُزالة — وفق المعايير الدولية.",
       channelLabel: "مستقر",

@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// PUSAKA — VersionBadge & ChangelogDialog (Gunara OS) — Task 12
+// PUSAKA — VersionBadge & ChangelogDialog (PUSAKA) — Task 12
 // Lencana versi di footer: klik → dialog Riwayat Versi interaktif.
 // Data: src/lib/version.ts (sumber kebenaran) — tidak melakukan fetch.
 // i18n penuh (id/en/ar), RTL-safe (utilitas logis), dark-mode token.

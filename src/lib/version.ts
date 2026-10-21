@@ -1,5 +1,5 @@
 // ============================================================
-// GUNARA OS — Registri Versi & Utilitas SemVer
+// PUSAKA — Registri Versi & Utilitas SemVer
 // ------------------------------------------------------------
 // SUMBER KEBENARAN (single source of truth) untuk versi sistem.
 // Standar: SemVer 2.0.0 (https://semver.org) + Keep a Changelog 1.1.0
@@ -37,7 +37,7 @@ export type ChangelogKind =
   | "fixed"
   | "security";
 
-/** Satu entri riwayat rilis Gunara OS. */
+/** Satu entri riwayat rilis PUSAKA. */
 export interface ChangelogEntry {
   /** Versi semantik, mis. "6.0.0". */
   version: string;
@@ -74,13 +74,13 @@ function isoDaysAgo(days: number): string {
 
 // ---------- Identitas OS (perbarui saat rilis) ----------
 
-export const OS_NAME = "Gunara OS";
+export const OS_NAME = "PUSAKA";
 
 /** Versi berjalan — sinkron dengan file VERSION dan entri teratas CHANGELOG. */
-export const OS_VERSION = "6.0.0";
+export const OS_VERSION = "6.0.1";
 
 /** Nama kode rilis berjalan. */
-export const OS_CODENAME = "Sentinel";
+export const OS_CODENAME = "Lingua";
 
 /** Saluran rilis: stable | beta | alpha. */
 export const OS_CHANNEL = "stable" as const;
@@ -95,11 +95,28 @@ export const OS_RELEASE_DATE = isoDaysAgo(0);
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "6.0.1",
+    date: isoDaysAgo(0),
+    type: "patch",
+    codename: "Lingua",
+    title: "Perbaikan Persistensi Bahasa",
+    summary:
+      "Preferensi bahasa pengguna kini bertahan setelah muat ulang halaman — bug pra-ada pada provider i18n dituntaskan.",
+    tasks: ["12-b"],
+    fixed: [
+      "I18nProvider menimpa localStorage bahasa tersimpan saat mount (effect [lang] menulis default “id” sebelum pembacaan selesai) — penulisan kini hanya terjadi saat pengguna mengganti bahasa",
+      "Pembacaan bahasa tersimpan tidak lagi memakai setTimeout sehingga pemuatan lebih deterministik",
+    ],
+    changed: [
+      "Rebrand sistem versi: “Gunara OS” → “PUSAKA” (revisi pemilik produk) — lencana, dialog, kamus i18n 3 bahasa, dan dokumen standar",
+    ],
+  },
+  {
     version: "6.0.0",
     date: isoDaysAgo(0),
     type: "major",
     codename: "Sentinel",
-    title: "Sistem Kontrol Versi Gunara OS",
+    title: "Sistem Kontrol Versi PUSAKA",
     summary:
       "Tata kelola rilis berstandar internasional kini hidup di kode, API, dan antarmuka — setiap perubahan masa depan tercatat sistematis.",
     tasks: ["12"],
@@ -107,7 +124,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Standar VERSIONING.md (SemVer 2.0.0 + Keep a Changelog 1.1.0) dan file VERSION di akar repositori",
       "Registri src/lib/version.ts — 18 rilis terdokumentasi lengkap dengan ketertelusuran Task ID + util semver parse/compare/bump",
       "API GET /api/version (?type=&limit=&q=) untuk konsumsi mesin, monitoring, dan otomasi CI",
-      "Lencana Gunara OS di footer + dialog Riwayat Versi interaktif (i18n ID/EN/AR, RTL-safe)",
+      "Lencana PUSAKA di footer + dialog Riwayat Versi interaktif (i18n ID/EN/AR, RTL-safe)",
       "Protokol Worklog v2 — setiap task wajib bertag rilis dengan marker [+]/[~]/[-]/[!]/[$]",
     ],
     changed: [
@@ -445,7 +462,7 @@ export function bumpSemVer(version: string, part: ReleaseType): string {
   return `${v.major}.${v.minor}.${v.patch + 1}`;
 }
 
-/** Label tampilan, mis. "Gunara OS v6.0.0". */
+/** Label tampilan, mis. "PUSAKA v6.0.0". */
 export function getVersionLabel(version: string = OS_VERSION): string {
   return `${OS_NAME} v${version}`;
 }
