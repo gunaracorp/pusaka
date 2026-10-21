@@ -8,6 +8,17 @@ Format mengikuti **Keep a Changelog 1.1.0** + **SemVer 2.0.0** (standar lengkap:
 
 ---
 
+## [6.1.1] — PATCH — "Codex"
+
+**README Dokumentasi Desain Penuh.** *Task: 14*
+
+- [+] `README.md` akar repositori dirancang lengkap: banner og-image resmi, lencana versi/stack (SemVer 2.0.0, Next.js 16, TypeScript 5, Prisma 6, Tailwind 4), daftar isi bernavigasi, statistik kunci (14.840 pemegang · 24 lembaga · 32 negara · 46 pakar · 500+ layanan)
+- [+] Diagram Mermaid: arsitektur sistem 4 lapis, alur pembayaran, alur rilis 8 langkah
+- [+] Referensi API lengkap 13 grup (publik, pembayaran, portal, admin, versi) dengan contoh curl + jq
+- [+] Tabel 13 model data + alur status, tabel i18n, tabel SEO, tabel CMS/portal, roadmap, profil pendiri Gugun Gunara + 3 situs ekosistem, kontak resmi
+- [+] Panduan memulai cepat: instalasi, skrip, kredensial demo (CMS + 4 akun portal), kode contoh verifikasi & pelacakan
+- [+] Release train 21 rilis (Genesis → Codex) + cara membaca versi + protokol kontribusi Worklog v2
+
 ## [6.1.0] — MINOR — "Lighthouse"
 
 **Halaman Tersendiri & Infrastruktur SEO Penuh.** *Task: 13*

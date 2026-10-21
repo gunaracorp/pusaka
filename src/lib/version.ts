@@ -77,10 +77,10 @@ function isoDaysAgo(days: number): string {
 export const OS_NAME = "PUSAKA";
 
 /** Versi berjalan — sinkron dengan file VERSION dan entri teratas CHANGELOG. */
-export const OS_VERSION = "6.1.0";
+export const OS_VERSION = "6.1.1";
 
 /** Nama kode rilis berjalan. */
-export const OS_CODENAME = "Lighthouse";
+export const OS_CODENAME = "Codex";
 
 /** Saluran rilis: stable | beta | alpha. */
 export const OS_CHANNEL = "stable" as const;
@@ -94,6 +94,24 @@ export const OS_RELEASE_DATE = isoDaysAgo(0);
 // ---------- Riwayat rilis (terbaru di atas — append-only) ----------
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "6.1.1",
+    date: isoDaysAgo(0),
+    type: "patch",
+    codename: "Codex",
+    title: "README Dokumentasi Desain Penuh",
+    summary:
+      "Dokumentasi README akar repositori dirancang lengkap: banner, lencana, arsitektur, API, data, i18n, SEO, panduan cepat, release train, hingga profil pendiri.",
+    tasks: ["14"],
+    added: [
+      "README.md desain penuh — banner og-image, lencana versi & stack, daftar isi, statistik kunci, tabel fitur/program/jaringan global",
+      "Diagram arsitektur & alur pembayaran & alur rilis (Mermaid) + kontrak API resmi",
+      "Pohon struktur proyek, referensi API lengkap 13 grup, 13 model data, i18n, SEO, CMS, portal, payment",
+      "Panduan memulai cepat (prasyarat, instalasi, skrip, akun demo, kode contoh)",
+      "Release train 21 rilis + cara membaca versi + API versi untuk mesin",
+      "Roadmap, profil pendiri Gugun Gunara + 3 situs ekosistem, kontak resmi, protokol kontribusi Worklog v2",
+    ],
+  },
   {
     version: "6.1.0",
     date: isoDaysAgo(0),

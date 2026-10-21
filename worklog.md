@@ -725,3 +725,31 @@ Stage Summary:
 - E2E Agent Browser lulus: deep-link langsung 11 halaman (judul dinamis benar pada load penuh & SPA), dropdown→Tentang, Sheet mobile→Privasi, dialog program→PIHK, CTA layanan→#pendaftaran (form ditemukan), RTL Arab penuh (dir=rtl, judul Arab, breadcrumb rtl), EN via ?lang= (tanpa menulis storage), mode gelap, footer sticky (2800px viewport), mobile 390px, regresi Quick Verify PPU-2025-0001 → PT Zahra Tour PLATINUM, dialog versi "20 rilis — Rilis Berjalan Lighthouse".
 - SEO files 200: /sitemap.xml, /robots.txt, /manifest.webmanifest, /icon.svg, /og-image.png; /api/version → 6.1.0 "Lighthouse", registryHealthy+semverValid true.
 - Kontrak baru di atas: rute SEO file-based + deep-link #/p/... (lihat CHANGELOG 6.1.0) — tambahkan ke dokumentasi kontrak.
+
+---
+Task ID: 14
+Agent: Main Orchestrator (Z.ai)
+Rilis: PUSAKA v6.1.1 (PATCH — codename "Codex")
+Task: Membuat README akar repositori yang sangat cantik, desain penuh, sangat detail, dan lengkap — dokumentasi resmi seluruh platform PUSAKA.
+
+Work Log:
+- [+] Baca seluruh artefak sumber (worklog Task 1–13, package.json, version.ts, schema.prisma, site.ts, layout.tsx, pusaka.ts, seed.ts, struktur src/) agar README 100% akurat — tanpa klaim karangan.
+- [+] README.md (BARU, ~470 baris) desain penuh: banner og-image.png resmi 1200×630, judul + tagline, 5+5 lencana shields.io (PUSAKA v6.1.1·Codex, SemVer 2.0.0, Next.js 16, TypeScript 5, Prisma 6, Tailwind 4, shadcn/ui, React 19, Bahasa ID/EN/AR, Status Stable) emerald+amber tanpa indigo/blue, bar navigasi cepat, daftar isi 18 seksi × 3 kolom.
+- [+] Seksi Tentang: 8 statistik kunci (14.840 pemegang · 24 lembaga · 32 negara · 46 pakar · 500+ layanan · 7 program · 3 bahasa · 21 rilis) + 6 alasan memilih PUSAKA; tabel Fitur Unggulan 3×4 beremoji.
+- [+] Tabel 7 program resmi (kode, kategori, durasi, investasi, cakupan) dari seed.ts + catatan halaman resmi #/p/layanan/*; tabel jaringan global 8 wilayah dari 33 node.
+- [+] Seksi SAKA AI + tabel Tech Stack 12 lapisan (Next.js 16, TS 5 strict, React 19, shadcn/ui, Tailwind 4, Lucide, Framer Motion, Zustand/TanStack, Prisma 6 SQLite, scrypt auth, z-ai-web-dev-sdk, Plus Jakarta Sans/Geist Mono, Emerald+Gold).
+- [+] 3 diagram Mermaid: arsitektur 4 lapis (klien → 6 grup API → Prisma → SQLite + SDK AI), alur pembayaran (wizard → 4 metode → settlement → 3 titik sinkron), alur rilis 8 langkah; kontrak API resmi { ok, data } / { ok, false, error } dengan catatan force-dynamic + no-store.
+- [+] Struktur proyek: pohon direktori berannotasi dalam <details open> (VERSION/CHANGELOG/VERSIONING/worklog, prisma/, db/, public/, src/app + api, components pusaka 34+pages 6+admin 12 + ui 48, lib lengkap, i18n 37 namespace).
+- [+] API Referensi lengkap 3 tabel: 14 endpoint publik bernomor (dengan parameter query), 4 endpoint pembayaran, grup portal/auth/10 resource admin; contoh curl+jq /api/version.
+- [+] Tabel 13 model data dengan kolom kunci + alur status aplikasi (5 tahap) & pembayaran; tabel i18n (arsitektur, RTL, format lokal, persistensi, ?lang=); tabel SEO (metadata, hreflang, robots, 11 halaman, JSON-LD @graph, sitemap, PWA, OG, usePageSeo+MutationObserver); diagram+tabel payment; tabel portal anggota; tabel 10 modul CMS.
+- [+] Memulai Cepat: prasyarat (Bun ≥1.3), 4 langkah instalasi, tabel 7 skrip, <details> kredensial demo (admin/Pusaka2026! · editor/Editor2026! · 4 akun portal pusaka123), tabel kode contoh (3 nomor sertifikat, PSK-2025-83012, rentang SVC).
+- [+] Seksi Sistem Versi: cara membaca versi (diagram v9.1.2), tabel release train 21 rilis (Genesis→Codex dengan penanda RILIS BERJALAN), diagram alur rilis 8 langkah, contoh query API versi (?type/&limit/&q + meta self-audit).
+- [+] Kualitas & Pengujian (5 gerbang), Roadmap (7 selesai ✓ + 6 rencana), profil pendiri Gugun Gunara (3 gelar + 3 lencana situs ekosistem) + kontak resmi, protokol kontribusi Worklog v2 5 langkah + prinsip append-only, tabel 5 dokumentasi terkait.
+- [+] Footer desain: ASCII art PUSAKA + kredit "PUSAKA v6.1.1 Codex" + hak cipta Gugun Gunara.
+- [~] Bump PATCH sesuai VERSIONING.md §6: VERSION 6.1.1; version.ts OS_VERSION/OS_CODENAME "Codex" + entri registri teratas (tasks: ["14"]) → 21 rilis; CHANGELOG.md entri [6.1.1] PATCH "Codex" (marker [+]).
+
+Stage Summary:
+- README.md akar repositori LIVE — dokumentasi desain penuh yang mencerminkan platform secara akurat: banner, lencana, TOC, statistik, fitur, program, jaringan, stack, arsitektur Mermaid, struktur, 30+ endpoint, 13 model, i18n, SEO, payment, portal, CMS, quick start, 21 release train, roadmap, pendiri, kontribusi, lisensi/footer.
+- Palet README konsisten dengan identitas (emerald 059669 / amber d97706, label gelap 064E3B/92400E) — tanpa indigo/blue.
+- Sinkron penuh 3 artefak versi: VERSION → version.ts → CHANGELOG.md; registryHealthy expected true.
+- Tidak ada perubahan kode aplikasi, skema DB, atau kontrak API — dokumentasi murni (PATCH semantik).
